@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+# GiftSafe Mini App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Telegram Mini App — маркет NFT-подарков. Аналог MRKT/Portals с комиссией 2.5% и без азартных игр.
 
-## Available Scripts
+## Стек
+- **Фронтенд**: React + Vite + React Router
+- **API**: Vercel Serverless Functions (Node.js)
+- **Бот**: Python + aiogram 3 (отдельный репозиторий)
 
-In the project directory, you can run:
+## Деплой на Vercel
 
-### `npm start`
+### 1. Залить на GitHub
+```bash
+git init
+git add .
+git commit -m "init giftsafe miniapp"
+git remote add origin https://github.com/ВАШ_USERNAME/giftsafe-miniapp.git
+git push -u origin main
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 2. Подключить к Vercel
+- Открыть vercel.com → New Project → Import репозиторий
+- Framework: Vite (определится автоматически)
+- Добавить переменные окружения:
+  - `TELEGRAM_BOT_TOKEN` — токен вашего бота
+  - `MINIAPP_URL` — URL задеплоенного сайта (после деплоя)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 3. Подключить Mini App к боту
 
-### `npm test`
+После деплоя (получите URL вида `https://giftsafe-miniapp.vercel.app`):
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**Вариант A: через @BotFather (рекомендуется)**
+```
+/newapp — создать Web App
+URL: https://giftsafe-miniapp.vercel.app
+```
 
-### `npm run build`
+**Вариант B: через кнопку в боте (уже настроено в webhook.js)**
+Команда /start отправляет кнопку с `web_app.url`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 4. Установить webhook для бота
+```
+https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://giftsafe-miniapp.vercel.app/api/webhook
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 5. Настроить MenuButton (кнопка в интерфейсе чата)
+```
+https://api.telegram.org/bot<TOKEN>/setChatMenuButton
+Body: {"menu_button": {"type": "web_app", "text": "Маркет", "web_app": {"url": "https://giftsafe-miniapp.vercel.app"}}}
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Локальная разработка
+```bash
+npm install
+npm run dev
+# Открыть http://localhost:3000
+# В браузере работает без Telegram (мок-данные)
+```
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Архитектура
+```
+giftsafe/
+├── src/
+│   ├── pages/          # Market, Auctions, Portfolio, Profile, Sell, ListingDetail
+│   ├── components/     # NavBar, GiftCard
+│   ├── hooks/          # useTelegram
+│   ├── api/            # client.js (fetch + mock data)
+│   └── styles/         # global.css
+├── api/                # Vercel Serverless Functions
+│   ├── listings.js     # GET/POST /api/listings
+│   └── webhook.js      # POST /api/webhook (Telegram бот)
+├── vercel.json
+└── index.html
+```

@@ -1,172 +1,138 @@
-import React, { useState, useEffect } from 'react';
-import WebApp from '@twa-dev/sdk';
-import { getAuctions, placeBid, buyoutAuction } from '../api/client';
-import { useToast } from '../hooks/useToast';
+import { useState, useEffect } from 'react'
+import { MOCK } from '../api/client'
+import { useTelegram } from '../hooks/useTelegram'
 
-const RARITY_EMOJI = { Common: '⬜', Rare: '🔵', Epic: '🟣', Legendary: '🟡' };
-const GIFT_EMOJI   = ['🎁', '🧸', '🌹', '🚀', '💍', '❤️', '🎄', '🦋'];
+function Countdown({ endsAt }) {
+  const [left, setLeft] = useState(endsAt - Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setLeft(endsAt - Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [endsAt])
 
-function timeLeft(endsAt) {
-  const diff = new Date(endsAt) - new Date();
-  if (diff <= 0) return '⌛ Завершён';
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  return `${h}ч ${m}м`;
+  if (left <= 0) return <span style={{ color: 'var(--red)' }}>Завершён</span>
+  const h = Math.floor(left / 3600000)
+  const m = Math.floor((left % 3600000) / 60000)
+  const s = Math.floor((left % 60000) / 1000)
+  const urgent = left < 3600000
+
+  return (
+    <span style={{
+      fontFamily: 'var(--font-display)',
+      fontWeight: 700,
+      color: urgent ? 'var(--red)' : 'var(--gold)',
+      fontSize: 13,
+    }}>
+      {h > 0 ? `${h}ч ` : ''}{m}м {s}с
+    </span>
+  )
 }
 
-export default function Auctions({ user }) {
-  const [auctions, setAuctions] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [selected, setSelected] = useState(null);
-  const [bidAmount, setBidAmount] = useState('');
-  const { toast, showToast }    = useToast();
+export default function Auctions() {
+  const { haptic, showConfirm } = useTelegram()
+  const [bidding, setBidding] = useState(null)
+  const [bids, setBids] = useState({})
 
-  useEffect(() => { loadAuctions(); }, []);
-
-  async function loadAuctions() {
-    setLoading(true);
-    try {
-      const data = await getAuctions();
-      setAuctions(data.auctions || []);
-    } catch {
-      setAuctions(DEMO_AUCTIONS);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleBid() {
-    const amount = parseFloat(bidAmount);
-    const minBid = selected.current_price + selected.min_step;
-    if (!amount || amount < minBid) {
-      showToast(`❌ Минимальная ставка: ${minBid} TON`);
-      return;
-    }
-    try {
-      await placeBid(selected.auction_id, amount);
-      showToast('✅ Ставка принята!');
-      setBidAmount('');
-      setSelected(null);
-      loadAuctions();
-    } catch (e) {
-      showToast('❌ ' + (e.response?.data?.error || 'Ошибка'));
-    }
-  }
-
-  async function handleBuyout() {
-    WebApp.showConfirm(
-      `Купить за ${selected.buyout_price} TON?`,
-      async (confirmed) => {
-        if (!confirmed) return;
-        try {
-          await buyoutAuction(selected.auction_id);
-          showToast('🎉 Куплено!');
-          setSelected(null);
-          loadAuctions();
-        } catch (e) {
-          showToast('❌ ' + (e.response?.data?.error || 'Ошибка'));
-        }
+  const handleBid = (auction) => {
+    haptic('medium')
+    showConfirm(
+      `Поставить ставку ⭐ ${auction.min_bid} на «${auction.name}»?`,
+      (ok) => {
+        if (!ok) return
+        setBidding(auction.id)
+        setTimeout(() => {
+          setBidding(null)
+          setBids(prev => ({ ...prev, [auction.id]: auction.min_bid }))
+        }, 1000)
       }
-    );
+    )
   }
 
   return (
-    <div>
-      <div className="section-header">
-        <span className="section-title">🔨 Аукционы</span>
-        <span className="section-badge">{auctions.length} активных</span>
+    <div className="page">
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
+          ⚡ <span style={{ color: 'var(--gold)' }}>Аукционы</span>
+        </h1>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+          Ставки в реальном времени · Без накруток
+        </p>
       </div>
 
-      {loading ? (
-        <div className="loading"><div className="spinner" /></div>
-      ) : auctions.length === 0 ? (
-        <div className="empty">
-          <div className="empty-icon">🔨</div>
-          <div className="empty-text">Нет активных аукционов</div>
-        </div>
-      ) : (
-        auctions.map(a => (
-          <div key={a.auction_id} className="gift-card" onClick={() => { setSelected(a); setBidAmount(''); }}>
-            <div className="gift-emoji">
-              {GIFT_EMOJI[a.auction_id % GIFT_EMOJI.length]}
-            </div>
-            <div className="gift-info">
-              <div className="gift-name">{a.gift_name} #{a.gift_number || '?'}</div>
-              <div className="gift-collection">{a.collection_name}</div>
-              <span className="timer">⏰ {timeLeft(a.ends_at)}</span>
-            </div>
-            <div className="gift-price">
-              {a.current_price}
-              <span>TON</span>
-            </div>
-          </div>
-        ))
-      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {MOCK.auctions.map(auction => {
+          const myBid = bids[auction.id]
+          const winning = myBid && myBid >= auction.min_bid
 
-      {selected && (
-        <div className="modal-overlay" onClick={() => setSelected(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelected(null)}>×</button>
-            <div className="modal-title">{selected.gift_name} #{selected.gift_number || '?'}</div>
-            <div style={{ textAlign: 'center', fontSize: 64, margin: '12px 0' }}>
-              {GIFT_EMOJI[selected.auction_id % GIFT_EMOJI.length]}
-            </div>
-
-            <div className="card" style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Текущая ставка</span>
-                <span style={{ fontWeight: 700, color: 'var(--accent2)' }}>{selected.current_price} TON</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Мин. шаг</span>
-                <span>{selected.min_step} TON</span>
-              </div>
-              {selected.buyout_price && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Buyout</span>
-                  <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{selected.buyout_price} TON</span>
+          return (
+            <div key={auction.id} className="card" style={{ padding: 16 }}>
+              <div style={{ display: 'flex', gap: 14, marginBottom: 12 }}>
+                {/* Emoji */}
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--gold-dim)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 32,
+                  flexShrink: 0,
+                }}>
+                  {auction.emoji}
                 </div>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>До конца</span>
-                <span className="timer">{timeLeft(selected.ends_at)}</span>
+
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15 }}>
+                      {auction.name}
+                    </span>
+                    <span className="badge badge-gold">{auction.rarity}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+                    {auction.bids_count} ставок · лидер: @{auction.top_bidder}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Осталось:</span>
+                    <Countdown endsAt={auction.ends_at} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="divider" style={{ margin: '0 0 12px' }} />
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>Текущая ставка</div>
+                  <div className="price price-md">⭐ {auction.current_bid}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  {winning ? (
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--green)', marginBottom: 2 }}>✓ Ваша ставка</div>
+                      <div style={{ fontWeight: 600, color: 'var(--green)', fontSize: 14 }}>⭐ {myBid}</div>
+                    </div>
+                  ) : (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handleBid(auction)}
+                      disabled={bidding === auction.id}
+                      style={{ boxShadow: 'var(--gold-glow)' }}
+                    >
+                      {bidding === auction.id ? '⏳' : `Ставить ⭐ ${auction.min_bid}`}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
+          )
+        })}
+      </div>
 
-            {selected.seller_id !== user?.id && (
-              <>
-                <div className="input-group">
-                  <label className="input-label">Ваша ставка (TON)</label>
-                  <input
-                    className="input"
-                    type="number"
-                    step="0.1"
-                    min={selected.current_price + selected.min_step}
-                    placeholder={`Минимум ${(selected.current_price + selected.min_step).toFixed(2)}`}
-                    value={bidAmount}
-                    onChange={e => setBidAmount(e.target.value)}
-                  />
-                </div>
-                <button className="btn btn-primary" style={{ marginBottom: 8 }} onClick={handleBid}>
-                  ⬆ Сделать ставку
-                </button>
-                {selected.buyout_price && (
-                  <button className="btn btn-secondary" onClick={handleBuyout}>
-                    ⚡ Купить сразу за {selected.buyout_price} TON
-                  </button>
-                )}
-              </>
-            )}
-          </div>
+      <div style={{ margin: '24px 0', padding: '14px 16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+          💡 <strong style={{ color: 'var(--text-secondary)' }}>Как работают аукционы:</strong> ставки проходят через эскроу. Если вас перебьют — звёзды возвращаются автоматически.
         </div>
-      )}
-
-      {toast && <div className="toast">{toast}</div>}
+      </div>
     </div>
-  );
+  )
 }
-
-const DEMO_AUCTIONS = [
-  { auction_id: 1, gift_name: 'Teddy Bear', gift_number: '777', collection_name: 'Bears', rarity: 'Epic', current_price: 8.5, min_step: 0.5, buyout_price: 20.0, ends_at: new Date(Date.now() + 3600000 * 5).toISOString() },
-  { auction_id: 2, gift_name: 'Christmas Tree', gift_number: '33', collection_name: 'Holiday', rarity: 'Rare', current_price: 3.0, min_step: 0.2, buyout_price: null, ends_at: new Date(Date.now() + 3600000 * 12).toISOString() },
-];

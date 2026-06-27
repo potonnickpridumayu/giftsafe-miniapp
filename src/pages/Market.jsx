@@ -1,160 +1,143 @@
-import React, { useState, useEffect } from 'react';
-import WebApp from '@twa-dev/sdk';
-import { getListings, buyListing } from '../api/client';
-import { useToast } from '../hooks/useToast';
+import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import GiftCard from '../components/GiftCard'
+import { MOCK } from '../api/client'
+import { useTelegram } from '../hooks/useTelegram'
 
-const RARITY_EMOJI = { Common: '⬜', Rare: '🔵', Epic: '🟣', Legendary: '🟡' };
-const GIFT_EMOJI   = ['🎁', '🧸', '🌹', '🚀', '💍', '❤️', '🎄', '🦋'];
+const FILTERS = ['Все', 'Legendary', 'Epic', 'Rare', 'Common']
+const SORTS = [
+  { label: 'Дешевле', value: 'price_asc' },
+  { label: 'Дороже', value: 'price_desc' },
+  { label: 'Новые', value: 'new' },
+]
 
-export default function Market({ user }) {
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [selected, setSelected] = useState(null);
-  const [buying, setBuying]     = useState(false);
-  const { toast, showToast }    = useToast();
+export default function Market() {
+  const navigate = useNavigate()
+  const { haptic } = useTelegram()
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState('Все')
+  const [sort, setSort] = useState('new')
 
-  useEffect(() => {
-    loadListings();
-  }, []);
-
-  async function loadListings() {
-    setLoading(true);
-    try {
-      const data = await getListings();
-      setListings(data.listings || []);
-    } catch {
-      // Demo mode — показываем моковые данные
-      setListings(DEMO_LISTINGS);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleBuy(listing) {
-    WebApp.showConfirm(
-      `Купить ${listing.gift_name} за ${listing.price_ton} TON?`,
-      async (confirmed) => {
-        if (!confirmed) return;
-        setBuying(true);
-        try {
-          await buyListing(listing.listing_id);
-          showToast('✅ Покупка успешна!');
-          setSelected(null);
-          loadListings();
-        } catch (e) {
-          showToast('❌ ' + (e.response?.data?.error || 'Ошибка покупки'));
-        } finally {
-          setBuying(false);
-        }
-      }
-    );
-  }
+  const items = useMemo(() => {
+    let list = [...MOCK.listings]
+    if (search) list = list.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
+    if (filter !== 'Все') list = list.filter(i => i.rarity === filter)
+    if (sort === 'price_asc') list.sort((a, b) => a.price - b.price)
+    else if (sort === 'price_desc') list.sort((a, b) => b.price - a.price)
+    else list.sort((a, b) => b.listed_at - a.listed_at)
+    return list
+  }, [search, filter, sort])
 
   return (
-    <div>
-      <div className="section-header">
-        <span className="section-title">🛍 Маркет</span>
-        <span className="section-badge">{listings.length} лотов</span>
+    <div className="page">
+      {/* Header */}
+      <div style={{ marginBottom: 16 }}>
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 24,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          marginBottom: 4,
+        }}>
+          GiftSafe <span style={{ color: 'var(--gold)' }}>Маркет</span>
+        </h1>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+          {MOCK.listings.length} подарков • Комиссия 2.5%
+        </p>
       </div>
 
-      <div className="fee-badge">🔥 Комиссия всего 3%</div>
+      {/* Search */}
+      <input
+        className="input"
+        placeholder="🔍 Поиск подарков..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        style={{ marginBottom: 12 }}
+      />
 
-      {loading ? (
-        <div className="loading"><div className="spinner" /></div>
-      ) : listings.length === 0 ? (
-        <div className="empty">
-          <div className="empty-icon">🛍</div>
-          <div className="empty-text">Нет активных объявлений</div>
-          <div className="empty-sub">Выставь свой подарок первым!</div>
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 12 }}>
+        {FILTERS.map(f => (
+          <button
+            key={f}
+            onClick={() => { haptic('light'); setFilter(f) }}
+            className="btn btn-sm"
+            style={{
+              flexShrink: 0,
+              background: filter === f ? 'var(--gold-dim)' : 'var(--bg-card)',
+              color: filter === f ? 'var(--gold)' : 'var(--text-secondary)',
+              border: `1px solid ${filter === f ? 'rgba(212,175,55,0.3)' : 'var(--border)'}`,
+            }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* Sort */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {SORTS.map(s => (
+          <button
+            key={s.value}
+            onClick={() => { haptic('light'); setSort(s.value) }}
+            style={{
+              flex: 1,
+              padding: '8px 0',
+              fontSize: 12,
+              fontWeight: 500,
+              background: sort === s.value ? 'var(--bg-card-hover)' : 'transparent',
+              color: sort === s.value ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: `1px solid ${sort === s.value ? 'var(--border)' : 'transparent'}`,
+              borderRadius: 'var(--radius-sm)',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid */}
+      {items.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <div className="empty-title">Ничего не найдено</div>
+          <div className="empty-desc">Попробуйте другой запрос</div>
         </div>
       ) : (
-        listings.map(lst => (
-          <div key={lst.listing_id} className="gift-card" onClick={() => setSelected(lst)}>
-            <div className="gift-emoji">
-              {GIFT_EMOJI[lst.listing_id % GIFT_EMOJI.length]}
-            </div>
-            <div className="gift-info">
-              <div className="gift-name">{lst.gift_name} #{lst.gift_number || '?'}</div>
-              <div className="gift-collection">{lst.collection_name}</div>
-              <span className={`gift-rarity rarity-${lst.rarity}`}>
-                {RARITY_EMOJI[lst.rarity]} {lst.rarity}
-              </span>
-            </div>
-            <div className="gift-price">
-              {lst.price_ton}
-              <span>TON</span>
-            </div>
-          </div>
-        ))
-      )}
-
-      {/* Detail modal */}
-      {selected && (
-        <div className="modal-overlay" onClick={() => setSelected(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelected(null)}>×</button>
-            <div className="modal-title">
-              {selected.gift_name} #{selected.gift_number || '?'}
-            </div>
-            <div style={{ textAlign: 'center', fontSize: 64, margin: '16px 0' }}>
-              {GIFT_EMOJI[selected.listing_id % GIFT_EMOJI.length]}
-            </div>
-            <div className="card" style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Коллекция</span>
-                <span style={{ fontWeight: 600 }}>{selected.collection_name}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Редкость</span>
-                <span className={`gift-rarity rarity-${selected.rarity}`}>
-                  {RARITY_EMOJI[selected.rarity]} {selected.rarity}
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Продавец</span>
-                <span>@{selected.seller_username || '?'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Просмотров</span>
-                <span>{selected.views || 0}</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent2)' }}>
-                  {selected.price_ton} TON
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  Комиссия: {(selected.price_ton * 0.03).toFixed(4)} TON (3%)
-                </div>
-              </div>
-            </div>
-            {selected.seller_id !== user?.id && (
-              <button
-                className="btn btn-primary"
-                onClick={() => handleBuy(selected)}
-                disabled={buying}
-              >
-                {buying ? '⏳ Покупка...' : `💳 Купить за ${selected.price_ton} TON`}
-              </button>
-            )}
-            {selected.seller_id === user?.id && (
-              <div style={{ color: 'var(--text-muted)', textAlign: 'center', fontSize: 13 }}>
-                Это ваш лот
-              </div>
-            )}
-          </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 12,
+        }}>
+          {items.map(item => (
+            <GiftCard
+              key={item.id}
+              item={item}
+              onClick={() => { haptic('light'); navigate(`/listing/${item.id}`) }}
+            />
+          ))}
         </div>
       )}
 
-      {toast && <div className="toast">{toast}</div>}
+      {/* Sell button */}
+      <div style={{ position: 'fixed', right: 16, bottom: 80, zIndex: 50 }}>
+        <button
+          className="btn btn-primary"
+          onClick={() => { haptic('medium'); navigate('/sell') }}
+          style={{
+            borderRadius: 50,
+            width: 52,
+            height: 52,
+            padding: 0,
+            fontSize: 22,
+            boxShadow: 'var(--gold-glow)',
+          }}
+        >
+          +
+        </button>
+      </div>
     </div>
-  );
+  )
 }
-
-const DEMO_LISTINGS = [
-  { listing_id: 1, gift_name: 'Teddy Bear', gift_number: '1234', collection_name: 'Bears', rarity: 'Rare', price_ton: 5.5, seller_username: 'user1', views: 42 },
-  { listing_id: 2, gift_name: 'Diamond Ring', gift_number: '88', collection_name: 'Jewelry', rarity: 'Legendary', price_ton: 25.0, seller_username: 'user2', views: 128 },
-  { listing_id: 3, gift_name: 'Red Rose', gift_number: '555', collection_name: 'Flowers', rarity: 'Common', price_ton: 1.2, seller_username: 'user3', views: 15 },
-  { listing_id: 4, gift_name: 'Rocket', gift_number: '9', collection_name: 'Space', rarity: 'Epic', price_ton: 12.0, seller_username: 'user4', views: 77 },
-];

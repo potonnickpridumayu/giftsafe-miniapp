@@ -1,62 +1,58 @@
-import axios from 'axios';
-import WebApp from '@twa-dev/sdk';
+const BASE = '/api'
 
-// В продакшене замени на URL твоего бэкенда
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+async function request(path, options = {}) {
+  const tg = window.Telegram?.WebApp
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(tg?.initData ? { 'X-Telegram-Init-Data': tg.initData } : {}),
+    ...options.headers,
+  }
+  const res = await fetch(`${BASE}${path}`, { ...options, headers })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
 
-const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-});
+export const api = {
+  // Market
+  getListings: (params = {}) => {
+    const q = new URLSearchParams(params).toString()
+    return request(`/listings${q ? '?' + q : ''}`)
+  },
+  getListing: (id) => request(`/listings/${id}`),
+  buyListing: (id) => request(`/listings/${id}/buy`, { method: 'POST' }),
 
-// Автоматически добавляем Telegram initData для аутентификации
-api.interceptors.request.use(config => {
-  config.headers['X-Telegram-Init-Data'] = WebApp.initData || '';
-  return config;
-});
+  // Auctions
+  getAuctions: () => request('/auctions'),
+  placeBid: (id, amount) => request(`/auctions/${id}/bid`, { method: 'POST', body: JSON.stringify({ amount }) }),
 
-// ── Market ──────────────────────────────────────────────────────────────────
-export const getListings = (offset = 0) =>
-  api.get(`/api/listings?offset=${offset}`).then(r => r.data);
+  // Portfolio
+  getPortfolio: () => request('/portfolio'),
 
-export const getListing = (id) =>
-  api.get(`/api/listings/${id}`).then(r => r.data);
+  // Profile
+  getProfile: () => request('/profile'),
 
-export const buyListing = (listingId) =>
-  api.post(`/api/listings/${listingId}/buy`).then(r => r.data);
+  // Sell
+  createListing: (data) => request('/listings', { method: 'POST', body: JSON.stringify(data) }),
+}
 
-export const createListing = (data) =>
-  api.post('/api/listings', data).then(r => r.data);
-
-export const cancelListing = (id) =>
-  api.delete(`/api/listings/${id}`).then(r => r.data);
-
-// ── Auctions ─────────────────────────────────────────────────────────────────
-export const getAuctions = (offset = 0) =>
-  api.get(`/api/auctions?offset=${offset}`).then(r => r.data);
-
-export const getAuction = (id) =>
-  api.get(`/api/auctions/${id}`).then(r => r.data);
-
-export const placeBid = (auctionId, amount) =>
-  api.post(`/api/auctions/${auctionId}/bid`, { amount }).then(r => r.data);
-
-export const buyoutAuction = (auctionId) =>
-  api.post(`/api/auctions/${auctionId}/buyout`).then(r => r.data);
-
-export const createAuction = (data) =>
-  api.post('/api/auctions', data).then(r => r.data);
-
-// ── Portfolio ─────────────────────────────────────────────────────────────────
-export const getPortfolio = () =>
-  api.get('/api/portfolio').then(r => r.data);
-
-export const getTransactions = () =>
-  api.get('/api/transactions').then(r => r.data);
-
-// ── Profile ───────────────────────────────────────────────────────────────────
-export const getProfile = () =>
-  api.get('/api/profile').then(r => r.data);
-
-export const getRefLink = () =>
-  api.get('/api/referral').then(r => r.data);
+// Mock data for dev (когда нет бэкенда)
+export const MOCK = {
+  listings: [
+    { id: 1, name: 'Durov\'s Cap', emoji: '🎩', rarity: 'Legendary', price: 250, model: 'Cap', backdrop: 'Gold', symbol: '⭐', seller: 'cryptowhale', seller_id: 111, listed_at: Date.now() - 3600000 },
+    { id: 2, name: 'Plush Pepe', emoji: '🐸', rarity: 'Epic', price: 85, model: 'Pepe', backdrop: 'Green', symbol: '💎', seller: 'nftcollector', seller_id: 222, listed_at: Date.now() - 7200000 },
+    { id: 3, name: 'Loot Bag', emoji: '🎒', rarity: 'Rare', price: 42, model: 'Bag', backdrop: 'Purple', symbol: '🌙', seller: 'giftmaster', seller_id: 333, listed_at: Date.now() - 86400000 },
+    { id: 4, name: 'Diamond Ring', emoji: '💍', rarity: 'Legendary', price: 500, model: 'Ring', backdrop: 'Crystal', symbol: '🔷', seller: 'richguy', seller_id: 444, listed_at: Date.now() - 10800000 },
+    { id: 5, name: 'Cake Slice', emoji: '🎂', rarity: 'Common', price: 12, model: 'Cake', backdrop: 'Pink', symbol: '🎀', seller: 'bakery', seller_id: 555, listed_at: Date.now() - 172800000 },
+    { id: 6, name: 'Magic Wand', emoji: '🪄', rarity: 'Epic', price: 130, model: 'Wand', backdrop: 'Dark', symbol: '✨', seller: 'wizard99', seller_id: 666, listed_at: Date.now() - 43200000 },
+  ],
+  auctions: [
+    { id: 1, name: 'Cosmic Cat', emoji: '🐱', rarity: 'Legendary', current_bid: 320, min_bid: 340, ends_at: Date.now() + 7200000, bids_count: 14, top_bidder: 'cryptowhale' },
+    { id: 2, name: 'Golden Trophy', emoji: '🏆', rarity: 'Epic', current_bid: 95, min_bid: 100, ends_at: Date.now() + 3600000, bids_count: 7, top_bidder: 'collector' },
+    { id: 3, name: 'Dragon Egg', emoji: '🥚', rarity: 'Legendary', current_bid: 750, min_bid: 800, ends_at: Date.now() + 86400000, bids_count: 31, top_bidder: 'whaleking' },
+  ],
+  portfolio: [
+    { id: 1, name: 'Durov\'s Cap', emoji: '🎩', rarity: 'Legendary', estimated: 280, bought_for: 250 },
+    { id: 2, name: 'Lucky Clover', emoji: '🍀', rarity: 'Rare', estimated: 38, bought_for: 30 },
+    { id: 3, name: 'Fire Heart', emoji: '❤️‍🔥', rarity: 'Epic', estimated: 95, bought_for: 80 },
+  ],
+}
