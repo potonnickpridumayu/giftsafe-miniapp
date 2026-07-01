@@ -1,16 +1,37 @@
+import { useState, useEffect } from 'react'
 import { useTelegram } from '../hooks/useTelegram'
-
-const STATS = [
-  { label: 'Сделок', value: '12' },
-  { label: 'Продано', value: '5' },
-  { label: 'Рейтинг', value: '4.9 ⭐' },
-]
+import { api } from '../api/client'
 
 export default function Profile() {
   const { user, haptic } = useTelegram()
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let alive = true
+    api.getProfile()
+      .then(res => { if (alive) setProfile(res) })
+      .catch(e => { if (alive) setError(e.message || 'Ошибка загрузки') })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [])
+
+  const dbUser = profile?.user || null
+  const txs = profile?.transactions || []
+  const balance = dbUser?.balance_ton ?? 0
+  const earned = dbUser?.total_earned ?? 0
+  const spent = dbUser?.total_spent ?? 0
 
   const name = user ? (user.first_name + (user.last_name ? ' ' + user.last_name : '')) : 'Гость'
   const username = user?.username ? '@' + user.username : 'без username'
+
+  // Реальные метрики из БД (total_earned / total_spent обновляются при каждой сделке)
+  const stats = [
+    { label: 'Сделок', value: loading ? '…' : String(txs.length) },
+    { label: 'Заработано', value: loading ? '…' : earned.toFixed(1) },
+    { label: 'Потрачено', value: loading ? '…' : spent.toFixed(1) },
+  ]
 
   return (
     <div className="page">
@@ -58,9 +79,29 @@ export default function Profile() {
         <div className="badge badge-gold">✓ Верифицирован через Telegram</div>
       </div>
 
+      {/* Balance */}
+      <div style={{
+        background: 'linear-gradient(135deg, var(--gold-dim), var(--bg-card))',
+        border: '1px solid rgba(212,175,55,0.3)',
+        borderRadius: 'var(--radius-xl)',
+        padding: 20,
+        marginBottom: 16,
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, letterSpacing: 0.5 }}>
+          БАЛАНС
+        </div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700, color: 'var(--gold)' }}>
+          {loading ? '…' : `${balance.toFixed(2)} TON`}
+        </div>
+        {error && (
+          <div style={{ fontSize: 12, color: 'var(--danger, #e5484d)', marginTop: 6 }}>{error}</div>
+        )}
+      </div>
+
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
-        {STATS.map(s => (
+        {stats.map(s => (
           <div key={s.label} style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border)',
@@ -79,7 +120,7 @@ export default function Profile() {
       {/* Menu */}
       {[
         { icon: '🔗', label: 'Реферальная ссылка', sub: 'Заработайте с каждой продажи' },
-        { icon: '📊', label: 'История сделок', sub: '12 завершённых транзакций' },
+        { icon: '📊', label: 'История сделок', sub: `${txs.length} завершённых транзакций` },
         { icon: '⚙️', label: 'Настройки', sub: 'Уведомления и безопасность' },
         { icon: '❓', label: 'Поддержка', sub: 'Написать в @GiftSafe_support' },
       ].map((item, i) => (
@@ -110,8 +151,8 @@ export default function Profile() {
           💰 Наши комиссии
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-          • Маркет: 2.5% (vs 5% у конкурентов)<br/>
-          • Аукцион: 2% победитель<br/>
+          • Маркет: 3% (ниже, чем у конкурентов)<br/>
+          • Аукцион: 3% с победителя<br/>
           • Вывод: без комиссии
         </div>
       </div>
