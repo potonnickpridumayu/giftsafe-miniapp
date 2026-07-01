@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import GiftCard from '../components/GiftCard'
-import { MOCK } from '../api/client'
+import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 
 const FILTERS = ['Все', 'Legendary', 'Epic', 'Rare', 'Common']
@@ -18,15 +18,35 @@ export default function Market() {
   const [filter, setFilter] = useState('Все')
   const [sort, setSort] = useState('new')
 
+  // данные с бэкенда
+  const [listings, setListings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await api.getListings()
+      setListings(data)
+    } catch (e) {
+      setError(e.message || 'Не удалось загрузить маркет')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
   const items = useMemo(() => {
-    let list = [...MOCK.listings]
-    if (search) list = list.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
+    let list = [...listings]
+    if (search) list = list.filter(i => i.name?.toLowerCase().includes(search.toLowerCase()))
     if (filter !== 'Все') list = list.filter(i => i.rarity === filter)
     if (sort === 'price_asc') list.sort((a, b) => a.price - b.price)
     else if (sort === 'price_desc') list.sort((a, b) => b.price - a.price)
     else list.sort((a, b) => b.listed_at - a.listed_at)
     return list
-  }, [search, filter, sort])
+  }, [listings, search, filter, sort])
 
   return (
     <div className="page">
@@ -42,7 +62,7 @@ export default function Market() {
           GiftSafe <span style={{ color: 'var(--gold)' }}>Маркет</span>
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          {MOCK.listings.length} подарков • Комиссия 2.5%
+          {loading ? 'Загрузка…' : `${listings.length} подарков`} • Комиссия 2.5%
         </p>
       </div>
 
@@ -98,8 +118,32 @@ export default function Market() {
         ))}
       </div>
 
-      {/* Grid */}
-      {items.length === 0 ? (
+      {/* Content */}
+      {loading ? (
+        <div className="empty-state">
+          <div className="empty-icon">⏳</div>
+          <div className="empty-title">Загружаем маркет…</div>
+        </div>
+      ) : error ? (
+        <div className="empty-state">
+          <div className="empty-icon">⚠️</div>
+          <div className="empty-title">Ошибка загрузки</div>
+          <div className="empty-desc">{error}</div>
+          <button
+            className="btn btn-primary"
+            onClick={() => { haptic('medium'); load() }}
+            style={{ marginTop: 12 }}
+          >
+            Повторить
+          </button>
+        </div>
+      ) : listings.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">📭</div>
+          <div className="empty-title">Пока нет объявлений</div>
+          <div className="empty-desc">Будь первым — выставь свой подарок!</div>
+        </div>
+      ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
           <div className="empty-title">Ничего не найдено</div>

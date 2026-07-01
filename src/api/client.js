@@ -8,25 +8,81 @@ async function request(path, options = {}) {
     ...options.headers,
   }
   const res = await fetch(`${BASE}${path}`, { ...options, headers })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`
+    try { const j = await res.json(); if (j?.detail) detail = j.detail } catch {}
+    const err = new Error(detail)
+    err.status = res.status
+    throw err
+  }
   return res.json()
+}
+
+// --- Нормализация: приводим ответ API к форме, которую ждут страницы ---
+
+// эмодзи-заглушка, пока у гифтов нет картинок (image_url пустой)
+const RARITY_EMOJI = {
+  Legendary: '👑',
+  Epic: '💎',
+  Rare: '🔮',
+  Common: '🎁',
+}
+
+function normalizeListing(x) {
+  return {
+    id: x.listing_id,
+    gift_id: x.gift_id,
+    name: x.gift_name,
+    collection: x.collection_name,   // бывш. "model" в моках
+    number: x.gift_number,           // напр. "#999"
+    emoji: RARITY_EMOJI[x.rarity] || '🎁',
+    image_url: x.image_url || '',
+    rarity: x.rarity,
+    price: x.price_ton,
+    seller: x.seller_username,
+    seller_id: x.seller_id,
+    views: x.views,
+    description: x.description,
+    status: x.status,
+    listed_at: x.created_at ? new Date(x.created_at).getTime() : Date.now(),
+  }
+}
+
+// на случай, если ответ обёрнут в {listings: [...]} / {items: [...]} / просто массив
+function toArray(res, key) {
+  if (Array.isArray(res)) return res
+  if (res && Array.isArray(res[key])) return res[key]
+  if (res && Array.isArray(res.items)) return res.items
+  return []
 }
 
 export const api = {
   // Market
-  getListings: (params = {}) => {
+  getListings: async (params = {}) => {
     const q = new URLSearchParams(params).toString()
-    return request(`/listings${q ? '?' + q : ''}`)
+    const res = await request(`/listings${q ? '?' + q : ''}`)
+    return toArray(res, 'listings').map(normalizeListing)
   },
-  getListing: (id) => request(`/listings/${id}`),
+  getListing: async (id) => {
+    const res = await request(`/listings/${id}`)
+    // detail может прийти как объект или как {listing: {...}}
+    return normalizeListing(res.listing || res)
+  },
   buyListing: (id) => request(`/listings/${id}/buy`, { method: 'POST' }),
 
-  // Auctions
-  getAuctions: () => request('/auctions'),
-  placeBid: (id, amount) => request(`/auctions/${id}/bid`, { method: 'POST', body: JSON.stringify({ amount }) }),
+  // Auctions — TODO: нормализовать под реальный ответ, когда увидим /api/auctions
+  getAuctions: async () => {
+    const res = await request('/auctions')
+    return toArray(res, 'auctions')
+  },
+  placeBid: (id, amount) =>
+    request(`/auctions/${id}/bid`, { method: 'POST', body: JSON.stringify({ amount }) }),
 
-  // Portfolio
-  getPortfolio: () => request('/portfolio'),
+  // Portfolio — TODO: нормализовать под реальный ответ
+  getPortfolio: async () => {
+    const res = await request('/portfolio')
+    return toArray(res, 'portfolio')
+  },
 
   // Profile
   getProfile: () => request('/profile'),

@@ -1,47 +1,94 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
-import { MOCK } from '../api/client'
+import { useState, useEffect, useCallback } from 'react'
+import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 
 const RARITY_COLORS = {
   Common: '#8888aa', Rare: '#5e9cf5', Epic: '#a855f7', Legendary: '#d4af37',
 }
 
+// Должна совпадать с MARKET_FEE на бэкенде и цифрой в Market.jsx.
+// Итоговая комиссия всё равно приходит в ответе покупки — это лишь предпросмотр.
+const FEE_RATE = 0.03
+
 export default function ListingDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { haptic, showConfirm, user } = useTelegram()
+
+  const [item, setItem] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
+
   const [buying, setBuying] = useState(false)
   const [bought, setBought] = useState(false)
+  const [buyError, setBuyError] = useState(null)
+  const [result, setResult] = useState(null)
 
-  const item = MOCK.listings.find(l => l.id === Number(id))
-  if (!item) return (
+  const load = useCallback(async () => {
+    setLoading(true)
+    setLoadError(null)
+    try {
+      const data = await api.getListing(id)
+      setItem(data)
+    } catch (e) {
+      setLoadError(e.message || 'Ошибка загрузки')
+    } finally {
+      setLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => { load() }, [load])
+
+  if (loading) return (
     <div className="page">
       <div className="empty-state">
-        <div className="empty-icon">❓</div>
-        <div className="empty-title">Лот не найден</div>
-        <button className="btn btn-ghost" onClick={() => navigate('/')}>← Назад</button>
+        <div className="empty-icon">⏳</div>
+        <div className="empty-title">Загрузка…</div>
       </div>
     </div>
   )
 
-  const rarityColor = RARITY_COLORS[item.rarity]
-  const fee = Math.round(item.price * 0.025)
+  if (loadError || !item) return (
+    <div className="page">
+      <div className="empty-state">
+        <div className="empty-icon">❓</div>
+        <div className="empty-title">{loadError ? 'Ошибка' : 'Лот не найден'}</div>
+        {loadError && <div className="empty-desc">{loadError}</div>}
+        <button className="btn btn-ghost" onClick={() => navigate('/')} style={{ marginTop: 12 }}>
+          ← Назад
+        </button>
+      </div>
+    </div>
+  )
+
+  const rarityColor = RARITY_COLORS[item.rarity] || '#8888aa'
+  const fee = +(item.price * FEE_RATE).toFixed(4)
   const total = item.price
+  const soldOut = item.status && item.status !== 'active'
+  const isOwnListing = user?.id === item.seller_id
 
   const handleBuy = () => {
     haptic('medium')
     showConfirm(
-      `Купить «${item.name}» за ⭐ ${item.price}?`,
-      (ok) => {
+      `Купить «${item.name}» за ${item.price} TON?`,
+      async (ok) => {
         if (!ok) return
         setBuying(true)
-        setTimeout(() => { setBuying(false); setBought(true) }, 1500)
+        setBuyError(null)
+        try {
+          const res = await api.buyListing(item.id)
+          setResult(res)
+          setBought(true)
+        } catch (e) {
+          setBuyError(e.message || 'Не удалось совершить покупку')
+          haptic('heavy')
+        } finally {
+          setBuying(false)
+        }
       }
     )
   }
-
-  const isOwnListing = user?.id === item.seller_id
 
   return (
     <div className="page">
@@ -68,8 +115,9 @@ export default function ListingDetail() {
         border: `1px solid ${rarityColor}33`,
         position: 'relative',
       }}>
-        <span>{item.emoji}</span>
-        <span style={{ position: 'absolute', top: 16, right: 16, fontSize: 24, opacity: 0.4 }}>{item.symbol}</span>
+        {item.image_url
+          ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
+          : <span>{item.emoji}</span>}
         <span className="badge" style={{
           position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
           background: `${rarityColor}22`, color: rarityColor, border: `1px solid ${rarityColor}40`,
@@ -80,10 +128,10 @@ export default function ListingDetail() {
 
       {/* Title */}
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
-        {item.name}
+        {item.name} {item.number ? <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{item.number}</span> : null}
       </h2>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
-        Модель: {item.model} · Фон: {item.backdrop}
+        Коллекция: {item.collection || '—'}
       </p>
 
       {/* Seller */}
@@ -102,25 +150,34 @@ export default function ListingDetail() {
       <div className="card" style={{ padding: '14px 16px', marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Цена</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>⭐ {item.price}</span>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>{item.price} TON</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия GiftSafe (2.5%)</span>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>⭐ {fee}</span>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия GiftSafe ({Math.round(FEE_RATE * 100)}%)</span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fee} TON</span>
         </div>
         <div className="divider" style={{ margin: '10px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontWeight: 600 }}>Итого</span>
-          <span className="price price-md">⭐ {total}</span>
+          <span className="price price-md">{total} TON</span>
         </div>
       </div>
+
+      {/* Buy error */}
+      {buyError && (
+        <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
+          ⚠️ {buyError}
+        </div>
+      )}
 
       {/* Buy button */}
       {bought ? (
         <div style={{ textAlign: 'center', padding: 20 }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Куплено!</div>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Подарок добавлен в ваш портфель</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
+            {result?.gift_name || item.name} добавлен в ваш портфель
+          </p>
           <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/portfolio')}>
             Перейти в портфель
           </button>
@@ -129,6 +186,10 @@ export default function ListingDetail() {
         <button className="btn btn-ghost btn-full" disabled>
           Это ваш лот
         </button>
+      ) : soldOut ? (
+        <button className="btn btn-ghost btn-full" disabled>
+          Лот уже продан
+        </button>
       ) : (
         <button
           className="btn btn-primary btn-full"
@@ -136,7 +197,7 @@ export default function ListingDetail() {
           disabled={buying}
           style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
         >
-          {buying ? '⏳ Обработка...' : `Купить за ⭐ ${total}`}
+          {buying ? '⏳ Обработка...' : `Купить за ${total} TON`}
         </button>
       )}
     </div>
