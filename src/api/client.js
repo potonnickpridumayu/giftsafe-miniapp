@@ -1,4 +1,4 @@
-const BASE = 'https://comfort-tour-biography-graduate.trycloudflare.com/api'
+const BASE = 'https://nftmarketbot-production.up.railway.app/api'
 
 async function request(path, options = {}) {
   const tg = window.Telegram?.WebApp
