@@ -62,7 +62,7 @@ export default function Market() {
           GiftSafe <span style={{ color: 'var(--gold)' }}>Маркет</span>
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          {loading ? 'Загрузка…' : `${listings.length} подарков`} • Комиссия 2.5%
+          {loading ? 'Загрузка…' : `${listings.length} подарков`} • Комиссия 3%
         </p>
       </div>
 
