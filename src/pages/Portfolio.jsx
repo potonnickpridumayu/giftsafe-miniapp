@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
+import { TonConnectButton } from '@tonconnect/ui-react';
+
 
 const RARITY_COLORS = {
   Common: '#8888aa', Rare: '#5e9cf5', Epic: '#a855f7', Legendary: '#d4af37',
@@ -154,9 +156,15 @@ export default function Portfolio() {
   return (
     <div className="page">
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 16 }}>
-          💼 <span style={{ color: 'var(--gold)' }}>Портфель</span>
-        </h1>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 12, marginBottom: 16,
+        }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, margin: 0 }}>
+            💼 <span style={{ color: 'var(--gold)' }}>Портфель</span>
+          </h1>
+          <TonConnectButton />
+        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 4 }}>
           {[

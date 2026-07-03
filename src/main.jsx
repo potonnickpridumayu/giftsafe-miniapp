@@ -3,8 +3,13 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './styles/global.css'
 
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <TonConnectUIProvider manifestUrl="https://giftsafe.pages.dev/tonconnect-manifest.json">
+      <App />
+    </TonConnectUIProvider>
   </React.StrictMode>
 )
+
