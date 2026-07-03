@@ -89,6 +89,10 @@ export const api = {
 
   // Sell
   createListing: (data) => request('/listings', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Escrow deposit
+  createDepositIntent: () => request('/escrow/deposit-intent', { method: 'POST' }),
+  getDepositStatus: () => request('/escrow/deposit-intent'),
 }
 
 // Mock data for dev (когда нет бэкенда)
