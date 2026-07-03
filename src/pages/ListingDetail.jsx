@@ -24,6 +24,9 @@ export default function ListingDetail() {
   const [bought, setBought] = useState(false)
   const [buyError, setBuyError] = useState(null)
   const [result, setResult] = useState(null)
+  const [withdrawing, setWithdrawing] = useState(false)
+  const [withdrawn, setWithdrawn] = useState(false)
+  const [withdrawError, setWithdrawError] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -85,6 +88,27 @@ export default function ListingDetail() {
           haptic('heavy')
         } finally {
           setBuying(false)
+        }
+      }
+    )
+  }
+
+  const handleWithdraw = () => {
+    haptic('medium')
+    showConfirm(
+      `Снять «${item.name}» с продажи? NFT вернётся на ваш кошелёк.`,
+      async (ok) => {
+        if (!ok) return
+        setWithdrawing(true)
+        setWithdrawError(null)
+        try {
+          await api.withdrawListing(item.id)
+          setWithdrawn(true)
+        } catch (e) {
+          setWithdrawError(e.message || 'Не удалось снять лот')
+          haptic('heavy')
+        } finally {
+          setWithdrawing(false)
         }
       }
     )
@@ -183,9 +207,33 @@ export default function ListingDetail() {
           </button>
         </div>
       ) : isOwnListing ? (
-        <button className="btn btn-ghost btn-full" disabled>
-          Это ваш лот
-        </button>
+        withdrawn ? (
+          <div style={{ textAlign: 'center', padding: 20 }}>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>📤</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Лот снят</div>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
+              NFT отправлен на ваш кошелёк — придёт в течение минуты
+            </p>
+            <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/')}>
+              На маркет
+            </button>
+          </div>
+        ) : (
+          <>
+            {withdrawError && (
+              <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
+                ⚠️ {withdrawError}
+              </div>
+            )}
+            <button
+              className="btn btn-ghost btn-full"
+              onClick={handleWithdraw}
+              disabled={withdrawing || soldOut}
+            >
+              {withdrawing ? '⏳ Снимаем...' : soldOut ? 'Лот неактивен' : 'Снять с продажи'}
+            </button>
+          </>
+        )
       ) : soldOut ? (
         <button className="btn btn-ghost btn-full" disabled>
           Лот уже продан

@@ -93,6 +93,7 @@ export const api = {
   // Escrow deposit
   createDepositIntent: () => request('/escrow/deposit-intent', { method: 'POST' }),
   getDepositStatus: () => request('/escrow/deposit-intent'),
+  withdrawListing: (id) => request(`/escrow/withdraw/${id}`, { method: 'POST' }),
 }
 
 // Mock data for dev (когда нет бэкенда)
