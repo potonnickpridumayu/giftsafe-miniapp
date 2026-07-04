@@ -343,4 +343,3 @@ export default function Profile() {
     </div>
   )
 }
-git add src/pages/Profile.jsx src/api/client.js
