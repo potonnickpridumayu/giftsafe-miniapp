@@ -17,6 +17,12 @@ export default function Profile() {
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [showWithdraw, setShowWithdraw] = useState(false)
   const [withdrawStatus, setWithdrawStatus] = useState(null)
+  const [copiedRef, setCopiedRef] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+
+  // Поменять при переезде бота на @giftruby
+  const BOT_USERNAME = 'mrkt_helping_service_bot'
+  const SUPPORT_USERNAME = 'GiftSafe_support'
 
   const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
 
@@ -314,23 +320,85 @@ export default function Profile() {
 
       {/* Menu */}
       {[
-        { icon: '🔗', label: 'Реферальная ссылка', sub: 'Заработайте с каждой продажи' },
-        { icon: '📊', label: 'История сделок', sub: `${txs.length} завершённых транзакций` },
-        { icon: '⚙️', label: 'Настройки', sub: 'Уведомления и безопасность' },
-        { icon: '❓', label: 'Поддержка', sub: 'Написать в @GiftSafe_support' },
+        {
+          icon: '🔗', label: 'Реферальная ссылка',
+          sub: copiedRef ? '✓ Ссылка скопирована!' : 'Заработайте с каждой продажи',
+          onClick: async () => {
+            haptic('light')
+            const link = `https://t.me/${BOT_USERNAME}?start=ref_${user?.id || ''}`
+            try {
+              await navigator.clipboard.writeText(link)
+            } catch {
+              const ta = document.createElement('textarea')
+              ta.value = link
+              ta.style.position = 'fixed'
+              ta.style.opacity = '0'
+              document.body.appendChild(ta)
+              ta.select()
+              document.execCommand('copy')
+              document.body.removeChild(ta)
+            }
+            setCopiedRef(true)
+            setTimeout(() => setCopiedRef(false), 2000)
+          },
+        },
+        {
+          icon: '📊', label: 'История сделок',
+          sub: `${txs.length} завершённых транзакций`,
+          onClick: () => { haptic('light'); setShowHistory(v => !v) },
+        },
+        {
+          icon: '❓', label: 'Поддержка',
+          sub: `Написать в @${SUPPORT_USERNAME}`,
+          onClick: () => {
+            haptic('light')
+            const url = `https://t.me/${SUPPORT_USERNAME}`
+            if (window.Telegram?.WebApp?.openTelegramLink) {
+              window.Telegram.WebApp.openTelegramLink(url)
+            } else {
+              window.open(url, '_blank')
+            }
+          },
+        },
       ].map((item, i) => (
-        <div
-          key={i}
-          className="card"
-          style={{ padding: '14px 16px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-          onClick={() => haptic('light')}
-        >
-          <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>{item.icon}</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 500 }}>{item.label}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{item.sub}</div>
+        <div key={i}>
+          <div
+            className="card"
+            style={{ padding: '14px 16px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+            onClick={item.onClick}
+          >
+            <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>{item.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{item.label}</div>
+              <div style={{ fontSize: 12, color: item.sub.startsWith('✓') ? 'var(--gold)' : 'var(--text-muted)', marginTop: 1 }}>{item.sub}</div>
+            </div>
+            <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>
+              {item.label === 'История сделок' ? (showHistory ? '⌄' : '›') : '›'}
+            </span>
           </div>
-          <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>›</span>
+          {item.label === 'История сделок' && showHistory && (
+            <div style={{ marginBottom: 8 }}>
+              {txs.length === 0 ? (
+                <div className="card" style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Сделок пока нет
+                </div>
+              ) : txs.map((tx, j) => (
+                <div key={j} className="card" style={{ padding: '10px 16px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 500 }}>
+                      {tx.buyer_id === user?.id ? '🛒 Покупка' : '💰 Продажа'}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ru-RU') : ''}
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: tx.buyer_id === user?.id ? 'var(--text-secondary)' : 'var(--gold)' }}>
+                    {tx.buyer_id === user?.id ? '−' : '+'}{Number(tx.amount_ton ?? 0).toFixed(2)} TON
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ))}
 
