@@ -14,8 +14,34 @@ export default function Profile() {
   const [depositAmount, setDepositAmount] = useState('')
   const [showDeposit, setShowDeposit] = useState(false)
   const [depositStatus, setDepositStatus] = useState(null)
+  const [withdrawAmount, setWithdrawAmount] = useState('')
+  const [showWithdraw, setShowWithdraw] = useState(false)
+  const [withdrawStatus, setWithdrawStatus] = useState(null)
 
   const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
+
+  const handleWithdraw = async () => {
+  const amount = parseFloat(String(withdrawAmount).replace(',', '.'))
+  if (!amount || amount < 0.1) { setWithdrawStatus('Минимум 0.1 TON'); return }
+  if (amount > balance) { setWithdrawStatus('Недостаточно средств'); return }
+  if (!walletAddress) {
+    setWithdrawStatus('Сначала подключи кошелёк')
+    tonConnectUI.openModal()
+    return
+  }
+  setWithdrawStatus('Отправляем…')
+  try {
+    await api.withdrawBalance(walletAddress, amount)
+    try { haptic('medium') } catch {}
+    setShowWithdraw(false)
+    setWithdrawAmount('')
+    setWithdrawStatus('Отправлено! TON придут через ~15 секунд')
+    const res = await api.getProfile()
+    setProfile(res)
+  } catch (e) {
+    setWithdrawStatus(e.message || 'Что-то пошло не так, попробуй ещё раз')
+  }
+}
 
   const handleDeposit = async () => {
     const amount = parseFloat(String(depositAmount).replace(',', '.'))
@@ -159,7 +185,7 @@ export default function Profile() {
           {loading ? '…' : `${balance.toFixed(2)} TON`}
         </div>
         <button
-          onClick={() => { haptic('light'); setShowDeposit(v => !v); setDepositStatus(null); setDepositAmount('0.1') }}
+          onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
           style={{
             marginTop: 12, padding: '10px 24px', borderRadius: 'var(--radius-md)',
             background: 'var(--gold)', color: '#000', fontWeight: 700, fontSize: 14,
@@ -167,6 +193,16 @@ export default function Profile() {
           }}
         >
           ➕ Пополнить
+        </button>
+        <button
+          onClick={() => { haptic('light'); setShowWithdraw(v => !v); setShowDeposit(false); setWithdrawStatus(null); setWithdrawAmount('0.1') }}
+          style={{
+            marginTop: 12, marginLeft: 8, padding: '10px 24px', borderRadius: 'var(--radius-md)',
+            background: 'transparent', color: 'var(--gold)', fontWeight: 700, fontSize: 14,
+            border: '1px solid var(--gold)', cursor: 'pointer',
+          }}
+        >
+          ➖ Вывести
         </button>
         {showDeposit && (
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
@@ -202,8 +238,45 @@ export default function Profile() {
             </button>
           </div>
         )}
+        {showWithdraw && (
+          <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <button
+              onClick={() => setWithdrawAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+            >−</button>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="0.1"
+              value={withdrawAmount}
+              onChange={e => setWithdrawAmount(e.target.value)}
+              style={{
+                width: 80, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)', background: 'var(--bg-card)',
+                color: 'var(--text)', fontSize: 14, textAlign: 'center',
+              }}
+            />
+            <button
+              onClick={() => setWithdrawAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+            >+</button>
+            <button
+              onClick={handleWithdraw}
+              style={{
+                padding: '10px 16px', borderRadius: 'var(--radius-md)',
+                background: 'var(--gold)', color: '#000', fontWeight: 700,
+                border: 'none', cursor: 'pointer', fontSize: 14,
+              }}
+            >
+              OK
+            </button>
+          </div>
+        )}
         {depositStatus && (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{depositStatus}</div>
+        )}
+        {withdrawStatus && (
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{withdrawStatus}</div>
         )}
         {error && (
           <div style={{ fontSize: 12, color: 'var(--danger, #e5484d)', marginTop: 6 }}>{error}</div>
@@ -270,3 +343,4 @@ export default function Profile() {
     </div>
   )
 }
+git add src/pages/Profile.jsx src/api/client.js

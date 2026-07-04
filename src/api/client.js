@@ -94,6 +94,10 @@ export const api = {
   createDepositIntent: () => request('/escrow/deposit-intent', { method: 'POST' }),
   getDepositStatus: () => request('/escrow/deposit-intent'),
   withdrawListing: (id) => request(`/escrow/withdraw/${id}`, { method: 'POST' }),
+
+  // TON balance withdrawal
+  withdrawBalance: (to_address, amount) =>
+    request('/balance/withdraw', { method: 'POST', body: JSON.stringify({ to_address, amount }) }),
 }
 
 // Mock data for dev (когда нет бэкенда)
