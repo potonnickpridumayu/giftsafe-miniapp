@@ -1,12 +1,54 @@
 import { useState, useEffect } from 'react'
 import { useTelegram } from '../hooks/useTelegram'
 import { api } from '../api/client'
+import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
+import { beginCell } from '@ton/core'
 
 export default function Profile() {
-  const { user, haptic } = useTelegram()
-  const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+    const { user, haptic } = useTelegram()
+    const [profile, setProfile] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+    const [tonConnectUI] = useTonConnectUI()
+    const walletAddress = useTonAddress()
+    const [depositAmount, setDepositAmount] = useState('')
+    const [showDeposit, setShowDeposit] = useState(false)
+    const [depositStatus, setDepositStatus] = useState(null)
+
+    const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
+
+    const handleDeposit = async () => {
+      const amount = parseFloat(depositAmount)
+      if (!amount || amount < 0.05) { setDepositStatus('Минимум 0.05 TON'); return }
+      if (!walletAddress) {
+        setDepositStatus('Сначала подключи кошелёк')
+        tonConnectUI.openModal()
+        return
+      }
+      try {
+        const payload = beginCell()
+          .storeUint(0, 32)
+          .storeStringTail(`GS-DEP-${user?.id}`)
+          .endCell()
+          .toBoc()
+          .toString('base64')
+
+        await tonConnectUI.sendTransaction({
+          validUntil: Math.floor(Date.now() / 1000) + 300,
+          messages: [{
+            address: SAFE_ADDRESS,
+            amount: String(Math.round(amount * 1e9)), // nanotons
+            payload,
+          }],
+        })
+        haptic('success')
+        setDepositStatus('Отправлено! Баланс обновится через ~30 сек')
+        setShowDeposit(false)
+        setDepositAmount('')
+      } catch (e) {
+        setDepositStatus(e.message?.includes('reject') ? 'Отменено' : 'Ошибка: ' + e.message)
+      }
+    }
 
   useEffect(() => {
     let alive = true
@@ -93,6 +135,46 @@ export default function Profile() {
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700, color: 'var(--gold)' }}>
           {loading ? '…' : `${balance.toFixed(2)} TON`}
+          <button
+          onClick={() => { haptic('light'); setShowDeposit(v => !v); setDepositStatus(null) }}
+          style={{
+            marginTop: 12, padding: '10px 24px', borderRadius: 'var(--radius-md)',
+            background: 'var(--gold)', color: '#000', fontWeight: 700, fontSize: 14,
+            border: 'none', cursor: 'pointer',
+          }}
+        >
+          ➕ Пополнить
+        </button>
+        {showDeposit && (
+          <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <input
+              type="number"
+              min="0.05"
+              step="0.1"
+              placeholder="Сумма TON"
+              value={depositAmount}
+              onChange={e => setDepositAmount(e.target.value)}
+              style={{
+                width: 120, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)', background: 'var(--bg-card)',
+                color: 'var(--text)', fontSize: 14,
+              }}
+            />
+            <button
+              onClick={handleDeposit}
+              style={{
+                padding: '10px 16px', borderRadius: 'var(--radius-md)',
+                background: 'var(--gold)', color: '#000', fontWeight: 700,
+                border: 'none', cursor: 'pointer', fontSize: 14,
+              }}
+            >
+              OK
+            </button>
+          </div>
+        )}
+        {depositStatus && (
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{depositStatus}</div>
+        )}
         </div>
         {error && (
           <div style={{ fontSize: 12, color: 'var(--danger, #e5484d)', marginTop: 6 }}>{error}</div>
