@@ -18,7 +18,6 @@ export default function Market() {
   const [filter, setFilter] = useState('Все')
   const [sort, setSort] = useState('new')
 
-  // данные с бэкенда
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -54,14 +53,18 @@ export default function Market() {
       <div style={{ marginBottom: 16 }}>
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 24,
+          fontSize: 26,
           fontWeight: 700,
           color: 'var(--text-primary)',
           marginBottom: 4,
         }}>
-          Rubuy <span style={{ color: 'var(--gold)' }}>Маркет</span>
+          Rubuy <span style={{
+            background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>Маркет</span>
         </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
           {loading ? 'Загрузка…' : `${listings.length} подарков`} • Комиссия 3%
         </p>
       </div>
@@ -76,26 +79,28 @@ export default function Market() {
       />
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 10 }}>
         {FILTERS.map(f => (
           <button
             key={f}
             onClick={() => { haptic('light'); setFilter(f) }}
-            className="btn btn-sm"
-            style={{
-              flexShrink: 0,
-              background: filter === f ? 'var(--gold-dim)' : 'var(--bg-card)',
-              color: filter === f ? 'var(--gold)' : 'var(--text-secondary)',
-              border: `1px solid ${filter === f ? 'rgba(212,175,55,0.3)' : 'var(--border)'}`,
-            }}
+            className={`chip${filter === f ? ' active' : ''}`}
+            style={{ flexShrink: 0 }}
           >
             {f}
           </button>
         ))}
       </div>
 
-      {/* Sort */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      {/* Sort — сегмент-контрол */}
+      <div style={{
+        display: 'flex',
+        background: 'var(--bg-input)',
+        border: '1px solid var(--border)',
+        borderRadius: 999,
+        padding: 4,
+        marginBottom: 16,
+      }}>
         {SORTS.map(s => (
           <button
             key={s.value}
@@ -103,14 +108,15 @@ export default function Market() {
             style={{
               flex: 1,
               padding: '8px 0',
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: 13,
+              fontWeight: 600,
               background: sort === s.value ? 'var(--bg-card-hover)' : 'transparent',
-              color: sort === s.value ? 'var(--text-primary)' : 'var(--text-muted)',
-              border: `1px solid ${sort === s.value ? 'var(--border)' : 'transparent'}`,
-              borderRadius: 'var(--radius-sm)',
+              color: sort === s.value ? 'var(--gold-light)' : 'var(--text-muted)',
+              border: 'none',
+              borderRadius: 999,
               cursor: 'pointer',
               fontFamily: 'var(--font-body)',
+              transition: 'all 0.15s',
             }}
           >
             {s.label}
@@ -142,6 +148,13 @@ export default function Market() {
           <div className="empty-icon">📭</div>
           <div className="empty-title">Пока нет объявлений</div>
           <div className="empty-desc">Будь первым — выставь свой подарок!</div>
+          <button
+            className="btn btn-primary"
+            onClick={() => { haptic('medium'); navigate('/sell') }}
+            style={{ marginTop: 14 }}
+          >
+            + Выставить подарок
+          </button>
         </div>
       ) : items.length === 0 ? (
         <div className="empty-state">
@@ -165,18 +178,18 @@ export default function Market() {
         </div>
       )}
 
-      {/* Sell button */}
-      <div style={{ position: 'fixed', right: 16, bottom: 80, zIndex: 50 }}>
+      {/* Sell FAB */}
+      <div style={{ position: 'fixed', right: 16, bottom: 84, zIndex: 50 }}>
         <button
           className="btn btn-primary"
           onClick={() => { haptic('medium'); navigate('/sell') }}
           style={{
-            borderRadius: 50,
-            width: 52,
-            height: 52,
+            borderRadius: '50%',
+            width: 58,
+            height: 58,
             padding: 0,
-            fontSize: 22,
-            boxShadow: 'var(--gold-glow)',
+            fontSize: 26,
+            lineHeight: 1,
           }}
         >
           +
