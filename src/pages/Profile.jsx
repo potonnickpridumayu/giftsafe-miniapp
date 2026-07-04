@@ -19,7 +19,7 @@ export default function Profile() {
 
   const handleDeposit = async () => {
     const amount = parseFloat(depositAmount)
-    if (!amount || amount < 0.05) { setDepositStatus('Минимум 0.05 TON'); return }
+    if (!amount || amount < 0.1) { setDepositStatus('Минимум 0.1 TON'); return }
     if (!walletAddress) {
       setDepositStatus('Сначала подключи кошелёк')
       tonConnectUI.openModal()
@@ -42,13 +42,24 @@ export default function Profile() {
         }],
       })
       try { haptic('medium') } catch {}
-      setDepositStatus('Отправлено! Баланс обновится через ~30 сек')
+      setDepositStatus('Отправлено! Ждём подтверждения…')
       setShowDeposit(false)
       setDepositAmount('')
-      // авто-обновление баланса
-      setTimeout(() => {
-        api.getProfile().then(setProfile).catch(() => {})
-      }, 30000)
+      // опрашиваем профиль каждые 5 сек, пока баланс не вырастет (макс 2 мин)
+      const prevBalance = balance
+      let tries = 0
+      const poll = setInterval(async () => {
+        tries++
+        try {
+          const res = await api.getProfile()
+          setProfile(res)
+          if ((res?.user?.balance_ton ?? 0) > prevBalance) {
+            setDepositStatus(null)
+            clearInterval(poll)
+          }
+        } catch {}
+        if (tries >= 24) clearInterval(poll)
+      }, 5000)
     } catch (e) {
       setDepositStatus(e.message?.includes('reject') ? 'Отменено' : 'Ошибка: ' + e.message)
     }
