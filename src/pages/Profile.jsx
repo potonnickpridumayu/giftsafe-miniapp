@@ -183,6 +183,16 @@ export default function Profile() {
               onClick={() => setDepositAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
               style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
             >+</button>
+            <button
+              onClick={handleDeposit}
+              style={{
+                padding: '10px 16px', borderRadius: 'var(--radius-md)',
+                background: 'var(--gold)', color: '#000', fontWeight: 700,
+                border: 'none', cursor: 'pointer', fontSize: 14,
+              }}
+            >
+              OK
+            </button>
           </div>
         )}
         {depositStatus && (
