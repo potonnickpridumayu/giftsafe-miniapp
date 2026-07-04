@@ -1,15 +1,15 @@
 :root {
-  --bg:        #0e0e0e;
-  --bg-card:   #1a1a1a;
-  --bg-input:  #252525;
-  --border:    #2e2e2e;
-  --accent:    #7c5cfc;
-  --accent2:   #a78bfa;
-  --gold:      #f5c518;
-  --text:      #f0f0f0;
-  --text-muted:#888;
-  --green:     #22c55e;
-  --red:       #ef4444;
+  --bg:        #14111c;
+  --bg-card:   #1e1826;
+  --bg-input:  #2a2133;
+  --border:    #372c40;
+  --accent:    #d94f66;
+  --accent2:   #f093a3;
+  --gold:      #e8b48c;
+  --text:      #f6eef1;
+  --text-muted:#9d8b96;
+  --green:     #4ade80;
+  --red:       #ff7070;
   --radius:    14px;
   --radius-sm: 8px;
 }
@@ -153,10 +153,10 @@ body {
   border-radius: 20px;
   font-weight: 600;
 }
-.rarity-Common    { background: #2a2a2a; color: #aaa; }
-.rarity-Rare      { background: #1a2a4a; color: #60a5fa; }
-.rarity-Epic      { background: #2a1a4a; color: #c084fc; }
-.rarity-Legendary { background: #3a2a0a; color: var(--gold); }
+.rarity-Common    { background: #2b2530; color: #b3a5ac; }
+.rarity-Rare      { background: #23283f; color: #8fb0f5; }
+.rarity-Epic      { background: #33203a; color: #d79bd9; }
+.rarity-Legendary { background: #3a2620; color: var(--gold); }
 
 .gift-price {
   font-size: 16px;
@@ -185,7 +185,7 @@ body {
 }
 .btn:active { transform: scale(0.98); opacity: 0.85; }
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  background: linear-gradient(135deg, #b53a52, var(--accent));
   color: #fff;
 }
 .btn-secondary {
@@ -194,9 +194,9 @@ body {
   border: 1px solid var(--border);
 }
 .btn-danger {
-  background: rgba(239,68,68,0.15);
+  background: rgba(255,112,112,0.12);
   color: var(--red);
-  border: 1px solid rgba(239,68,68,0.3);
+  border: 1px solid rgba(255,112,112,0.3);
 }
 .btn-sm {
   padding: 8px 14px;
@@ -250,9 +250,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(124,92,252,0.15);
+  background: rgba(217,79,102,0.14);
   color: var(--accent2);
-  border: 1px solid rgba(124,92,252,0.3);
+  border: 1px solid rgba(217,79,102,0.35);
   border-radius: 20px;
   padding: 4px 10px;
   font-size: 12px;
@@ -305,7 +305,7 @@ body {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(10,7,14,0.75);
   display: flex;
   align-items: flex-end;
   z-index: 100;
