@@ -74,6 +74,9 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
     try {
       await api.createListing({ gift_id: gift.gift_id, price: priceNum, description: '' })
       haptic('medium')
+      setBusy(false)
+      setPanel(null)
+      setPrice('')
       onListed(gift.gift_id)
     } catch (e) {
       setError(e.message)
@@ -111,14 +114,18 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
           </div>
         </div>
         {onChain && (
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-            <button
-              className="btn btn-primary"
-              style={{ fontSize: 12, padding: '8px 12px' }}
-              onClick={() => togglePanel('sell')}
-            >
-              {panel === 'sell' ? 'Скрыть' : 'Продать'}
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {gift.on_sale ? (
+              <span className="badge badge-gold" style={{ fontSize: 11 }}>На продаже</span>
+            ) : (
+              <button
+                className="btn btn-primary"
+                style={{ fontSize: 12, padding: '8px 12px' }}
+                onClick={() => togglePanel('sell')}
+              >
+                {panel === 'sell' ? 'Скрыть' : 'Продать'}
+              </button>
+            )}
             <button
               className="btn btn-ghost"
               style={{ fontSize: 12, padding: '8px 12px' }}
