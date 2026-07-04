@@ -18,7 +18,7 @@ export default function Profile() {
   const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
 
   const handleDeposit = async () => {
-    const amount = parseFloat(depositAmount)
+    const amount = parseFloat(String(depositAmount).replace(',', '.'))
     if (!amount || amount < 0.1) { setDepositStatus('Минимум 0.1 TON'); return }
     if (!walletAddress) {
       setDepositStatus('Сначала подключи кошелёк')
@@ -163,29 +163,26 @@ export default function Profile() {
         </button>
         {showDeposit && (
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
+              <button
+              onClick={() => setDepositAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+            >−</button>
             <input
-              type="number"
-              min="0.05"
-              step="0.1"
-              placeholder="Сумма TON"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.1"
               value={depositAmount}
               onChange={e => setDepositAmount(e.target.value)}
               style={{
-                width: 120, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                width: 80, padding: '10px 12px', borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border)', background: 'var(--bg-card)',
-                color: 'var(--text)', fontSize: 14,
+                color: 'var(--text)', fontSize: 14, textAlign: 'center',
               }}
             />
             <button
-              onClick={handleDeposit}
-              style={{
-                padding: '10px 16px', borderRadius: 'var(--radius-md)',
-                background: 'var(--gold)', color: '#000', fontWeight: 700,
-                border: 'none', cursor: 'pointer', fontSize: 14,
-              }}
-            >
-              OK
-            </button>
+              onClick={() => setDepositAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+            >+</button>
           </div>
         )}
         {depositStatus && (
