@@ -39,7 +39,9 @@ export default function GiftCard({ item, onClick }) {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        <span>{item.emoji}</span>
+        {item.image_url
+          ? <img src={item.image_url} alt={item.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+          : <span>{item.emoji}</span>}
         <span style={{
           position: 'absolute',
           top: 8,
@@ -66,7 +68,7 @@ export default function GiftCard({ item, onClick }) {
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span className="price price-sm">⭐ {item.price}</span>
+          <span className="price price-sm">{item.price} TON</span>
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {timeAgo(item.listed_at)}
           </span>

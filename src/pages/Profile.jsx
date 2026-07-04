@@ -20,6 +20,15 @@ export default function Profile() {
 
   const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
 
+  // Единая перезагрузка профиля; best-effort — ошибку глотаем,
+  // чтобы не перетереть статус вывода/пополнения.
+  const reloadProfile = async () => {
+    try {
+      const res = await api.getProfile()
+      setProfile(res)
+    } catch {}
+  }
+
   const handleWithdraw = async () => {
   const amount = parseFloat(String(withdrawAmount).replace(',', '.'))
   if (!amount || amount < 0.1) { setWithdrawStatus('Минимум 0.1 TON'); return }
@@ -36,10 +45,12 @@ export default function Profile() {
     setShowWithdraw(false)
     setWithdrawAmount('')
     setWithdrawStatus('Отправлено! TON придут через ~15 секунд')
-    const res = await api.getProfile()
-    setProfile(res)
+    await reloadProfile()
   } catch (e) {
     setWithdrawStatus(e.message || 'Что-то пошло не так, попробуй ещё раз')
+    // При 502 баланс уже списан на бэке (pending) — показываем актуальный,
+    // чтобы юзер видел «зависшую» сумму до подтверждения/возврата.
+    await reloadProfile()
   }
 }
 
@@ -119,8 +130,8 @@ export default function Profile() {
   // Реальные метрики из БД (total_earned / total_spent обновляются при каждой сделке)
   const stats = [
     { label: 'Сделок', value: loading ? '…' : String(txs.length) },
-    { label: 'Заработано', value: loading ? '…' : earned.toFixed(1) },
-    { label: 'Потрачено', value: loading ? '…' : spent.toFixed(1) },
+    { label: 'Заработано', value: loading ? '…' : earned.toFixed(2) },
+    { label: 'Потрачено', value: loading ? '…' : spent.toFixed(2) },
   ]
 
   return (
