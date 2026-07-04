@@ -61,7 +61,14 @@ export default function Profile() {
         if (tries >= 24) clearInterval(poll)
       }, 5000)
     } catch (e) {
-      setDepositStatus(e.message?.includes('reject') ? 'Отменено' : 'Ошибка: ' + e.message)
+      const m = e.message || ''
+      if (m.includes('reject') || m.includes('Reject')) {
+        setDepositStatus('Отменено')
+      } else if (m.includes('was not sent') || m.includes('TON_CONNECT')) {
+        setDepositStatus('Не удалось отправить — открой Tonkeeper и попробуй ещё раз')
+      } else {
+        setDepositStatus('Что-то пошло не так, попробуй ещё раз')
+      }
     }
   }
 
