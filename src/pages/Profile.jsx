@@ -135,13 +135,23 @@ export default function Profile() {
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700, color: 'var(--gold)' }}>
           {loading ? '…' : `${balance.toFixed(2)} TON`}
-          <button
+        </div>
+        <button
           onClick={() => { haptic('light'); setShowDeposit(v => !v); setDepositStatus(null) }}
           style={{
             marginTop: 12, padding: '10px 24px', borderRadius: 'var(--radius-md)',
             background: 'var(--gold)', color: '#000', fontWeight: 700, fontSize: 14,
             border: 'none', cursor: 'pointer',
           }}
+        >
+          ➕ Пополнить
+        </button>
+        {showDeposit && (
+          ...весь блок без изменений...
+        )}
+        {depositStatus && (
+          ...без изменений...
+        )}
         >
           ➕ Пополнить
         </button>
