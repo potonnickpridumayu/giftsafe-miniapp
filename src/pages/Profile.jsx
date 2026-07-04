@@ -5,50 +5,54 @@ import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
 
 export default function Profile() {
-    const { user, haptic } = useTelegram()
-    const [profile, setProfile] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-    const [tonConnectUI] = useTonConnectUI()
-    const walletAddress = useTonAddress()
-    const [depositAmount, setDepositAmount] = useState('')
-    const [showDeposit, setShowDeposit] = useState(false)
-    const [depositStatus, setDepositStatus] = useState(null)
+  const { user, haptic } = useTelegram()
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [tonConnectUI] = useTonConnectUI()
+  const walletAddress = useTonAddress()
+  const [depositAmount, setDepositAmount] = useState('')
+  const [showDeposit, setShowDeposit] = useState(false)
+  const [depositStatus, setDepositStatus] = useState(null)
 
-    const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
+  const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
 
-    const handleDeposit = async () => {
-      const amount = parseFloat(depositAmount)
-      if (!amount || amount < 0.05) { setDepositStatus('Минимум 0.05 TON'); return }
-      if (!walletAddress) {
-        setDepositStatus('Сначала подключи кошелёк')
-        tonConnectUI.openModal()
-        return
-      }
-      try {
-        const boc = beginCell()
-      .storeUint(0, 32)
-      .storeStringTail(`GS-DEP-${user?.id}`)
-      .endCell()
-      .toBoc()
-    const payload = btoa(String.fromCharCode(...boc))
-
-        await tonConnectUI.sendTransaction({
-          validUntil: Math.floor(Date.now() / 1000) + 300,
-          messages: [{
-            address: SAFE_ADDRESS,
-            amount: String(Math.round(amount * 1e9)), // nanotons
-            payload,
-          }],
-        })
-        haptic('success')
-        setDepositStatus('Отправлено! Баланс обновится через ~30 сек')
-        setShowDeposit(false)
-        setDepositAmount('')
-      } catch (e) {
-        setDepositStatus(e.message?.includes('reject') ? 'Отменено' : 'Ошибка: ' + e.message)
-      }
+  const handleDeposit = async () => {
+    const amount = parseFloat(depositAmount)
+    if (!amount || amount < 0.05) { setDepositStatus('Минимум 0.05 TON'); return }
+    if (!walletAddress) {
+      setDepositStatus('Сначала подключи кошелёк')
+      tonConnectUI.openModal()
+      return
     }
+    try {
+      const boc = beginCell()
+        .storeUint(0, 32)
+        .storeStringTail(`GS-DEP-${user?.id}`)
+        .endCell()
+        .toBoc()
+      const payload = btoa(String.fromCharCode(...boc))
+
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 300,
+        messages: [{
+          address: SAFE_ADDRESS,
+          amount: String(Math.round(amount * 1e9)), // nanotons
+          payload,
+        }],
+      })
+      haptic('medium')
+      setDepositStatus('Отправлено! Баланс обновится через ~30 сек')
+      setShowDeposit(false)
+      setDepositAmount('')
+      // авто-обновление баланса через 30 сек
+      setTimeout(() => {
+        api.getProfile().then(setProfile).catch(() => {})
+      }, 30000)
+    } catch (e) {
+      setDepositStatus(e.message?.includes('reject') ? 'Отменено' : 'Ошибка: ' + e.message)
+    }
+  }
 
   useEffect(() => {
     let alive = true
@@ -147,15 +151,6 @@ export default function Profile() {
           ➕ Пополнить
         </button>
         {showDeposit && (
-          ...весь блок без изменений...
-        )}
-        {depositStatus && (
-          ...без изменений...
-        )}
-        >
-          ➕ Пополнить
-        </button>
-        {showDeposit && (
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
             <input
               type="number"
@@ -185,7 +180,6 @@ export default function Profile() {
         {depositStatus && (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{depositStatus}</div>
         )}
-        </div>
         {error && (
           <div style={{ fontSize: 12, color: 'var(--danger, #e5484d)', marginTop: 6 }}>{error}</div>
         )}
