@@ -1,26 +1,26 @@
-/* ===== GIFTSAFE DESIGN SYSTEM ===== */
-/* Стиль: холодный, минималистичный, с золотым акцентом — как premium NFT vault */
+/* ===== RUBUY DESIGN SYSTEM ===== */
+/* Стиль: закатные облака — глубокий сине-сливовый фон, пыльно-рубиновый акцент */
 
 :root {
-  --bg-base: #0a0a0f;
-  --bg-card: #111118;
-  --bg-card-hover: #16161f;
-  --bg-input: #0e0e16;
+  --bg-base: #100d16;
+  --bg-card: #181321;
+  --bg-card-hover: #1f1929;
+  --bg-input: #151020;
   --border: rgba(255, 255, 255, 0.06);
-  --border-active: rgba(212, 175, 55, 0.4);
+  --border-active: rgba(224, 94, 116, 0.45);
 
-  --gold: #d4af37;
-  --gold-light: #f0cc5a;
-  --gold-dim: rgba(212, 175, 55, 0.15);
-  --gold-glow: 0 0 20px rgba(212, 175, 55, 0.2);
+  --gold: #e05e74;
+  --gold-light: #f2919f;
+  --gold-dim: rgba(224, 94, 116, 0.14);
+  --gold-glow: 0 0 20px rgba(224, 94, 116, 0.22);
 
-  --text-primary: #f0f0f5;
-  --text-secondary: #8888aa;
-  --text-muted: #44445a;
+  --text-primary: #f5eef1;
+  --text-secondary: #9b8a99;
+  --text-muted: #55475a;
 
-  --green: #34c759;
-  --red: #ff3b30;
-  --blue: #5e9cf5;
+  --green: #34c77a;
+  --red: #ff6b5e;
+  --blue: #7f9df5;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -101,7 +101,7 @@ html, body {
 
 .btn-primary {
   background: var(--gold);
-  color: #0a0a0f;
+  color: #fff;
 }
 .btn-primary:active { background: var(--gold-light); transform: scale(0.97); }
 
@@ -126,9 +126,9 @@ html, body {
   font-weight: 600;
   letter-spacing: 0.3px;
 }
-.badge-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(212,175,55,0.2); }
-.badge-green { background: rgba(52,199,89,0.1); color: var(--green); }
-.badge-red { background: rgba(255,59,48,0.1); color: var(--red); }
+.badge-gold { background: var(--gold-dim); color: var(--gold-light); border: 1px solid rgba(224,94,116,0.25); }
+.badge-green { background: rgba(52,199,122,0.1); color: var(--green); }
+.badge-red { background: rgba(255,107,94,0.1); color: var(--red); }
 .badge-muted { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
 
 /* ===== INPUTS ===== */
@@ -158,7 +158,7 @@ html, body {
 .price {
   font-family: var(--font-display);
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-light);
 }
 .price-sm { font-size: 14px; }
 .price-md { font-size: 18px; }
