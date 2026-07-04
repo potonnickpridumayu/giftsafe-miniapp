@@ -39,6 +39,8 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
 
   const rarityColor = RARITY_COLORS[gift.rarity] || '#8888aa'
   const onChain = Boolean(gift.nft_address)
+  const isTgGift = Boolean(gift.tg_owned_gift_id)
+  const canTrade = onChain || isTgGift
 
   const priceNum = parseFloat(String(price).replace(',', '.')) || 0
   const youGet = round4(priceNum - priceNum * FEE_RATE)
@@ -110,10 +112,10 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             fontSize: 12, color: 'var(--text-muted)',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>
-            {onChain ? '⛓ В сейфе GiftSafe' : gift.collection_name || 'Подарок'}
+            {onChain ? '⛓ В сейфе GiftSafe' : isTgGift ? '🎁 В Telegram-сейфе' : gift.collection_name || 'Подарок'}
           </div>
         </div>
-        {onChain && (
+        {canTrade && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
             {gift.on_sale ? (
               <span className="badge badge-gold" style={{ fontSize: 11 }}>На продаже</span>
@@ -126,13 +128,15 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
                 {panel === 'sell' ? 'Скрыть' : 'Продать'}
               </button>
             )}
-            <button
-              className="btn btn-ghost"
-              style={{ fontSize: 12, padding: '8px 12px' }}
-              onClick={() => togglePanel('withdraw')}
-            >
-              {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
-            </button>
+            {onChain && (
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: 12, padding: '8px 12px' }}
+                onClick={() => togglePanel('withdraw')}
+              >
+                {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+              </button>
+            )}
           </div>
         )}
       </div>
