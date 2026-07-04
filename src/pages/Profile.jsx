@@ -26,12 +26,12 @@ export default function Profile() {
         return
       }
       try {
-        const payload = beginCell()
-          .storeUint(0, 32)
-          .storeStringTail(`GS-DEP-${user?.id}`)
-          .endCell()
-          .toBoc()
-          .toString('base64')
+        const boc = beginCell()
+      .storeUint(0, 32)
+      .storeStringTail(`GS-DEP-${user?.id}`)
+      .endCell()
+      .toBoc()
+    const payload = btoa(String.fromCharCode(...boc))
 
         await tonConnectUI.sendTransaction({
           validUntil: Math.floor(Date.now() / 1000) + 300,
