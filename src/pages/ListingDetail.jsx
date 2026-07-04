@@ -96,7 +96,7 @@ export default function ListingDetail() {
   const handleWithdraw = () => {
     haptic('medium')
     showConfirm(
-      `Снять «${item.name}» с продажи? NFT вернётся на ваш кошелёк.`,
+      `Снять «${item.name}» с продажи? Подарок останется в вашем портфеле.`,
       async (ok) => {
         if (!ok) return
         setWithdrawing(true)
@@ -212,10 +212,10 @@ export default function ListingDetail() {
             <div style={{ fontSize: 48, marginBottom: 8 }}>📤</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Лот снят</div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-              NFT отправлен на ваш кошелёк — придёт в течение минуты
+              Подарок остался в вашем портфеле — можно перевыставить или вывести
             </p>
-            <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/')}>
-              На маркет
+            <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/portfolio')}>
+              В портфель
             </button>
           </div>
         ) : (
