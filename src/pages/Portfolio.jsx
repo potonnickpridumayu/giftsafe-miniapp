@@ -112,7 +112,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             fontSize: 12, color: 'var(--text-muted)',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>
-            {onChain ? '⛓ В сейфе GiftSafe' : isTgGift ? '🎁 В Telegram-сейфе' : gift.collection_name || 'Подарок'}
+            {onChain ? '⛓ В сейфе Rubuy' : isTgGift ? '🎁 В Telegram-сейфе' : gift.collection_name || 'Подарок'}
           </div>
         </div>
         {canTrade && (
@@ -144,7 +144,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
       {panel === 'sell' && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-            Лот появится на маркете. Комиссия GiftSafe {Math.round(FEE_RATE * 100)}%
+            Лот появится на маркете. Комиссия Rubuy {Math.round(FEE_RATE * 100)}%
             {priceNum > 0 ? ` — вы получите ${youGet} TON` : ''}.
           </div>
           <input

@@ -59,7 +59,7 @@ export default function Market() {
           color: 'var(--text-primary)',
           marginBottom: 4,
         }}>
-          GiftSafe <span style={{ color: 'var(--gold)' }}>Маркет</span>
+          Rubuy <span style={{ color: 'var(--gold)' }}>Маркет</span>
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
           {loading ? 'Загрузка…' : `${listings.length} подарков`} • Комиссия 3%

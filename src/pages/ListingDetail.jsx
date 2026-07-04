@@ -177,7 +177,7 @@ export default function ListingDetail() {
           <span style={{ fontSize: 13, fontWeight: 600 }}>{item.price} TON</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия GiftSafe ({Math.round(FEE_RATE * 100)}%)</span>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия Rubuy ({Math.round(FEE_RATE * 100)}%)</span>
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fee} TON</span>
         </div>
         <div className="divider" style={{ margin: '10px 0' }} />

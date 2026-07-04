@@ -167,7 +167,7 @@ export default function Sell() {
       {step === 'intro' && (
         <>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
-            Подарок хранится в эскроу GiftSafe до продажи
+            Подарок хранится в эскроу Rubuy до продажи
           </p>
           <div className="card" style={{ padding: '16px', marginBottom: 20, fontSize: 13, lineHeight: 1.7 }}>
             <div>1️⃣ Получите адрес сейфа и ваш код</div>
@@ -179,7 +179,7 @@ export default function Sell() {
             background: 'rgba(94,156,245,0.08)', border: '1px solid rgba(94,156,245,0.25)',
             borderRadius: 'var(--radius-lg)', fontSize: 13, color: '#5e9cf5', lineHeight: 1.5,
           }}>
-            🔒 NFT физически лежит на сейфе GiftSafe — покупатель гарантированно его получит,
+            🔒 NFT физически лежит на сейфе Rubuy — покупатель гарантированно его получит,
             а при снятии лота подарок вернётся вам.
           </div>
           {error && (
@@ -256,7 +256,7 @@ export default function Sell() {
               NFT получен!
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6, lineHeight: 1.6 }}>
-              Подарок уже в вашем портфеле и хранится в сейфе GiftSafe.
+              Подарок уже в вашем портфеле и хранится в сейфе Rubuy.
               Выставить на продажу можно сейчас или позже — из портфеля.
             </p>
           </div>
@@ -304,7 +304,7 @@ export default function Sell() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                Комиссия GiftSafe ({Math.round(FEE_RATE * 100)}%)
+                Комиссия Rubuy ({Math.round(FEE_RATE * 100)}%)
               </span>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fee} TON</span>
             </div>

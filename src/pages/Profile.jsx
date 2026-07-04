@@ -21,8 +21,8 @@ export default function Profile() {
   const [showHistory, setShowHistory] = useState(false)
 
   // Поменять при переезде бота на @giftruby
-  const BOT_USERNAME = 'Rubuy'
-  const SUPPORT_USERNAME = 'GiftSafe_support'
+  const BOT_USERNAME = 'giftruby_bot'
+  const SUPPORT_USERNAME = 'ruby_support'
 
   const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
 
