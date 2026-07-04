@@ -35,7 +35,7 @@ export default function Sell() {
   const navigate = useNavigate()
   const { haptic, showConfirm } = useTelegram()
 
-  // step: intro → deposit → price → done
+  // step: intro → deposit → deposited → price → done
   const [step, setStep] = useState('intro')
   const [intent, setIntent] = useState(null)   // { address, code }
   const [gift, setGift] = useState(null)       // { gift_id, nft_address }
@@ -59,7 +59,7 @@ export default function Sell() {
         if (st.status === 'completed' && st.gift_id) {
           haptic('light')
           setGift({ gift_id: st.gift_id, nft_address: st.nft_address })
-          setStep('price')
+          setStep('deposited')
         }
       } catch { /* сеть мигнула — попробуем в следующий цикл */ }
     }
@@ -244,6 +244,36 @@ export default function Sell() {
           <div className="card" style={{ padding: '14px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
             ⏳ Ждём ваш NFT… Проверяем каждые 10 секунд, страницу можно не обновлять.
           </div>
+        </>
+      )}
+
+      {/* ── Шаг 2.5: NFT в портфеле, цена — по желанию ── */}
+      {step === 'deposited' && gift && (
+        <>
+          <div style={{ textAlign: 'center', padding: '24px 0 8px' }}>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>
+              NFT получен!
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6, lineHeight: 1.6 }}>
+              Подарок уже в вашем портфеле и хранится в сейфе GiftSafe.
+              Выставить на продажу можно сейчас или позже — из портфеля.
+            </p>
+          </div>
+          <button
+            className="btn btn-primary btn-full"
+            style={{ marginTop: 16, fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
+            onClick={() => { haptic('medium'); setStep('price') }}
+          >
+            Назначить цену сейчас
+          </button>
+          <button
+            className="btn btn-ghost btn-full"
+            style={{ marginTop: 10 }}
+            onClick={() => { haptic('light'); navigate('/portfolio') }}
+          >
+            В портфель — продам позже
+          </button>
         </>
       )}
 

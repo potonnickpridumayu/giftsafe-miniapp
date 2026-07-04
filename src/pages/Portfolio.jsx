@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
+import { api } from '../api/client'
 import { TonConnectButton } from '@tonconnect/ui-react';
 
 
@@ -26,14 +27,27 @@ async function apiCall(path, options = {}) {
   return data
 }
 
-function GiftCard({ gift, onWithdrawn, haptic }) {
-  const [open, setOpen] = useState(false)
+const FEE_RATE = 0.03 // должна совпадать с MARKET_FEE на бэке и Sell.jsx
+const round4 = (n) => Math.round((n + Number.EPSILON) * 1e4) / 1e4
+
+function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
+  const [panel, setPanel] = useState(null) // null | 'withdraw' | 'sell'
   const [address, setAddress] = useState('')
+  const [price, setPrice] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   const rarityColor = RARITY_COLORS[gift.rarity] || '#8888aa'
   const onChain = Boolean(gift.nft_address)
+
+  const priceNum = parseFloat(String(price).replace(',', '.')) || 0
+  const youGet = round4(priceNum - priceNum * FEE_RATE)
+
+  const togglePanel = (name) => {
+    haptic('light')
+    setError('')
+    setPanel(p => (p === name ? null : name))
+  }
 
   const withdraw = async () => {
     const to = address.trim()
@@ -47,6 +61,20 @@ function GiftCard({ gift, onWithdrawn, haptic }) {
       })
       haptic('medium')
       onWithdrawn(gift.gift_id)
+    } catch (e) {
+      setError(e.message)
+      setBusy(false)
+    }
+  }
+
+  const sell = async () => {
+    if (!(priceNum > 0)) { setError('Укажите цену в TON больше нуля'); return }
+    setBusy(true)
+    setError('')
+    try {
+      await api.createListing({ gift_id: gift.gift_id, price: priceNum, description: '' })
+      haptic('medium')
+      onListed(gift.gift_id)
     } catch (e) {
       setError(e.message)
       setBusy(false)
@@ -83,17 +111,61 @@ function GiftCard({ gift, onWithdrawn, haptic }) {
           </div>
         </div>
         {onChain && (
-          <button
-            className="btn btn-ghost"
-            style={{ fontSize: 12, padding: '8px 12px', flexShrink: 0 }}
-            onClick={() => { haptic('light'); setOpen(!open); setError('') }}
-          >
-            {open ? 'Скрыть' : 'Вывести'}
-          </button>
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            <button
+              className="btn btn-primary"
+              style={{ fontSize: 12, padding: '8px 12px' }}
+              onClick={() => togglePanel('sell')}
+            >
+              {panel === 'sell' ? 'Скрыть' : 'Продать'}
+            </button>
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: 12, padding: '8px 12px' }}
+              onClick={() => togglePanel('withdraw')}
+            >
+              {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+            </button>
+          </div>
         )}
       </div>
 
-      {open && (
+      {panel === 'sell' && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+            Лот появится на маркете. Комиссия GiftSafe {Math.round(FEE_RATE * 100)}%
+            {priceNum > 0 ? ` — вы получите ${youGet} TON` : ''}.
+          </div>
+          <input
+            value={price}
+            onChange={e => { setPrice(e.target.value.replace(/[^\d.,]/g, '')); setError('') }}
+            placeholder="Цена в TON, например 10.5"
+            inputMode="decimal"
+            disabled={busy}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 12px',
+              color: 'inherit', fontSize: 13,
+              marginBottom: 8, outline: 'none',
+            }}
+          />
+          {error && (
+            <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
+          )}
+          <button
+            className="btn btn-primary btn-full"
+            disabled={busy || !(priceNum > 0)}
+            onClick={sell}
+          >
+            {busy ? 'Выставляем…' : 'Выставить на продажу'}
+          </button>
+        </div>
+      )}
+
+      {panel === 'withdraw' && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             NFT уйдёт из сейфа на указанный TON-адрес. Проверьте адрес перед отправкой.
@@ -149,6 +221,12 @@ export default function Portfolio() {
 
   const onWithdrawn = (giftId) => {
     setGifts(prev => prev.filter(g => g.gift_id !== giftId))
+  }
+
+  const onListed = () => {
+    // лот создан — перезагружаем портфель, чтобы состояние пришло с бэка
+    haptic('light')
+    load()
   }
 
   const onChainCount = (gifts || []).filter(g => g.nft_address).length
@@ -209,7 +287,7 @@ export default function Portfolio() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {gifts.map(gift => (
-            <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} haptic={haptic} />
+            <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} haptic={haptic} />
           ))}
         </div>
       )}
