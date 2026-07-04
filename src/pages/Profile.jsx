@@ -41,11 +41,11 @@ export default function Profile() {
           payload,
         }],
       })
-      haptic('medium')
+      try { haptic('medium') } catch {}
       setDepositStatus('Отправлено! Баланс обновится через ~30 сек')
       setShowDeposit(false)
       setDepositAmount('')
-      // авто-обновление баланса через 30 сек
+      // авто-обновление баланса
       setTimeout(() => {
         api.getProfile().then(setProfile).catch(() => {})
       }, 30000)
