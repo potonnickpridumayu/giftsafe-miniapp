@@ -152,7 +152,7 @@ export default function Profile() {
           {loading ? '…' : `${balance.toFixed(2)} TON`}
         </div>
         <button
-          onClick={() => { haptic('light'); setShowDeposit(v => !v); setDepositStatus(null) }}
+          onClick={() => { haptic('light'); setShowDeposit(v => !v); setDepositStatus(null); setDepositAmount('0.1') }}
           style={{
             marginTop: 12, padding: '10px 24px', borderRadius: 'var(--radius-md)',
             background: 'var(--gold)', color: '#000', fontWeight: 700, fontSize: 14,
