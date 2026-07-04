@@ -20,13 +20,12 @@ export default function Profile() {
   const [copiedRef, setCopiedRef] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
-  // Поменять при переезде бота на @giftruby
   const BOT_USERNAME = 'giftruby_bot'
-  const SUPPORT_USERNAME = 'ruby_support'
+  const SUPPORT_USERNAME = 'giftruby_support'
 
   const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
 
-  // Единая перезагрузка профиля; best-effort — ошибку глотаем,
+  // Единая перезагрузка профиля; best-effort — ошибку глотаем((,
   // чтобы не перетереть статус вывода/пополнения.
   const reloadProfile = async () => {
     try {
