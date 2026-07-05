@@ -178,23 +178,25 @@ export default function Market() {
         </div>
       )}
 
-      {/* Sell FAB */}
-      <div style={{ position: 'fixed', right: 16, bottom: 84, zIndex: 50 }}>
-        <button
-          className="btn btn-primary"
-          onClick={() => { haptic('medium'); navigate('/sell') }}
-          style={{
-            borderRadius: '50%',
-            width: 58,
-            height: 58,
-            padding: 0,
-            fontSize: 26,
-            lineHeight: 1,
-          }}
-        >
-          +
-        </button>
-      </div>
+      {/* Sell FAB — только когда есть объявления */}
+      {listings.length > 0 && (
+        <div style={{ position: 'fixed', right: 16, bottom: 84, zIndex: 50 }}>
+          <button
+            className="btn btn-primary"
+            onClick={() => { haptic('medium'); navigate('/sell') }}
+            style={{
+              borderRadius: '50%',
+              width: 58,
+              height: 58,
+              padding: 0,
+              fontSize: 26,
+              lineHeight: 1,
+            }}
+          >
+            +
+          </button>
+        </div>
+      )}
     </div>
   )
 }
