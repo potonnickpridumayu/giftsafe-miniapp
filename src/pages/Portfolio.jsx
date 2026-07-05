@@ -147,20 +147,13 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             {priceNum > 0 ? ` — вы получите ${youGet} TON` : ''}.
           </div>
           <input
+            className="input"
             value={price}
             onChange={e => { setPrice(e.target.value.replace(/[^\d.,]/g, '')); setError('') }}
             placeholder="Цена в TON, например 10.5"
             inputMode="decimal"
             disabled={busy}
-            style={{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 12px',
-              color: 'inherit', fontSize: 13,
-              marginBottom: 8, outline: 'none',
-            }}
+            style={{ fontSize: 13, marginBottom: 8 }}
           />
           {error && (
             <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
@@ -199,19 +192,12 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             NFT уйдёт на указанный TON-адрес. Проверьте адрес перед отправкой.
           </div>
           <input
+            className="input"
             value={address}
             onChange={e => setAddress(e.target.value)}
             placeholder="Адрес вашего TON-кошелька"
             disabled={busy}
-            style={{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 12px',
-              color: 'inherit', fontSize: 13,
-              marginBottom: 8, outline: 'none',
-            }}
+            style={{ fontSize: 13, marginBottom: 8 }}
           />
           {error && (
             <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>

@@ -224,7 +224,7 @@ export default function Profile() {
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
               <button
               onClick={() => setDepositAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
             >−</button>
             <input
               type="text"
@@ -233,21 +233,24 @@ export default function Profile() {
               value={depositAmount}
               onChange={e => setDepositAmount(e.target.value)}
               style={{
-                width: 80, padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border)', background: 'var(--bg-card)',
+                width: 80, padding: '10px 12px', borderRadius: 999,
+                border: '1px solid var(--border)', background: 'var(--bg-input)',
                 color: 'var(--text-primary)', fontSize: 14, textAlign: 'center',
+                outline: 'none',
               }}
             />
             <button
               onClick={() => setDepositAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
             >+</button>
             <button
               onClick={handleDeposit}
               style={{
-                padding: '10px 16px', borderRadius: 'var(--radius-md)',
-                background: 'var(--gold)', color: '#fff', fontWeight: 700,
+                padding: '10px 16px', borderRadius: 999,
+                background: 'linear-gradient(135deg, var(--gold), var(--gold-deep))',
+                color: '#fff', fontWeight: 700,
                 border: 'none', cursor: 'pointer', fontSize: 14,
+                boxShadow: 'var(--gold-glow)',
               }}
             >
               OK
@@ -258,7 +261,7 @@ export default function Profile() {
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
             <button
               onClick={() => setWithdrawAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
             >−</button>
             <input
               type="text"
@@ -267,21 +270,24 @@ export default function Profile() {
               value={withdrawAmount}
               onChange={e => setWithdrawAmount(e.target.value)}
               style={{
-                width: 80, padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border)', background: 'var(--bg-card)',
+                width: 80, padding: '10px 12px', borderRadius: 999,
+                border: '1px solid var(--border)', background: 'var(--bg-input)',
                 color: 'var(--text-primary)', fontSize: 14, textAlign: 'center',
+                outline: 'none',
               }}
             />
             <button
               onClick={() => setWithdrawAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
             >+</button>
             <button
               onClick={handleWithdraw}
               style={{
-                padding: '10px 16px', borderRadius: 'var(--radius-md)',
-                background: 'var(--gold)', color: '#fff', fontWeight: 700,
+                padding: '10px 16px', borderRadius: 999,
+                background: 'linear-gradient(135deg, var(--gold), var(--gold-deep))',
+                color: '#fff', fontWeight: 700,
                 border: 'none', cursor: 'pointer', fontSize: 14,
+                boxShadow: 'var(--gold-glow)',
               }}
             >
               OK
