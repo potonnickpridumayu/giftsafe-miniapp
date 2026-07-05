@@ -256,7 +256,7 @@ export default function Portfolio() {
     load()
   }
 
-  const onChainCount = (gifts || []).filter(g => g.nft_address).length
+  const onChainCount = (gifts || []).filter(g => g.nft_address || g.tg_owned_gift_id).length
 
   return (
     <div className="page">
