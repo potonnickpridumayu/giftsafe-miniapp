@@ -1,31 +1,32 @@
-/* ===== RUBUY DESIGN SYSTEM ===== */
-/* Стиль: закатные облака — глубокий сине-сливовый фон, пыльно-рубиновый акцент */
+/* ===== RUBUY DESIGN SYSTEM v2 ===== */
+/* Сочный рубин по мотивам MRKT: заливные акценты, pill-кнопки, glow */
 
 :root {
-  --bg-base: #100d16;
-  --bg-card: #181321;
-  --bg-card-hover: #1f1929;
-  --bg-input: #151020;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-active: rgba(224, 94, 116, 0.45);
+  --bg-base: #120d17;
+  --bg-card: #1c1523;
+  --bg-card-hover: #251b2e;
+  --bg-input: #191221;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-active: rgba(236, 84, 111, 0.55);
 
-  --gold: #e05e74;
-  --gold-light: #f2919f;
-  --gold-dim: rgba(224, 94, 116, 0.14);
-  --gold-glow: 0 0 20px rgba(224, 94, 116, 0.22);
+  --gold: #ec546f;
+  --gold-light: #ff8ba1;
+  --gold-deep: #c93a58;
+  --gold-dim: rgba(236, 84, 111, 0.16);
+  --gold-glow: 0 4px 24px rgba(236, 84, 111, 0.35);
 
-  --text-primary: #f5eef1;
-  --text-secondary: #9b8a99;
-  --text-muted: #55475a;
+  --text-primary: #f8f0f3;
+  --text-secondary: #a390a0;
+  --text-muted: #5c4d61;
 
-  --green: #34c77a;
+  --green: #3ddc84;
   --red: #ff6b5e;
   --blue: #7f9df5;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
 
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -59,7 +60,6 @@ html, body {
   min-height: 100vh;
 }
 
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 0; }
 
 /* ===== LAYOUT ===== */
@@ -79,7 +79,7 @@ html, body {
   overflow: hidden;
   transition: border-color 0.2s, transform 0.15s;
 }
-.card:active { transform: scale(0.98); }
+.card:active { transform: scale(0.98); border-color: var(--border-active); }
 
 /* ===== BUTTONS ===== */
 .btn {
@@ -87,11 +87,11 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
+  padding: 13px 22px;
+  border-radius: 999px;
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   border: none;
   transition: all 0.15s;
@@ -100,44 +100,68 @@ html, body {
 }
 
 .btn-primary {
-  background: var(--gold);
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
   color: #fff;
+  box-shadow: var(--gold-glow);
 }
-.btn-primary:active { background: var(--gold-light); transform: scale(0.97); }
+.btn-primary:active { transform: scale(0.96); filter: brightness(1.15); }
 
 .btn-ghost {
-  background: transparent;
+  background: var(--bg-card-hover);
   color: var(--text-secondary);
   border: 1px solid var(--border);
 }
-.btn-ghost:active { background: var(--bg-card-hover); }
+.btn-ghost:active { background: var(--bg-card); }
 
-.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-sm { padding: 9px 16px; font-size: 13px; }
 .btn-full { width: 100%; }
+
+/* ===== CHIPS (фильтры как у MRKT) ===== */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-card-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.chip.active {
+  background: var(--gold);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: var(--gold-glow);
+}
 
 /* ===== BADGES ===== */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
-  border-radius: 20px;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.3px;
 }
-.badge-gold { background: var(--gold-dim); color: var(--gold-light); border: 1px solid rgba(224,94,116,0.25); }
-.badge-green { background: rgba(52,199,122,0.1); color: var(--green); }
-.badge-red { background: rgba(255,107,94,0.1); color: var(--red); }
-.badge-muted { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+.badge-gold { background: var(--gold); color: #fff; }
+.badge-green { background: rgba(61,220,132,0.12); color: var(--green); }
+.badge-red { background: rgba(255,107,94,0.12); color: var(--red); }
+.badge-muted { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
 
 /* ===== INPUTS ===== */
 .input {
   width: 100%;
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
+  border-radius: 999px;
+  padding: 13px 18px;
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--text-primary);
@@ -154,15 +178,21 @@ html, body {
   margin: 16px 0;
 }
 
-/* ===== PRICE ===== */
+/* ===== PRICE (плашка как у MRKT) ===== */
 .price {
   font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--gold-light);
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  border-radius: 999px;
+  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
-.price-sm { font-size: 14px; }
-.price-md { font-size: 18px; }
-.price-lg { font-size: 24px; }
+.price-sm { font-size: 13px; }
+.price-md { font-size: 15px; }
+.price-lg { font-size: 19px; padding: 8px 18px; }
 
 /* ===== SECTION HEADER ===== */
 .section-header {
@@ -173,8 +203,8 @@ html, body {
 }
 .section-title {
   font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -245,6 +275,6 @@ html, body {
 .gold-line {
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity: 0.4;
+  opacity: 0.5;
   margin: 0 -16px;
 }
