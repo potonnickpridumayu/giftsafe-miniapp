@@ -6,6 +6,7 @@ import Auctions from './pages/Auctions'
 import Portfolio from './pages/Portfolio'
 import Profile from './pages/Profile'
 import Sell from './pages/Sell'
+import Referral from './pages/Referral'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/sell" element={<Sell />} />
+        <Route path="/referral" element={<Referral />} />
       </Routes>
       <NavBar />
     </BrowserRouter>
