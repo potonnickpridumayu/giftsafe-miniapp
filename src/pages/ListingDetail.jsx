@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
+import TgGiftSticker from '../components/TgGiftSticker'
 
 const RARITY_COLORS = {
   Common: '#8888aa', Rare: '#5e9cf5', Epic: '#a855f7', Legendary: '#d4af37',
@@ -139,9 +140,13 @@ export default function ListingDetail() {
         border: `1px solid ${rarityColor}33`,
         position: 'relative',
       }}>
-        {item.image_url
-          ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
-          : <span>{item.emoji}</span>}
+        {item.tg_thumb
+          ? <div style={{ width: '70%', height: '70%' }}>
+              <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} fallback={item.emoji} />
+            </div>
+          : item.image_url
+            ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
+            : <span>{item.emoji}</span>}
         <span className="badge" style={{
           position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
           background: `${rarityColor}22`, color: rarityColor, border: `1px solid ${rarityColor}40`,

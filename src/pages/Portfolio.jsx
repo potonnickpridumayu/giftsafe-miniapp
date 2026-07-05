@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api } from '../api/client'
 import { TonConnectButton } from '@tonconnect/ui-react';
+import TgGiftSticker from '../components/TgGiftSticker'
 
 
 const RARITY_COLORS = {
@@ -96,9 +97,11 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 26, flexShrink: 0, overflow: 'hidden',
         }}>
-          {gift.image_url
-            ? <img src={gift.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : '🎁'}
+          {gift.tg_thumb
+            ? <TgGiftSticker thumbId={gift.tg_thumb} stickerId={gift.tg_sticker} />
+            : gift.image_url
+              ? <img src={gift.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : '🎁'}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -242,7 +245,7 @@ export default function Portfolio() {
     load()
   }
 
-  const onChainCount = (gifts || []).filter(g => g.nft_address || g.tg_owned_gift_id).length
+  const onSaleCount = (gifts || []).filter(g => g.on_sale).length
 
   return (
     <div className="page">
@@ -260,7 +263,7 @@ export default function Portfolio() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
           {[
             { label: 'Подарков', value: gifts === null ? '…' : gifts.length },
-            { label: 'Хранится в Rubuy', value: gifts === null ? '…' : onChainCount },
+            { label: 'На продаже', value: gifts === null ? '…' : onSaleCount },
           ].map(stat => (
             <div key={stat.label} style={{
               background: 'var(--bg-card)',

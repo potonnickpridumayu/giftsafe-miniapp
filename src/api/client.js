@@ -37,6 +37,8 @@ function normalizeListing(x) {
     number: x.gift_number,           // напр. "#999"
     emoji: RARITY_EMOJI[x.rarity] || '🎁',
     image_url: x.image_url || '',
+    tg_sticker: x.tg_sticker || '',
+    tg_thumb: x.tg_thumb || '',
     rarity: x.rarity,
     price: x.price_ton,
     seller: x.seller_username,
