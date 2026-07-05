@@ -52,13 +52,13 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
 
   const withdraw = async () => {
     const to = address.trim()
-    if (!to) { setError('Укажите адрес кошелька'); return }
+    if (!isTgGift && !to) { setError('Укажите адрес кошелька'); return }
     setBusy(true)
     setError('')
     try {
       await apiCall(`/api/gifts/${gift.gift_id}/withdraw`, {
         method: 'POST',
-        body: JSON.stringify({ to_address: to }),
+        body: JSON.stringify(isTgGift ? {} : { to_address: to }),
       })
       haptic('medium')
       onWithdrawn(gift.gift_id)
@@ -127,7 +127,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
                 {panel === 'sell' ? 'Скрыть' : 'Продать'}
               </button>
             )}
-            {onChain && (
+            {canTrade && (
               <button
                 className="btn btn-ghost"
                 style={{ fontSize: 12, padding: '8px 12px' }}
@@ -175,7 +175,25 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
         </div>
       )}
 
-      {panel === 'withdraw' && (
+      {panel === 'withdraw' && isTgGift && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+            Подарок вернётся в ваш аккаунт Telegram обычной посылкой.
+          </div>
+          {error && (
+            <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
+          )}
+          <button
+            className="btn btn-primary btn-full"
+            disabled={busy}
+            onClick={withdraw}
+          >
+            {busy ? 'Отправляем…' : 'Вернуть в Telegram'}
+          </button>
+        </div>
+      )}
+
+      {panel === 'withdraw' && !isTgGift && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             NFT уйдёт на указанный TON-адрес. Проверьте адрес перед отправкой.
