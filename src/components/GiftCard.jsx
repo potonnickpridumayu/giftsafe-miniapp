@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 
 const RARITY_COLORS = {
-  Common: '#8888aa',
-  Rare: '#5e9cf5',
-  Epic: '#a855f7',
-  Legendary: '#d4af37',
+  Common: '#a390a0',
+  Rare: '#7f9df5',
+  Epic: '#c084f0',
+  Legendary: '#f0b47e',
 }
 
 function timeAgo(ts) {
@@ -16,26 +16,26 @@ function timeAgo(ts) {
 }
 
 export default function GiftCard({ item, onClick }) {
-  const rarityColor = RARITY_COLORS[item.rarity] || '#8888aa'
+  const rarityColor = RARITY_COLORS[item.rarity] || '#a390a0'
 
   return (
     <div
       className="card"
       onClick={onClick}
-      style={{ cursor: 'pointer', padding: 14 }}
+      style={{ cursor: 'pointer', padding: 12 }}
     >
       {/* Gift Preview */}
       <div style={{
         width: '100%',
         aspectRatio: '1',
-        background: `radial-gradient(circle at 40% 35%, ${rarityColor}22, var(--bg-card))`,
+        background: `radial-gradient(circle at 40% 35%, ${rarityColor}2e, var(--bg-card-hover))`,
         borderRadius: 'var(--radius-md)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: 48,
         marginBottom: 10,
-        border: `1px solid ${rarityColor}22`,
+        border: `1px solid ${rarityColor}30`,
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -52,17 +52,17 @@ export default function GiftCard({ item, onClick }) {
       </div>
 
       {/* Info */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
             {item.name}
           </span>
           <span className="badge" style={{
-            background: `${rarityColor}18`,
+            background: `${rarityColor}1c`,
             color: rarityColor,
-            border: `1px solid ${rarityColor}30`,
+            border: `1px solid ${rarityColor}35`,
             fontSize: 9,
-            padding: '2px 6px',
+            padding: '2px 7px',
           }}>
             {item.rarity}
           </span>
