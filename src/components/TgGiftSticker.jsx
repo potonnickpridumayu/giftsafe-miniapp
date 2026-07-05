@@ -23,14 +23,15 @@ export default function TgGiftSticker({ thumbId, stickerId, fallback = '🎁' })
         const res = await fetch(`${FILE_BASE}/${stickerId}`)
         if (!res.ok) throw new Error()
         const buf = new Uint8Array(await res.arrayBuffer())
-        // .tgs = gzip-нутый Lottie JSON (магия 1f 8b), иногда бывает голый JSON
-        animData.current = (buf[0] === 0x1f && buf[1] === 0x8b)
-          ? JSON.parse(ungzip(buf, { to: 'string' }))
-          : JSON.parse(new TextDecoder().decode(buf))
+        // .tgs = gzip-нутый Lottie JSON (магия 1f 8b), иногда бывает голый JSON.
+        // ungzip возвращает байты — декодируем сами (опция to:'string' ненадёжна)
+        const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
+        animData.current = JSON.parse(new TextDecoder().decode(raw))
       }
       setPlaying(true)
     } catch {
-      setFailed(true)
+      // анимация не завелась — просто остаёмся на статичной картинке
+      animData.current = null
     }
   }
 

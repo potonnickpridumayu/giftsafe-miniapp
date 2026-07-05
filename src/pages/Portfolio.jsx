@@ -110,12 +110,14 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             </span>
             <span style={{ fontSize: 10, color: rarityColor, fontWeight: 600 }}>{gift.rarity}</span>
           </div>
-          <div style={{
-            fontSize: 12, color: 'var(--text-muted)',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>
-            {onChain ? '💎 Хранится в Rubuy' : isTgGift ? '🎁 Хранится в Rubuy' : gift.collection_name || 'Подарок'}
-          </div>
+          {!onChain && !isTgGift && (
+            <div style={{
+              fontSize: 12, color: 'var(--text-muted)',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {gift.collection_name || 'Подарок'}
+            </div>
+          )}
         </div>
         {canTrade && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
