@@ -58,6 +58,7 @@ function toArray(res, key) {
 
 export const api = {
   // Market
+  getReferralStats: () => request('/referral/stats'),
   getListings: async (params = {}) => {
     const q = new URLSearchParams(params).toString()
     const res = await request(`/listings${q ? '?' + q : ''}`)
