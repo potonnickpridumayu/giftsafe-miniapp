@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api } from '../api/client'
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
 
 export default function Profile() {
+  const navigate = useNavigate()
   const { user, haptic } = useTelegram()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -17,15 +19,13 @@ export default function Profile() {
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [showWithdraw, setShowWithdraw] = useState(false)
   const [withdrawStatus, setWithdrawStatus] = useState(null)
-  const [copiedRef, setCopiedRef] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
-  const BOT_USERNAME = 'giftruby_bot'
   const SUPPORT_USERNAME = 'giftruby_support'
 
   const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
 
-  // Единая перезагрузка профиля; best-effort — ошибку глотаем((,
+  // Единая перезагрузка профиля; best-effort — ошибку глотаем,
   // чтобы не перетереть статус вывода/пополнения.
   const reloadProfile = async () => {
     try {
@@ -182,13 +182,12 @@ export default function Profile() {
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>{name}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 2 }}>{username}</div>
         </div>
-        <div className="badge badge-gold">✓ Верифицирован через Telegram</div>
       </div>
 
       {/* Balance */}
       <div style={{
         background: 'linear-gradient(135deg, var(--gold-dim), var(--bg-card))',
-        border: '1px solid rgba(212,175,55,0.3)',
+        border: '1px solid var(--border-active)',
         borderRadius: 'var(--radius-xl)',
         padding: 20,
         marginBottom: 16,
@@ -203,8 +202,9 @@ export default function Profile() {
         <button
           onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
           style={{
-            marginTop: 12, padding: '10px 24px', borderRadius: 'var(--radius-md)',
-            background: 'var(--gold)', color: '#000', fontWeight: 700, fontSize: 14,
+            marginTop: 12, padding: '10px 24px', borderRadius: 999,
+            background: 'linear-gradient(135deg, var(--gold), var(--gold-deep))',
+            color: '#fff', fontWeight: 700, fontSize: 14,
             border: 'none', cursor: 'pointer',
           }}
         >
@@ -213,7 +213,7 @@ export default function Profile() {
         <button
           onClick={() => { haptic('light'); setShowWithdraw(v => !v); setShowDeposit(false); setWithdrawStatus(null); setWithdrawAmount('0.1') }}
           style={{
-            marginTop: 12, marginLeft: 8, padding: '10px 24px', borderRadius: 'var(--radius-md)',
+            marginTop: 12, marginLeft: 8, padding: '10px 24px', borderRadius: 999,
             background: 'transparent', color: 'var(--gold)', fontWeight: 700, fontSize: 14,
             border: '1px solid var(--gold)', cursor: 'pointer',
           }}
@@ -235,7 +235,7 @@ export default function Profile() {
               style={{
                 width: 80, padding: '10px 12px', borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border)', background: 'var(--bg-card)',
-                color: 'var(--text)', fontSize: 14, textAlign: 'center',
+                color: 'var(--text-primary)', fontSize: 14, textAlign: 'center',
               }}
             />
             <button
@@ -246,7 +246,7 @@ export default function Profile() {
               onClick={handleDeposit}
               style={{
                 padding: '10px 16px', borderRadius: 'var(--radius-md)',
-                background: 'var(--gold)', color: '#000', fontWeight: 700,
+                background: 'var(--gold)', color: '#fff', fontWeight: 700,
                 border: 'none', cursor: 'pointer', fontSize: 14,
               }}
             >
@@ -269,7 +269,7 @@ export default function Profile() {
               style={{
                 width: 80, padding: '10px 12px', borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border)', background: 'var(--bg-card)',
-                color: 'var(--text)', fontSize: 14, textAlign: 'center',
+                color: 'var(--text-primary)', fontSize: 14, textAlign: 'center',
               }}
             />
             <button
@@ -280,7 +280,7 @@ export default function Profile() {
               onClick={handleWithdraw}
               style={{
                 padding: '10px 16px', borderRadius: 'var(--radius-md)',
-                background: 'var(--gold)', color: '#000', fontWeight: 700,
+                background: 'var(--gold)', color: '#fff', fontWeight: 700,
                 border: 'none', cursor: 'pointer', fontSize: 14,
               }}
             >
@@ -295,7 +295,7 @@ export default function Profile() {
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{withdrawStatus}</div>
         )}
         {error && (
-          <div style={{ fontSize: 12, color: 'var(--danger, #e5484d)', marginTop: 6 }}>{error}</div>
+          <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 6 }}>{error}</div>
         )}
       </div>
 
@@ -320,26 +320,9 @@ export default function Profile() {
       {/* Menu */}
       {[
         {
-          icon: '🔗', label: 'Реферальная ссылка',
-          sub: copiedRef ? '✓ Ссылка скопирована!' : 'Заработайте с каждой продажи',
-          onClick: async () => {
-            haptic('light')
-            const link = `https://t.me/${BOT_USERNAME}?start=ref_${user?.id || ''}`
-            try {
-              await navigator.clipboard.writeText(link)
-            } catch {
-              const ta = document.createElement('textarea')
-              ta.value = link
-              ta.style.position = 'fixed'
-              ta.style.opacity = '0'
-              document.body.appendChild(ta)
-              ta.select()
-              document.execCommand('copy')
-              document.body.removeChild(ta)
-            }
-            setCopiedRef(true)
-            setTimeout(() => setCopiedRef(false), 2000)
-          },
+          icon: '🔗', label: 'Рефералы',
+          sub: 'Приглашайте друзей и зарабатывайте',
+          onClick: () => { haptic('light'); navigate('/referral') },
         },
         {
           icon: '📊', label: 'История сделок',
@@ -369,7 +352,7 @@ export default function Profile() {
             <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>{item.icon}</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 500 }}>{item.label}</div>
-              <div style={{ fontSize: 12, color: item.sub.startsWith('✓') ? 'var(--gold)' : 'var(--text-muted)', marginTop: 1 }}>{item.sub}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{item.sub}</div>
             </div>
             <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>
               {item.label === 'История сделок' ? (showHistory ? '⌄' : '›') : '›'}
@@ -400,24 +383,6 @@ export default function Profile() {
           )}
         </div>
       ))}
-
-      {/* Fee info */}
-      <div style={{
-        marginTop: 20,
-        padding: '14px 16px',
-        background: 'var(--gold-dim)',
-        border: '1px solid rgba(212,175,55,0.2)',
-        borderRadius: 'var(--radius-lg)',
-      }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--gold)', marginBottom: 4 }}>
-          💰 Наши комиссии
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-          • Маркет: 3% (ниже, чем у конкурентов)<br/>
-          • Аукцион: 3% с победителя<br/>
-          • Вывод: без комиссии
-        </div>
-      </div>
     </div>
   )
 }

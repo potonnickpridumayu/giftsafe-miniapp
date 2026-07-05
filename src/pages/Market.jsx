@@ -6,9 +6,9 @@ import { useTelegram } from '../hooks/useTelegram'
 
 const FILTERS = ['Все', 'Legendary', 'Epic', 'Rare', 'Common']
 const SORTS = [
+  { label: 'Новые', value: 'new' },
   { label: 'Дешевле', value: 'price_asc' },
   { label: 'Дороже', value: 'price_desc' },
-  { label: 'Новые', value: 'new' },
 ]
 
 export default function Market() {
@@ -17,6 +17,7 @@ export default function Market() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('Все')
   const [sort, setSort] = useState('new')
+  const [showFilters, setShowFilters] = useState(false)
 
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -47,6 +48,8 @@ export default function Market() {
     return list
   }, [listings, search, filter, sort])
 
+  const filtersActive = filter !== 'Все' || sort !== 'new'
+
   return (
     <div className="page">
       {/* Header */}
@@ -65,63 +68,27 @@ export default function Market() {
           }}>Маркет</span>
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          {loading ? 'Загрузка…' : `${listings.length} подарков`} • Комиссия 3%
+          {loading ? 'Загрузка…' : `${listings.length} подарков`}
         </p>
       </div>
 
-      {/* Search */}
-      <input
-        className="input"
-        placeholder="🔍 Поиск подарков..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        style={{ marginBottom: 12 }}
-      />
-
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 10 }}>
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => { haptic('light'); setFilter(f) }}
-            className={`chip${filter === f ? ' active' : ''}`}
-            style={{ flexShrink: 0 }}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
-      {/* Sort — сегмент-контрол */}
-      <div style={{
-        display: 'flex',
-        background: 'var(--bg-input)',
-        border: '1px solid var(--border)',
-        borderRadius: 999,
-        padding: 4,
-        marginBottom: 16,
-      }}>
-        {SORTS.map(s => (
-          <button
-            key={s.value}
-            onClick={() => { haptic('light'); setSort(s.value) }}
-            style={{
-              flex: 1,
-              padding: '8px 0',
-              fontSize: 13,
-              fontWeight: 600,
-              background: sort === s.value ? 'var(--bg-card-hover)' : 'transparent',
-              color: sort === s.value ? 'var(--gold-light)' : 'var(--text-muted)',
-              border: 'none',
-              borderRadius: 999,
-              cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-              transition: 'all 0.15s',
-            }}
-          >
-            {s.label}
-          </button>
-        ))}
+      {/* Search + filter button */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <input
+          className="input"
+          placeholder="🔍 Поиск подарков..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1 }}
+        />
+        <button
+          onClick={() => { haptic('light'); setShowFilters(true) }}
+          className={`chip${filtersActive ? ' active' : ''}`}
+          style={{ flexShrink: 0, padding: '0 16px', fontSize: 17 }}
+          aria-label="Фильтры"
+        >
+          ⚙︎
+        </button>
       </div>
 
       {/* Content */}
@@ -160,7 +127,7 @@ export default function Market() {
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
           <div className="empty-title">Ничего не найдено</div>
-          <div className="empty-desc">Попробуйте другой запрос</div>
+          <div className="empty-desc">Попробуйте изменить фильтры</div>
         </div>
       ) : (
         <div style={{
@@ -195,6 +162,85 @@ export default function Market() {
           >
             +
           </button>
+        </div>
+      )}
+
+      {/* Filters bottom sheet */}
+      {showFilters && (
+        <div
+          onClick={() => setShowFilters(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(8,5,12,0.7)',
+            display: 'flex', alignItems: 'flex-end',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%',
+              background: 'var(--bg-card)',
+              borderRadius: '20px 20px 0 0',
+              border: '1px solid var(--border)',
+              borderBottom: 'none',
+              padding: '20px 16px calc(24px + env(safe-area-inset-bottom, 0px))',
+              maxWidth: 480,
+              margin: '0 auto',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>Фильтры</span>
+              <button
+                onClick={() => setShowFilters(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, fontWeight: 600 }}>РЕДКОСТЬ</div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+              {FILTERS.map(f => (
+                <button
+                  key={f}
+                  onClick={() => { haptic('light'); setFilter(f) }}
+                  className={`chip${filter === f ? ' active' : ''}`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, fontWeight: 600 }}>СОРТИРОВКА</div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 22 }}>
+              {SORTS.map(s => (
+                <button
+                  key={s.value}
+                  onClick={() => { haptic('light'); setSort(s.value) }}
+                  className={`chip${sort === s.value ? ' active' : ''}`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn btn-ghost"
+                style={{ flex: 1 }}
+                onClick={() => { haptic('light'); setFilter('Все'); setSort('new') }}
+              >
+                Сбросить
+              </button>
+              <button
+                className="btn btn-primary"
+                style={{ flex: 2 }}
+                onClick={() => { haptic('medium'); setShowFilters(false) }}
+              >
+                Показать
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
