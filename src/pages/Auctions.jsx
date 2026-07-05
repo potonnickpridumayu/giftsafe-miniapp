@@ -53,9 +53,6 @@ export default function Auctions() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
           ⚡ <span style={{ color: 'var(--gold)' }}>Аукционы</span>
         </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          Ставки в реальном времени · Без накруток
-        </p>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -66,7 +63,6 @@ export default function Auctions() {
           return (
             <div key={auction.id} className="card" style={{ padding: 16 }}>
               <div style={{ display: 'flex', gap: 14, marginBottom: 12 }}>
-                {/* Emoji */}
                 <div style={{
                   width: 64,
                   height: 64,
@@ -116,7 +112,6 @@ export default function Auctions() {
                       className="btn btn-primary btn-sm"
                       onClick={() => handleBid(auction)}
                       disabled={bidding === auction.id}
-                      style={{ boxShadow: 'var(--gold-glow)' }}
                     >
                       {bidding === auction.id ? '⏳' : `Ставить ⭐ ${auction.min_bid}`}
                     </button>
@@ -130,7 +125,7 @@ export default function Auctions() {
 
       <div style={{ margin: '24px 0', padding: '14px 16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-          💡 <strong style={{ color: 'var(--text-secondary)' }}>Как работают аукционы:</strong> ставки проходят через эскроу. Если вас перебьют — звёзды возвращаются автоматически.
+          💡 <strong style={{ color: 'var(--text-secondary)' }}>Как работают аукционы:</strong> если вашу ставку перебьют — звёзды вернутся автоматически.
         </div>
       </div>
     </div>

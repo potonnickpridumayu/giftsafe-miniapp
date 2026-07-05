@@ -134,7 +134,7 @@ export default function Sell() {
             Подарок выставлен!
           </div>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6 }}>
-            {done.gift_name ? `«${done.gift_name}» ` : ''}теперь в маркете под защитой эскроу.
+            {done.gift_name ? `«${done.gift_name}» ` : ''}теперь на маркете
             При продаже TON придёт вам на баланс.
           </p>
           <button
@@ -160,14 +160,14 @@ export default function Sell() {
       </button>
 
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
-        Продать <span style={{ color: 'var(--gold)' }}>NFT-подарок</span>
+        Закинуть <span style={{ color: 'var(--gold)' }}>подарок</span>
       </h1>
 
       {/* ── Шаг 1: интро ── */}
       {step === 'intro' && (
         <>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
-            Подарок хранится в эскроу Rubuy до продажи
+            Закиньте подарок — он будет надёжно храниться в Rubuy
           </p>
           <div className="card" style={{ padding: '16px', marginBottom: 20, fontSize: 13, lineHeight: 1.7 }}>
             <div>1️⃣ Получите адрес сейфа и ваш код</div>
@@ -281,7 +281,7 @@ export default function Sell() {
       {step === 'price' && gift && (
         <>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
-            ✅ NFT получен и находится в эскроу. Назначьте цену.
+            ✅ Подарок получен и хранится в Rubuy. Назначьте цену.
           </p>
 
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>

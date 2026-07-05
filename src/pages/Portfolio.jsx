@@ -6,10 +6,9 @@ import { TonConnectButton } from '@tonconnect/ui-react';
 
 
 const RARITY_COLORS = {
-  Common: '#8888aa', Rare: '#5e9cf5', Epic: '#a855f7', Legendary: '#d4af37',
+  Common: '#a390a0', Rare: '#7f9df5', Epic: '#c084f0', Legendary: '#f0b47e',
 }
 
-// Если в ../api/client уже есть общий helper с initData — замени apiCall на него.
 const API_BASE = 'https://nftmarketbot-production.up.railway.app'
 
 async function apiCall(path, options = {}) {
@@ -27,17 +26,17 @@ async function apiCall(path, options = {}) {
   return data
 }
 
-const FEE_RATE = 0.03 // должна совпадать с MARKET_FEE на бэке и Sell.jsx
+const FEE_RATE = 0.03
 const round4 = (n) => Math.round((n + Number.EPSILON) * 1e4) / 1e4
 
 function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
-  const [panel, setPanel] = useState(null) // null | 'withdraw' | 'sell'
+  const [panel, setPanel] = useState(null)
   const [address, setAddress] = useState('')
   const [price, setPrice] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  const rarityColor = RARITY_COLORS[gift.rarity] || '#8888aa'
+  const rarityColor = RARITY_COLORS[gift.rarity] || '#a390a0'
   const onChain = Boolean(gift.nft_address)
   const isTgGift = Boolean(gift.tg_owned_gift_id)
   const canTrade = onChain || isTgGift
@@ -112,7 +111,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             fontSize: 12, color: 'var(--text-muted)',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>
-            {onChain ? '⛓ В сейфе Rubuy' : isTgGift ? '🎁 В Telegram-сейфе' : gift.collection_name || 'Подарок'}
+            {onChain ? '💎 Хранится в Rubuy' : isTgGift ? '🎁 Хранится в Rubuy' : gift.collection_name || 'Подарок'}
           </div>
         </div>
         {canTrade && (
@@ -144,7 +143,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
       {panel === 'sell' && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-            Лот появится на маркете. Комиссия Rubuy {Math.round(FEE_RATE * 100)}%
+            Лот появится на маркете. Комиссия {Math.round(FEE_RATE * 100)}%
             {priceNum > 0 ? ` — вы получите ${youGet} TON` : ''}.
           </div>
           <input
@@ -179,7 +178,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
       {panel === 'withdraw' && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-            NFT уйдёт из сейфа на указанный TON-адрес. Проверьте адрес перед отправкой.
+            NFT уйдёт на указанный TON-адрес. Проверьте адрес перед отправкой.
           </div>
           <input
             value={address}
@@ -215,7 +214,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
 export default function Portfolio() {
   const navigate = useNavigate()
   const { haptic } = useTelegram()
-  const [gifts, setGifts] = useState(null) // null = загрузка
+  const [gifts, setGifts] = useState(null)
   const [error, setError] = useState('')
 
   const load = useCallback(async () => {
@@ -235,7 +234,6 @@ export default function Portfolio() {
   }
 
   const onListed = () => {
-    // лот создан — перезагружаем портфель, чтобы состояние пришло с бэка
     haptic('light')
     load()
   }
@@ -255,10 +253,10 @@ export default function Portfolio() {
           <TonConnectButton />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 4 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
           {[
             { label: 'Подарков', value: gifts === null ? '…' : gifts.length },
-            { label: 'В сейфе (ончейн)', value: gifts === null ? '…' : onChainCount },
+            { label: 'Хранится в Rubuy', value: gifts === null ? '…' : onChainCount },
           ].map(stat => (
             <div key={stat.label} style={{
               background: 'var(--bg-card)',
@@ -277,6 +275,13 @@ export default function Portfolio() {
             </div>
           ))}
         </div>
+
+        <button
+          className="btn btn-primary btn-full"
+          onClick={() => { haptic('medium'); navigate('/sell') }}
+        >
+          + Закинуть подарок
+        </button>
       </div>
 
       {gifts === null ? (
@@ -289,11 +294,8 @@ export default function Portfolio() {
           <div className="empty-icon">💼</div>
           <div className="empty-title">Портфель пуст</div>
           <div className="empty-desc">
-            {error ? `Не удалось загрузить: ${error}` : 'Купите первый подарок на маркете'}
+            {error ? `Не удалось загрузить: ${error}` : 'Закиньте свой подарок или купите на маркете'}
           </div>
-          <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => navigate('/')}>
-            Перейти на маркет
-          </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -301,16 +303,6 @@ export default function Portfolio() {
             <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} haptic={haptic} />
           ))}
         </div>
-      )}
-
-      {gifts !== null && gifts.length > 0 && (
-        <button
-          className="btn btn-ghost btn-full"
-          style={{ marginTop: 16 }}
-          onClick={() => { haptic('light'); navigate('/sell') }}
-        >
-          + Выставить на продажу
-        </button>
       )}
     </div>
   )
