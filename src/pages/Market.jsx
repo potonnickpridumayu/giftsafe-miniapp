@@ -99,7 +99,7 @@ export default function Market() {
       </div>
 
       {/* Quick rarity chips (как в макете) */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 2 }}>
+      <div className="chips-row">
         {FILTERS.map(f => (
           <button
             key={f}
