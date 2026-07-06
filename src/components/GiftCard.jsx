@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import TgGiftSticker from './TgGiftSticker'
+import GramIcon from './GramIcon'
 
 const RARITY_COLORS = {
   Common: '#a390a0',
@@ -73,7 +74,7 @@ export default function GiftCard({ item, onClick }) {
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span className="price price-sm">{item.price} TON</span>
+          <span className="price price-sm">{item.price} <GramIcon size={12} /></span>
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {timeAgo(item.listed_at)}
           </span>

@@ -50,8 +50,8 @@ export default function Auctions() {
   return (
     <div className="page">
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
-          ⚡ <span style={{ color: 'var(--gold)' }}>Аукционы</span>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4, letterSpacing: '-0.5px' }}>
+          Аукционы
         </h1>
       </div>
 

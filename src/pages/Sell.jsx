@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
+import GramIcon from '../components/GramIcon'
 
 // Должна совпадать с FEE_RATE в ListingDetail.jsx, "Комиссия 3%" в Market.jsx
 // и MARKET_FEE на бэкенде. Весь маркет работает в TON, не в Stars.
@@ -95,13 +96,13 @@ export default function Sell() {
 
   const submitListing = () => {
     if (!(priceNum > 0)) {
-      setError('Укажите цену в TON больше нуля')
+      setError('Укажите цену в GRAM больше нуля')
       haptic('heavy')
       return
     }
     haptic('medium')
     showConfirm(
-      `Выставить подарок за ${priceNum} TON? Вы получите ${youGet} TON.`,
+      `Выставить подарок за ${priceNum} GRAM? Вы получите ${youGet} GRAM.`,
       async (ok) => {
         if (!ok) return
         setBusy(true)
@@ -135,7 +136,7 @@ export default function Sell() {
           </div>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6 }}>
             {done.gift_name ? `«${done.gift_name}» ` : ''}теперь на маркете
-            При продаже TON придёт вам на баланс.
+            При продаже GRAM придёт вам на баланс.
           </p>
           <button
             className="btn btn-primary btn-full"
@@ -285,7 +286,7 @@ export default function Sell() {
           </p>
 
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
-            Цена в TON <span style={{ color: 'var(--gold)' }}>*</span>
+            Цена в GRAM <span style={{ color: 'var(--gold)' }}>*</span>
           </label>
           <input
             className="input"
@@ -300,18 +301,18 @@ export default function Sell() {
           <div className="card" style={{ padding: '14px 16px', marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Цена покупателя</span>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{priceNum || 0} TON</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{priceNum || 0} <GramIcon size={12} /></span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 Комиссия Rubuy ({Math.round(FEE_RATE * 100)}%)
               </span>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fee} TON</span>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fee} <GramIcon size={12} /></span>
             </div>
             <div className="divider" style={{ margin: '10px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 600 }}>Вы получите</span>
-              <span className="price price-md">{youGet} TON</span>
+              <span className="price price-md">{youGet} <GramIcon size={13} /></span>
             </div>
           </div>
 

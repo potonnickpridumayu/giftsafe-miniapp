@@ -1,23 +1,29 @@
-/* ===== RUBUY DESIGN SYSTEM v2 ===== */
-/* Сочный рубин по мотивам MRKT: заливные акценты, pill-кнопки, glow */
+/* ===== RUBUY DESIGN SYSTEM v3 — Neon Ruby ===== */
+/* Розово-рубиновый неон на почти чёрном + золото на всём денежном.
+   --gold (историческое имя) = основной акцент; --money-* = золото цен. */
 
 :root {
-  --bg-base: #120d17;
-  --bg-card: #1c1523;
-  --bg-card-hover: #251b2e;
-  --bg-input: #191221;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-active: rgba(236, 84, 111, 0.55);
+  --bg-base: #0c0710;
+  --bg-card: #150a12;
+  --bg-card-hover: #1e0c18;
+  --bg-input: #180a14;
+  --border: #2e1424;
+  --border-active: rgba(255, 77, 141, 0.6);
 
-  --gold: #ec546f;
-  --gold-light: #ff8ba1;
-  --gold-deep: #c93a58;
-  --gold-dim: rgba(236, 84, 111, 0.16);
-  --gold-glow: 0 4px 24px rgba(236, 84, 111, 0.35);
+  --gold: #ff4d8d;
+  --gold-light: #ff6ba3;
+  --gold-deep: #f42e63;
+  --gold-dim: rgba(255, 77, 141, 0.14);
+  --gold-glow: 0 0 18px rgba(255, 77, 141, 0.45);
 
-  --text-primary: #f8f0f3;
-  --text-secondary: #a390a0;
-  --text-muted: #5c4d61;
+  --money-1: #f2c14e;
+  --money-2: #cf8f2e;
+  --money-text: #241505;
+  --money-glow: 0 0 12px rgba(242, 193, 78, 0.35);
+
+  --text-primary: #faf3f7;
+  --text-secondary: #96798c;
+  --text-muted: #644a5b;
 
   --green: #3ddc84;
   --red: #ff6b5e;
@@ -178,17 +184,25 @@ html, body {
   margin: 16px 0;
 }
 
-/* ===== PRICE (плашка как у MRKT) ===== */
+/* ===== PRICE (золотая плашка — всё денежное золотом) ===== */
 .price {
   font-family: var(--font-display);
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  color: var(--money-text);
+  background: linear-gradient(135deg, var(--money-1), var(--money-2));
   border-radius: 999px;
   padding: 5px 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  box-shadow: var(--money-glow);
+}
+
+/* Золотой градиентный текст для крупных сумм (баланс, заработано) */
+.money-text {
+  background: linear-gradient(135deg, var(--money-1), var(--money-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .price-sm { font-size: 13px; }
 .price-md { font-size: 15px; }

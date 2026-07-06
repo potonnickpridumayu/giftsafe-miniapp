@@ -4,6 +4,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import { api } from '../api/client'
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
+import GramIcon from '../components/GramIcon'
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -36,7 +37,7 @@ export default function Profile() {
 
   const handleWithdraw = async () => {
   const amount = parseFloat(String(withdrawAmount).replace(',', '.'))
-  if (!amount || amount < 0.1) { setWithdrawStatus('Минимум 0.1 TON'); return }
+  if (!amount || amount < 0.1) { setWithdrawStatus('Минимум 0.1 GRAM'); return }
   if (amount > balance) { setWithdrawStatus('Недостаточно средств'); return }
   if (!walletAddress) {
     setWithdrawStatus('Сначала подключи кошелёк')
@@ -49,7 +50,7 @@ export default function Profile() {
     try { haptic('medium') } catch {}
     setShowWithdraw(false)
     setWithdrawAmount('')
-    setWithdrawStatus('Отправлено! TON придут через ~15 секунд')
+    setWithdrawStatus('Отправлено! GRAM придут через ~15 секунд')
     await reloadProfile()
   } catch (e) {
     setWithdrawStatus(e.message || 'Что-то пошло не так, попробуй ещё раз')
@@ -61,7 +62,7 @@ export default function Profile() {
 
   const handleDeposit = async () => {
     const amount = parseFloat(String(depositAmount).replace(',', '.'))
-    if (!amount || amount < 0.1) { setDepositStatus('Минимум 0.1 TON'); return }
+    if (!amount || amount < 0.1) { setDepositStatus('Минимум 0.1 GRAM'); return }
     if (!walletAddress) {
       setDepositStatus('Сначала подключи кошелёк')
       tonConnectUI.openModal()
@@ -135,14 +136,14 @@ export default function Profile() {
   // Реальные метрики из БД (total_earned / total_spent обновляются при каждой сделке)
   const stats = [
     { label: 'Сделок', value: loading ? '…' : String(txs.length) },
-    { label: 'Заработано', value: loading ? '…' : earned.toFixed(2) },
+    { label: 'Заработано', value: loading ? '…' : <span className="money-text">{earned.toFixed(2)}</span> },
     { label: 'Потрачено', value: loading ? '…' : spent.toFixed(2) },
   ]
 
   return (
     <div className="page">
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 20 }}>
-        👤 <span style={{ color: 'var(--gold)' }}>Профиль</span>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 20, letterSpacing: '-0.5px' }}>
+        Профиль
       </h1>
 
       {/* User card */}
@@ -196,8 +197,9 @@ export default function Profile() {
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, letterSpacing: 0.5 }}>
           БАЛАНС
         </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700, color: 'var(--gold)' }}>
-          {loading ? '…' : `${balance.toFixed(2)} TON`}
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700 }}>
+          <span className="money-text">{loading ? '…' : balance.toFixed(2)}</span>
+          {!loading && <GramIcon size={24} style={{ marginLeft: 6, verticalAlign: '-3px' }} />}
         </div>
         <button
           onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
@@ -381,7 +383,7 @@ export default function Profile() {
                     </div>
                   </div>
                   <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: tx.buyer_id === user?.id ? 'var(--text-secondary)' : 'var(--gold)' }}>
-                    {tx.buyer_id === user?.id ? '−' : '+'}{Number(tx.amount_ton ?? 0).toFixed(2)} TON
+                    {tx.buyer_id === user?.id ? '−' : '+'}{Number(tx.amount_ton ?? 0).toFixed(2)} <GramIcon size={11} />
                   </div>
                 </div>
               ))}

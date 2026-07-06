@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api } from '../api/client'
+import GramIcon from '../components/GramIcon'
 
 const BOT_USERNAME = 'giftruby_bot'
 
@@ -69,8 +70,8 @@ export default function Referral() {
         ← Назад
       </button>
 
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
-        🔗 <span style={{ color: 'var(--gold)' }}>Рефералы</span>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4, letterSpacing: '-0.5px' }}>
+        Рефералы
       </h1>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
         Приглашайте друзей и получайте процент с их сделок
@@ -80,7 +81,7 @@ export default function Referral() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'Приглашено', value: stats === null ? '…' : String(stats.invited ?? 0) },
-          { label: 'Заработано', value: stats === null ? '…' : `${Number(stats.earned_ton ?? 0).toFixed(2)} TON` },
+          { label: 'Заработано', value: stats === null ? '…' : <><span className="money-text">{Number(stats.earned_ton ?? 0).toFixed(2)}</span> <GramIcon size={15} /></> },
         ].map(s => (
           <div key={s.label} style={{
             background: 'var(--bg-card)',
@@ -116,7 +117,7 @@ export default function Referral() {
 
       <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-          💡 Друг заходит по вашей ссылке → совершает сделки → вы получаете долю с комиссии. Начисления приходят на TON-баланс автоматически.
+          💡 Друг заходит по вашей ссылке → совершает сделки → вы получаете долю с комиссии. Начисления приходят на GRAM-баланс автоматически.
         </div>
       </div>
     </div>

@@ -76,7 +76,7 @@ export default function Market() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <input
           className="input"
-          placeholder="🔍 Поиск подарков..."
+          placeholder="Поиск подарков..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{ flex: 1 }}

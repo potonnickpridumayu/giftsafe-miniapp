@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api } from '../api/client'
 import { TonConnectButton } from '@tonconnect/ui-react';
+import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
 
 
@@ -70,7 +71,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
   }
 
   const sell = async () => {
-    if (!(priceNum > 0)) { setError('Укажите цену в TON больше нуля'); return }
+    if (!(priceNum > 0)) { setError('Укажите цену в GRAM больше нуля'); return }
     setBusy(true)
     setError('')
     try {
@@ -149,13 +150,13 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Лот появится на маркете. Комиссия {Math.round(FEE_RATE * 100)}%
-            {priceNum > 0 ? ` — вы получите ${youGet} TON` : ''}.
+            {priceNum > 0 ? <> — вы получите {youGet} <GramIcon size={11} /></> : ''}.
           </div>
           <input
             className="input"
             value={price}
             onChange={e => { setPrice(e.target.value.replace(/[^\d.,]/g, '')); setError('') }}
-            placeholder="Цена в TON, например 10.5"
+            placeholder="Цена в GRAM, например 10.5"
             inputMode="decimal"
             disabled={busy}
             style={{ fontSize: 13, marginBottom: 8 }}
@@ -257,7 +258,7 @@ export default function Portfolio() {
           gap: 12, marginBottom: 16,
         }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, margin: 0 }}>
-            💼 <span style={{ color: 'var(--gold)' }}>Портфель</span>
+            Портфель
           </h1>
           <TonConnectButton />
         </div>
