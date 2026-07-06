@@ -178,6 +178,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Подарок вернётся в ваш аккаунт Telegram обычной посылкой.
+            Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.2 <GramIcon size={11} /></span>, спишется с баланса.
           </div>
           {error && (
             <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
