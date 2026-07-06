@@ -12,7 +12,7 @@ const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
  * мыльная превьюшка видна только пока грузится tgs. Тап — проигрывание.
  * Файлы идут через бэкенд-прокси (прямые ссылки Telegram раскрывают токен).
  */
-export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback = '🎁' }) {
+export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback = '🎁', pad = '9%' }) {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const instRef = useRef(null)
@@ -42,10 +42,8 @@ export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback =
           autoplay: false,
           animationData: data,
         })
-        // Средний кадр как статика: первый у многих анимаций пустой
-        const still = Math.floor((inst.totalFrames || 2) / 2)
-        inst.addEventListener('complete', () => inst.goToAndStop(still, true))
-        inst.goToAndStop(still, true)
+        inst.addEventListener('complete', () => inst.goToAndStop(0, true))
+        inst.goToAndStop(0, true)
         instRef.current = inst
         setReady(true)
       } catch {
@@ -80,19 +78,19 @@ export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback =
           position: 'absolute',
           inset: 0,
           backgroundImage: `url(${FILE_BASE}/${bd.pattern})`,
-          backgroundSize: '30px 30px',
+          backgroundSize: '26% 26%',
           backgroundRepeat: 'repeat',
           opacity: 0.16,
         }} />
       )}
-      <div ref={boxRef} style={{ position: 'absolute', inset: '9%' }} />
+      <div ref={boxRef} style={{ position: 'absolute', inset: pad }} />
       {!ready && (
         thumbId && !failed ? (
           <img
             src={`${FILE_BASE}/${thumbId}`}
             alt=""
             onError={() => setFailed(true)}
-            style={{ position: 'absolute', inset: '9%', width: '82%', height: '82%', objectFit: 'contain' }}
+            style={{ position: 'absolute', inset: pad, width: `calc(100% - 2*${pad})`, height: `calc(100% - 2*${pad})`, objectFit: 'contain' }}
           />
         ) : failed && !thumbId ? (
           <span style={{
@@ -105,7 +103,7 @@ export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback =
         <img
           src={`${FILE_BASE}/${thumbId}`}
           alt=""
-          style={{ position: 'absolute', inset: '9%', width: '82%', height: '82%', objectFit: 'contain' }}
+          style={{ position: 'absolute', inset: pad, width: `calc(100% - 2*${pad})`, height: `calc(100% - 2*${pad})`, objectFit: 'contain' }}
         />
       )}
     </div>

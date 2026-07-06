@@ -39,6 +39,7 @@ function normalizeListing(x) {
     image_url: x.image_url || '',
     tg_sticker: x.tg_sticker || '',
     tg_thumb: x.tg_thumb || '',
+    tg_backdrop: x.tg_backdrop || '',
     rarity: x.rarity,
     price: x.price_ton,
     seller: x.seller_username,
