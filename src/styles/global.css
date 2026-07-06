@@ -3,27 +3,27 @@
    --gold (историческое имя) = основной акцент; --money-* = золото цен. */
 
 :root {
-  --bg-base: #0c0710;
-  --bg-card: #150a12;
-  --bg-card-hover: #1e0c18;
-  --bg-input: #180a14;
-  --border: #2e1424;
-  --border-active: rgba(255, 77, 141, 0.6);
+  --bg-base: #0a0608;
+  --bg-card: #140a0e;
+  --bg-card-hover: #1c0c12;
+  --bg-input: #17090e;
+  --border: #2a1218;
+  --border-active: rgba(255, 45, 85, 0.6);
 
-  --gold: #ff4d8d;
-  --gold-light: #ff6ba3;
-  --gold-deep: #f42e63;
-  --gold-dim: rgba(255, 77, 141, 0.14);
-  --gold-glow: 0 0 18px rgba(255, 77, 141, 0.45);
+  --gold: #ff2d55;
+  --gold-light: #ff5c7c;
+  --gold-deep: #e01640;
+  --gold-dim: rgba(255, 45, 85, 0.14);
+  --gold-glow: 0 0 18px rgba(255, 45, 85, 0.5);
 
   --money-1: #f2c14e;
   --money-2: #cf8f2e;
   --money-text: #241505;
   --money-glow: 0 0 12px rgba(242, 193, 78, 0.35);
 
-  --text-primary: #faf3f7;
-  --text-secondary: #96798c;
-  --text-muted: #644a5b;
+  --text-primary: #faf3f5;
+  --text-secondary: #8d7580;
+  --text-muted: #5d4550;
 
   --green: #3ddc84;
   --red: #ff6b5e;
