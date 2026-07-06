@@ -68,6 +68,10 @@ export default function ListingDetail() {
   )
 
   const rarityColor = RARITY_COLORS[item.rarity] || '#8888aa'
+  let attrs = {}
+  if (item.tg_backdrop) {
+    try { attrs = JSON.parse(item.tg_backdrop) } catch { /* без атрибутов */ }
+  }
   const fee = +(item.price * FEE_RATE).toFixed(4)
   const total = item.price
   const soldOut = item.status && item.status !== 'active'
@@ -148,12 +152,6 @@ export default function ListingDetail() {
           : item.image_url
             ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
             : <span>{item.emoji}</span>}
-        <span className="badge" style={{
-          position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
-          background: `${rarityColor}22`, color: rarityColor, border: `1px solid ${rarityColor}40`,
-        }}>
-          {item.rarity}
-        </span>
       </div>
 
       {/* Title */}
@@ -163,6 +161,25 @@ export default function ListingDetail() {
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
         Коллекция: {item.collection || '—'}
       </p>
+
+      {/* Атрибуты подарка */}
+      {(attrs.model_name || attrs.backdrop_name || attrs.symbol_name) && (
+        <div className="card" style={{ padding: '12px 14px', marginBottom: 16 }}>
+          {[
+            ['Модель', attrs.model_name],
+            ['Фон', attrs.backdrop_name],
+            ['Символ', attrs.symbol_name],
+          ].filter(([, v]) => v).map(([label, value], i, arr) => (
+            <div key={label} style={{
+              display: 'flex', justifyContent: 'space-between',
+              marginBottom: i < arr.length - 1 ? 10 : 0,
+            }}>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{value}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Seller */}
       <div className="card" style={{ padding: '12px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>

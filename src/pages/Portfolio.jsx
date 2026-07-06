@@ -109,7 +109,6 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14 }}>
               {gift.gift_name}{gift.gift_number ? ` #${gift.gift_number}` : ''}
             </span>
-            <span style={{ fontSize: 10, color: rarityColor, fontWeight: 600 }}>{gift.rarity}</span>
           </div>
           {!onChain && !isTgGift && (
             <div style={{

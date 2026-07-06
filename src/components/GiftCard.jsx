@@ -66,15 +66,11 @@ export default function GiftCard({ item, onClick }) {
           }}>
             {item.name}
           </span>
-          <span className="badge" style={{
-            background: `${rarityColor}1c`,
-            color: rarityColor,
-            border: `1px solid ${rarityColor}35`,
-            fontSize: 9,
-            padding: '2px 7px',
-          }}>
-            {item.rarity}
-          </span>
+          {item.number && (
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+              {String(item.number).startsWith('#') ? item.number : `#${item.number}`}
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span className="price price-sm">{item.price} <GramIcon size={12} /></span>
