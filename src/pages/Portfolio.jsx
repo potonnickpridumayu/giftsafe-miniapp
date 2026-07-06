@@ -99,7 +99,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
           fontSize: 26, flexShrink: 0, overflow: 'hidden',
         }}>
           {gift.tg_thumb
-            ? <TgGiftSticker thumbId={gift.tg_thumb} stickerId={gift.tg_sticker} />
+            ? <TgGiftSticker thumbId={gift.tg_thumb} stickerId={gift.tg_sticker} backdrop={gift.tg_backdrop} />
             : gift.image_url
               ? <img src={gift.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : '🎁'}

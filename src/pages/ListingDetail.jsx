@@ -142,8 +142,8 @@ export default function ListingDetail() {
         position: 'relative',
       }}>
         {item.tg_thumb
-          ? <div style={{ width: '70%', height: '70%' }}>
-              <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} fallback={item.emoji} />
+          ? <div style={{ position: 'absolute', inset: 0 }}>
+              <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
             </div>
           : item.image_url
             ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
