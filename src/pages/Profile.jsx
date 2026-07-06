@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
+import { fmtGram } from '../utils/format'
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -136,8 +137,8 @@ export default function Profile() {
   // Реальные метрики из БД (total_earned / total_spent обновляются при каждой сделке)
   const stats = [
     { label: 'Сделок', value: loading ? '…' : String(txs.length) },
-    { label: 'Заработано', value: loading ? '…' : <span className="money-text">{earned.toFixed(2)}</span> },
-    { label: 'Потрачено', value: loading ? '…' : spent.toFixed(2) },
+    { label: 'Заработано', value: loading ? '…' : <span className="money-text">{fmtGram(earned)}</span> },
+    { label: 'Потрачено', value: loading ? '…' : fmtGram(spent) },
   ]
 
   return (
@@ -198,7 +199,7 @@ export default function Profile() {
           БАЛАНС
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700 }}>
-          <span className="money-text">{loading ? '…' : balance.toFixed(2)}</span>
+          <span className="money-text">{loading ? '…' : fmtGram(balance)}</span>
           {!loading && <GramIcon size={24} style={{ marginLeft: 6, verticalAlign: '-3px' }} />}
         </div>
         <button
@@ -383,7 +384,7 @@ export default function Profile() {
                     </div>
                   </div>
                   <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: tx.buyer_id === user?.id ? 'var(--text-secondary)' : 'var(--gold)' }}>
-                    {tx.buyer_id === user?.id ? '−' : '+'}{Number(tx.amount_ton ?? 0).toFixed(2)} <GramIcon size={11} />
+                    {tx.buyer_id === user?.id ? '−' : '+'}{fmtGram(tx.amount_ton)} <GramIcon size={11} />
                   </div>
                 </div>
               ))}
