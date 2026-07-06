@@ -5,6 +5,13 @@ import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 
 const FILTERS = ['Все', 'Legendary', 'Epic', 'Rare', 'Common']
+
+function plural(n) {
+  const mod10 = n % 10, mod100 = n % 100
+  if (mod10 === 1 && mod100 !== 11) return 'подарок'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'подарка'
+  return 'подарков'
+}
 const SORTS = [
   { label: 'Новые', value: 'new' },
   { label: 'Дешевле', value: 'price_asc' },
@@ -68,7 +75,7 @@ export default function Market() {
           }}>Маркет</span>
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          {loading ? 'Загрузка…' : `${listings.length} подарков`}
+          {loading ? 'Загрузка…' : `${listings.length} ${plural(listings.length)}`}
         </p>
       </div>
 
@@ -89,6 +96,19 @@ export default function Market() {
         >
           ⚙︎
         </button>
+      </div>
+
+      {/* Quick rarity chips (как в макете) */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 2 }}>
+        {FILTERS.map(f => (
+          <button
+            key={f}
+            onClick={() => { haptic('light'); setFilter(f) }}
+            className={`chip${filter === f ? ' active' : ''}`}
+          >
+            {f}
+          </button>
+        ))}
       </div>
 
       {/* Content */}

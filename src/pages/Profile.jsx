@@ -210,7 +210,7 @@ export default function Profile() {
             border: 'none', cursor: 'pointer',
           }}
         >
-          ➕ Пополнить
+          Пополнить
         </button>
         <button
           onClick={() => { haptic('light'); setShowWithdraw(v => !v); setShowDeposit(false); setWithdrawStatus(null); setWithdrawAmount('0.1') }}
@@ -220,7 +220,7 @@ export default function Profile() {
             border: '1px solid var(--gold)', cursor: 'pointer',
           }}
         >
-          ➖ Вывести
+          Вывести
         </button>
         {showDeposit && (
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
@@ -317,7 +317,7 @@ export default function Profile() {
             padding: '14px 10px',
             textAlign: 'center',
           }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--gold)', marginBottom: 4 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--text-primary)', marginBottom: 4 }}>
               {s.value}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.label}</div>
