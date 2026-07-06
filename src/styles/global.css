@@ -68,17 +68,14 @@ html, body {
 
 ::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Горизонтальный ряд чипов: запас под glow (иначе overflow режет свечение
-   в прямоугольник) + спрятанный скроллбар */
+/* Ряд чипов: перенос вместо скролла — overflow-контейнер режет свечение
+   в прямоугольник, а с wrap обрезать его просто нечему */
 .chips-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
-  padding: 10px 4px;
-  margin: -10px -4px 6px;
-  scrollbar-width: none;
+  margin-bottom: 14px;
 }
-.chips-row::-webkit-scrollbar { display: none; }
 
 /* ===== LAYOUT ===== */
 .page {

@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tabler/icons-react": "^3.44.0",
     "@ton/core": "^0.63.1",
     "@tonconnect/ui-react": "^3.0.0",
     "@twa-dev/sdk": "^7.10.0",
