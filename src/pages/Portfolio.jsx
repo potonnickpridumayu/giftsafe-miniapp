@@ -72,6 +72,20 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
     }
   }
 
+  const delist = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await api.withdrawListing(gift.listing_id)
+      haptic('medium')
+      setBusy(false)
+      onListed(gift.gift_id)
+    } catch (e) {
+      setError(e.message)
+      setBusy(false)
+    }
+  }
+
   const sell = async () => {
     if (!(priceNum > 0)) { setError('Укажите цену в GRAM больше нуля'); return }
     setBusy(true)
@@ -168,13 +182,23 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
       {canTrade && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {gift.on_sale ? (
-            <button
-              className="btn btn-ghost"
-              style={{ fontSize: 12, padding: '8px 12px' }}
-              onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}
-            >
-              {panel === 'editPrice' ? 'Скрыть' : '✏️ Изменить цену'}
-            </button>
+            <>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: 12, padding: '8px 12px' }}
+                onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}
+              >
+                {panel === 'editPrice' ? 'Скрыть' : '✏️ Изменить цену'}
+              </button>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: 12, padding: '8px 12px' }}
+                disabled={busy}
+                onClick={delist}
+              >
+                {busy ? '⏳' : 'Снять с продажи'}
+              </button>
+            </>
           ) : gift.on_trade ? null : (
             <>
               <button
@@ -201,6 +225,10 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
           </button>
         </div>
+      )}
+
+      {panel === null && error && (
+        <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 8 }}>{error}</div>
       )}
 
       {panel === 'editPrice' && (

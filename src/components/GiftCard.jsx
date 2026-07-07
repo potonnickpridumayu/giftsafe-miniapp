@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { IconMessageDollar } from '@tabler/icons-react'
 import GramIcon from './GramIcon'
 
 const RARITY_COLORS = {
@@ -16,7 +17,7 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}д назад`
 }
 
-export default function GiftCard({ item, onClick }) {
+export default function GiftCard({ item, onClick, onOffer }) {
   const rarityColor = RARITY_COLORS[item.rarity] || '#a390a0'
 
   return (
@@ -69,11 +70,27 @@ export default function GiftCard({ item, onClick }) {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {item.price != null
-            ? <span className="price price-sm">{item.price} <GramIcon size={12} /></span>
-            : <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {item.owner ? `@${item.owner}` : 'На обмен'}
-              </span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {item.price != null
+              ? <span className="price price-sm">{item.price} <GramIcon size={12} /></span>
+              : <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  {item.owner ? `@${item.owner}` : 'На обмен'}
+                </span>}
+            {onOffer && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onOffer(item) }}
+                aria-label="Предложить цену"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--bg-card-hover)', border: '1px solid var(--border)',
+                  color: 'var(--gold)', cursor: 'pointer', padding: 0,
+                }}
+              >
+                <IconMessageDollar size={13} stroke={2} />
+              </button>
+            )}
+          </div>
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {timeAgo(item.listed_at)}
           </span>

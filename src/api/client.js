@@ -125,6 +125,14 @@ export const api = {
   changePrice: (id, price) =>
     request(`/listings/${id}/price`, { method: 'POST', body: JSON.stringify({ price }) }),
 
+  // Офферы по цене на лоты Маркета (мин. 50% цены — проверяется на бэкенде)
+  proposeListingOffer: (listingId, amount_ton) =>
+    request(`/listings/${listingId}/offer`, { method: 'POST', body: JSON.stringify({ amount_ton }) }),
+  getMyListingOffers: () => request('/listings/offers/mine'),
+  acceptListingOffer: (offerId) => request(`/listings/offers/${offerId}/accept`, { method: 'POST' }),
+  declineListingOffer: (offerId) => request(`/listings/offers/${offerId}/decline`, { method: 'POST' }),
+  cancelListingOffer: (offerId) => request(`/listings/offers/${offerId}/cancel`, { method: 'POST' }),
+
   // Обмен
   getTrades: async (params = {}) => {
     const q = new URLSearchParams(params).toString()

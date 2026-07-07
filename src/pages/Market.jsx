@@ -35,7 +35,7 @@ const EMPTY_FILTERS = {
 
 export default function Market() {
   const navigate = useNavigate()
-  const { haptic } = useTelegram()
+  const { haptic, user } = useTelegram()
   const [search, setSearch] = useState('')
   const [collection, setCollection] = useState('Все')
   const [sort, setSort] = useState('new')
@@ -45,6 +45,41 @@ export default function Market() {
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const [offerTarget, setOfferTarget] = useState(null)
+  const [offerAmount, setOfferAmount] = useState('')
+  const [offerBusy, setOfferBusy] = useState(false)
+  const [offerError, setOfferError] = useState(null)
+  const [offerSent, setOfferSent] = useState(false)
+
+  const openOffer = (item) => {
+    haptic('light')
+    setOfferTarget(item)
+    setOfferAmount('')
+    setOfferError(null)
+    setOfferSent(false)
+  }
+
+  const submitOffer = async () => {
+    const amount = parseFloat(String(offerAmount).replace(',', '.'))
+    const min = offerTarget.price * 0.5
+    if (!amount || amount < min) {
+      setOfferError(`Минимум ${min.toFixed(2)} GRAM (50% цены)`)
+      return
+    }
+    haptic('medium')
+    setOfferBusy(true)
+    setOfferError(null)
+    try {
+      await api.proposeListingOffer(offerTarget.id, amount)
+      setOfferSent(true)
+    } catch (e) {
+      setOfferError(e.message || 'Не удалось отправить предложение')
+      haptic('heavy')
+    } finally {
+      setOfferBusy(false)
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -227,8 +262,76 @@ export default function Market() {
               key={item.id}
               item={item}
               onClick={() => { haptic('light'); navigate(`/listing/${item.id}`) }}
+              onOffer={item.seller_id !== user?.id ? openOffer : undefined}
             />
           ))}
+        </div>
+      )}
+
+      {/* Предложить цену */}
+      {offerTarget && (
+        <div
+          onClick={() => setOfferTarget(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(5,3,4,0.7)',
+            display: 'flex', alignItems: 'flex-end',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%', background: 'var(--bg-card)', borderRadius: '20px 20px 0 0',
+              border: '1px solid var(--border)', borderBottom: 'none',
+              padding: '20px 16px calc(24px + env(safe-area-inset-bottom, 0px))',
+              maxWidth: 480, margin: '0 auto',
+            }}
+          >
+            {offerSent ? (
+              <div style={{ textAlign: 'center', padding: 12 }}>
+                <div style={{ fontSize: 40, marginBottom: 8 }}>✅</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>Предложение отправлено!</div>
+                <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
+                  Продавец увидит его в Профиле → Офферы
+                </p>
+                <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => setOfferTarget(null)}>
+                  Закрыть
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, marginBottom: 4 }}>
+                  Предложить цену
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
+                  {offerTarget.name}{offerTarget.number ? ` ${offerTarget.number}` : ''} · цена лота {offerTarget.price} GRAM
+                </div>
+                <input
+                  className="input"
+                  value={offerAmount}
+                  onChange={e => { setOfferAmount(e.target.value.replace(/[^\d.,]/g, '')); setOfferError(null) }}
+                  placeholder={`От ${(offerTarget.price * 0.5).toFixed(2)} GRAM`}
+                  inputMode="decimal"
+                  disabled={offerBusy}
+                  style={{ fontSize: 13, marginBottom: 8 }}
+                />
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
+                  Минимум 50% цены лота — {(offerTarget.price * 0.5).toFixed(2)} GRAM
+                </div>
+                {offerError && (
+                  <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {offerError}</div>
+                )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-primary" style={{ flex: 1 }} onClick={submitOffer} disabled={offerBusy}>
+                    {offerBusy ? '⏳ Отправляем...' : 'Отправить'}
+                  </button>
+                  <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setOfferTarget(null)} disabled={offerBusy}>
+                    Отмена
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 
