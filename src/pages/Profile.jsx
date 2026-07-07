@@ -379,6 +379,11 @@ export default function Profile() {
                 const slug = giftSlug(tx.gift_name, tx.gift_number, tx.nft_address)
                 const thumb = fragmentImage(tx.gift_name, tx.gift_number, tx.nft_address)
                 const giftLink = slug ? `https://t.me/nft/${slug}` : ''
+                // Продавец получает цену за вычетом комиссии и реф-бонуса —
+                // показываем реально зачисленную сумму, а не цену лота.
+                const displayAmount = isBuy
+                  ? tx.amount_ton
+                  : tx.amount_ton - (tx.fee_ton || 0) - (tx.ref_bonus_ton || 0)
                 return (
                   <div
                     key={j} className="card"
@@ -413,7 +418,7 @@ export default function Profile() {
                       fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                       color: isBuy ? 'var(--text-secondary)' : 'var(--gold)',
                     }}>
-                      {isBuy ? '−' : '+'}{fmtGram(tx.amount_ton)} <GramIcon size={11} />
+                      {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={11} />
                     </div>
                   </div>
                 )
