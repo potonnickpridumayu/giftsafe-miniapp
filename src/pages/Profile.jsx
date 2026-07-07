@@ -413,8 +413,11 @@ export default function Profile() {
                         <span style={{ fontWeight: 600, color: isBuy ? 'var(--text-secondary)' : 'var(--gold)' }}>
                           {isBuy ? 'Покупка' : 'Продажа'}
                         </span>
+                        {counterpart && <span style={{ color: 'var(--text-primary)' }}>: @{counterpart}</span>}
                         <span style={{ color: 'var(--text-muted)' }}>
-                          {counterpart ? `: @${counterpart}` : ''} · {tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ru-RU') : ''}
+                          {' · '}
+                          {tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ru-RU') : ''}
+                          {tx.completed_at ? ` ${new Date(tx.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : ''}
                         </span>
                       </div>
                     </div>
