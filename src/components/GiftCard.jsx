@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TgGiftSticker from './TgGiftSticker'
 import GramIcon from './GramIcon'
@@ -19,6 +20,7 @@ function timeAgo(ts) {
 
 export default function GiftCard({ item, onClick }) {
   const rarityColor = RARITY_COLORS[item.rarity] || '#a390a0'
+  const [imgFail, setImgFail] = useState(false)
 
   return (
     <div
@@ -41,13 +43,16 @@ export default function GiftCard({ item, onClick }) {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {item.tg_thumb
-          ? <div style={{ position: 'absolute', inset: 0 }}>
-              <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
-            </div>
-          : item.image_url
-            ? <img src={item.image_url} alt={item.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
-            : <span>{item.emoji}</span>}
+        {item.image_full && !imgFail
+          ? <img src={item.image_full} alt={item.name} onError={() => setImgFail(true)}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          : item.tg_thumb
+            ? <div style={{ position: 'absolute', inset: 0 }}>
+                <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
+              </div>
+            : item.image_url
+              ? <img src={item.image_url} alt={item.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+              : <span>{item.emoji}</span>}
         <span style={{
           position: 'absolute',
           top: 8,

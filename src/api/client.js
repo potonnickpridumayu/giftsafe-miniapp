@@ -58,6 +58,8 @@ function normalizeListing(x) {
     price: x.price_ton,
     nft_address: x.nft_address || '',
     gift_link: _slug ? `https://t.me/nft/${_slug}` : '',
+    // Официальный рендер подарка от Telegram/Fragment (стикер+фон+узор) — как у Portals
+    image_full: _slug ? `https://nft.fragment.com/gift/${_slug.toLowerCase()}.medium.jpg` : '',
     seller: x.seller_username,
     seller_id: x.seller_id,
     views: x.views,

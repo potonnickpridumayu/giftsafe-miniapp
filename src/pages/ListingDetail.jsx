@@ -30,6 +30,7 @@ export default function ListingDetail() {
   const [withdrawn, setWithdrawn] = useState(false)
   const [withdrawError, setWithdrawError] = useState(null)
 
+  const [imgFail, setImgFail] = useState(false)
   const [editingPrice, setEditingPrice] = useState(false)
   const [newPrice, setNewPrice] = useState('')
   const [savingPrice, setSavingPrice] = useState(false)
@@ -172,13 +173,16 @@ export default function ListingDetail() {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {item.tg_thumb
-          ? <div style={{ position: 'absolute', inset: 0 }}>
-              <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
-            </div>
-          : item.image_url
-            ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
-            : <span>{item.emoji}</span>}
+        {item.image_full && !imgFail
+          ? <img src={item.image_full} alt={item.name} onError={() => setImgFail(true)}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          : item.tg_thumb
+            ? <div style={{ position: 'absolute', inset: 0 }}>
+                <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
+              </div>
+            : item.image_url
+              ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
+              : <span>{item.emoji}</span>}
       </div>
 
       {/* Title */}
@@ -203,16 +207,23 @@ export default function ListingDetail() {
       {(attrs.model_name || attrs.backdrop_name || attrs.symbol_name) && (
         <div className="card" style={{ padding: '12px 14px', marginBottom: 16 }}>
           {[
-            ['Модель', attrs.model_name],
-            ['Фон', attrs.backdrop_name],
-            ['Символ', attrs.symbol_name],
-          ].filter(([, v]) => v).map(([label, value], i, arr) => (
+            ['Модель', attrs.model_name, attrs.model_rarity],
+            ['Фон', attrs.backdrop_name, attrs.backdrop_rarity],
+            ['Символ', attrs.symbol_name, attrs.symbol_rarity],
+          ].filter(([, v]) => v).map(([label, value, rarity], i, arr) => (
             <div key={label} style={{
               display: 'flex', justifyContent: 'space-between',
               marginBottom: i < arr.length - 1 ? 10 : 0,
             }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{label}</span>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{value}</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>
+                {value}
+                {rarity != null && (
+                  <span style={{ color: 'var(--gold)', fontWeight: 600, marginLeft: 6 }}>
+                    {(rarity / 10).toFixed(1)}%
+                  </span>
+                )}
+              </span>
             </div>
           ))}
         </div>
