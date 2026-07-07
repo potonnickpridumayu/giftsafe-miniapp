@@ -529,6 +529,67 @@ export default function Profile() {
                   Сделок пока нет
                 </div>
               ) : txs.map((tx, j) => {
+                if (tx.kind === 'trade') {
+                  // isFrom: я тот, кто предложил обмен (отдал offered_gift, получил target_gift).
+                  const isFrom = tx.from_user_id === user?.id
+                  const counterpart = isFrom ? tx.to_username : tx.from_username
+                  const gaveName = isFrom ? tx.offered_gift_name : tx.target_gift_name
+                  const gotName = isFrom ? tx.target_gift_name : tx.offered_gift_name
+                  const gotNumber = isFrom ? tx.target_gift_number : tx.offered_gift_number
+                  const gotNft = isFrom ? tx.target_nft_address : tx.offered_nft_address
+                  const slug = giftSlug(gotName, gotNumber, gotNft)
+                  const thumb = fragmentImage(gotName, gotNumber, gotNft)
+                  const giftLink = slug ? `https://t.me/nft/${slug}` : ''
+                  const topUp = tx.top_up_ton || 0
+                  return (
+                    <div
+                      key={`t${j}`} className="card"
+                      style={{ padding: '10px 16px', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10, cursor: giftLink ? 'pointer' : 'default' }}
+                      onClick={giftLink ? () => { haptic('light'); openLink(giftLink) } : undefined}
+                    >
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                        flexShrink: 0, background: 'var(--bg-card-hover)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {thumb
+                          ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <span style={{ fontSize: 18 }}>🔄</span>}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: 13, fontWeight: 500,
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          {gotName}{gotNumber ? ` #${gotNumber}` : ''}
+                        </div>
+                        <div style={{
+                          fontSize: 11, marginTop: 2,
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          <span style={{ fontWeight: 600, color: '#8a7fd6' }}>🔄 Обмен</span>
+                          {counterpart && <span style={{ color: 'var(--text-primary)' }}>: @{counterpart}</span>}
+                          <span style={{ color: 'var(--text-muted)' }}> · отдал {gaveName}</span>
+                        </div>
+                        {tx.completed_at && (
+                          <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
+                            {new Date(tx.completed_at).toLocaleDateString('ru-RU')}
+                            {' '}
+                            {new Date(tx.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        )}
+                      </div>
+                      {topUp > 0 && (
+                        <div style={{
+                          fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
+                          color: isFrom ? 'var(--text-secondary)' : 'var(--gold)',
+                        }}>
+                          {isFrom ? '−' : '+'}{fmtGram(topUp)} <GramIcon size={11} />
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
                 const isBuy = tx.buyer_id === user?.id
                 const counterpart = isBuy ? tx.seller_username : tx.buyer_username
                 const slug = giftSlug(tx.gift_name, tx.gift_number, tx.nft_address)
