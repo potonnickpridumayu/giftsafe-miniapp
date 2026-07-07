@@ -547,13 +547,13 @@ export default function Profile() {
                   const gotLink = gotSlug ? `https://t.me/nft/${gotSlug}` : ''
                   const topUp = tx.top_up_ton || 0
                   const myUsername = user?.username || 'вы'
-                  const giftRow = (username, name, number, thumb, link) => (
+                  const giftRow = (username, name, number, thumb, link, paidTopUp) => (
                     <div
                       style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: link ? 'pointer' : 'default' }}
                       onClick={link ? () => { haptic('light'); openLink(link) } : undefined}
                     >
                       <div style={{
-                        width: 68, flexShrink: 0, fontSize: 11, color: 'var(--text-muted)',
+                        width: 68, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-primary)',
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
                         @{username}
@@ -573,6 +573,14 @@ export default function Profile() {
                       }}>
                         {name}{number ? ` #${number}` : ''}
                       </div>
+                      {paidTopUp > 0 && (
+                        <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                          <div style={{ fontSize: 9, color: 'var(--text-muted)', lineHeight: 1 }}>доплатил(а)</div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
+                            +{fmtGram(paidTopUp)} <GramIcon size={10} />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                   return (
@@ -589,16 +597,9 @@ export default function Profile() {
                           </span>
                         )}
                       </div>
-                      {giftRow(myUsername, gaveName, gaveNumber, gaveThumb, gaveLink)}
-                      <div style={{
-                        textAlign: 'center', fontSize: 12, fontWeight: 700, margin: '4px 0',
-                        color: topUp > 0 ? (isFrom ? 'var(--text-secondary)' : 'var(--gold)') : 'var(--text-muted)',
-                      }}>
-                        {topUp > 0
-                          ? <>{isFrom ? '−' : '+'}{fmtGram(topUp)} <GramIcon size={11} /></>
-                          : '⇅'}
-                      </div>
-                      {giftRow(counterpart, gotName, gotNumber, gotThumb, gotLink)}
+                      {giftRow(myUsername, gaveName, gaveNumber, gaveThumb, gaveLink, isFrom ? topUp : 0)}
+                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '3px 0' }}>⇅</div>
+                      {giftRow(counterpart, gotName, gotNumber, gotThumb, gotLink, !isFrom ? topUp : 0)}
                     </div>
                   )
                 }
