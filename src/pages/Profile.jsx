@@ -169,6 +169,54 @@ export default function Profile() {
     }
   }
 
+  // Строка одной стороны обмена в карточке оффера: юзернейм + список подарков,
+  // с опциональной доплатой (её всегда платит отправитель оффера).
+  const tradeOfferGiftSide = (username, gifts, paidTopUp) => (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+        @{username}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {(gifts || []).map((g, i) => {
+          const slug = giftSlug(g.gift_name, g.gift_number, g.nft_address)
+          const thumb = fragmentImage(g.gift_name, g.gift_number, g.nft_address)
+          const link = slug ? `https://t.me/nft/${slug}` : ''
+          return (
+            <div
+              key={i}
+              onClick={link ? () => { haptic('light'); openLink(link) } : undefined}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: link ? 'pointer' : 'default' }}
+            >
+              <div style={{
+                width: 34, height: 34, borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                flexShrink: 0, background: 'var(--bg-card-hover)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {thumb
+                  ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <span style={{ fontSize: 16 }}>🎁</span>}
+              </div>
+              <div style={{
+                fontSize: 13, fontWeight: 500, flex: 1, minWidth: 0,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {g.gift_name}{g.gift_number ? ` #${g.gift_number}` : ''}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      {paidTopUp > 0 && (
+        <div style={{ textAlign: 'right', marginTop: 4 }}>
+          <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>доплата </span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
+            +{fmtGram(paidTopUp)} <GramIcon size={10} />
+          </span>
+        </div>
+      )}
+    </div>
+  )
+
   const dbUser = profile?.user || null
   const txs = profile?.transactions || []
   const balance = dbUser?.balance_ton ?? 0
@@ -444,36 +492,46 @@ export default function Profile() {
                 <>
                   {offers.incoming.map(o => {
                     const isListing = o.kind === 'listing'
-                    const giftLabel = (arr) => (arr || []).map(
-                      g => `${g.gift_name}${g.gift_number ? ` #${g.gift_number}` : ''}`
-                    ).join(', ')
-                    const thumb = isListing
-                      ? fragmentImage(o.gift_name, o.gift_number, o.nft_address)
-                      : fragmentImage(o.offered_gifts?.[0]?.gift_name, o.offered_gifts?.[0]?.gift_number, o.offered_gifts?.[0]?.nft_address)
-                    const title = isListing
-                      ? `${o.gift_name}${o.gift_number ? ` #${o.gift_number}` : ''}`
-                      : giftLabel(o.offered_gifts)
-                    const sub = isListing
-                      ? <>Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} /></>
-                      : <>за {giftLabel(o.target_gifts)}{o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}</>
                     const busy = offerBusyId === o.offer_id
-                    return (
-                      <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
-                            {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 18 }}>🎁</span>}
+                    if (isListing) {
+                      const thumb = fragmentImage(o.gift_name, o.gift_number, o.nft_address)
+                      const title = `${o.gift_name}${o.gift_number ? ` #${o.gift_number}` : ''}`
+                      return (
+                        <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
+                              {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 18 }}>🎁</span>}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                💬 {title}
+                              </div>
+                              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                                Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} />
+                              </div>
+                              <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>От: @{o.from_username}</div>
+                            </div>
                           </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {isListing ? '💬' : '🔄'} {title}
-                            </div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>
-                              От: @{o.from_username}
-                            </div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
+                              disabled={busy} onClick={() => handleOfferAction(o, 'accept')}>
+                              {busy ? '⏳' : 'Принять'}
+                            </button>
+                            <button className="btn btn-ghost" style={{ flex: 1, fontSize: 12, padding: '8px' }}
+                              disabled={busy} onClick={() => handleOfferAction(o, 'decline')}>
+                              {busy ? '⏳' : 'Отклонить'}
+                            </button>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
+                      )
+                    }
+                    return (
+                      <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                        <div style={{ fontSize: 11, marginBottom: 6, fontWeight: 600, color: '#8a7fd6' }}>🔄 Предлагают обмен</div>
+                        {tradeOfferGiftSide(o.from_username, o.offered_gifts, o.top_up_ton)}
+                        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
+                        {tradeOfferGiftSide(user?.username || 'вы', o.target_gifts, 0)}
+                        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                           <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
                             disabled={busy} onClick={() => handleOfferAction(o, 'accept')}>
                             {busy ? '⏳' : 'Принять'}
@@ -488,36 +546,40 @@ export default function Profile() {
                   })}
                   {offers.outgoing.map(o => {
                     const isListing = o.kind === 'listing'
-                    const giftLabel = (arr) => (arr || []).map(
-                      g => `${g.gift_name}${g.gift_number ? ` #${g.gift_number}` : ''}`
-                    ).join(', ')
-                    const thumb = isListing
-                      ? fragmentImage(o.gift_name, o.gift_number, o.nft_address)
-                      : fragmentImage(o.offered_gifts?.[0]?.gift_name, o.offered_gifts?.[0]?.gift_number, o.offered_gifts?.[0]?.nft_address)
-                    const title = isListing
-                      ? `${o.gift_name}${o.gift_number ? ` #${o.gift_number}` : ''}`
-                      : giftLabel(o.offered_gifts)
-                    const sub = isListing
-                      ? <>Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} /></>
-                      : <>за {giftLabel(o.target_gifts)}{o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}</>
                     const busy = offerBusyId === o.offer_id
+                    if (isListing) {
+                      const thumb = fragmentImage(o.gift_name, o.gift_number, o.nft_address)
+                      const title = `${o.gift_name}${o.gift_number ? ` #${o.gift_number}` : ''}`
+                      return (
+                        <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
+                              {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 18 }}>🎁</span>}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                💬 {title}
+                              </div>
+                              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                                Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} />
+                              </div>
+                              <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>Кому: @{o.to_username}</div>
+                            </div>
+                          </div>
+                          <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px' }}
+                            disabled={busy} onClick={() => handleOfferAction(o, 'cancel')}>
+                            {busy ? '⏳' : 'Отменить предложение'}
+                          </button>
+                        </div>
+                      )
+                    }
                     return (
                       <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
-                            {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 18 }}>🎁</span>}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {isListing ? '💬' : '🔄'} {title}
-                            </div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>
-                              Кому: @{o.to_username}
-                            </div>
-                          </div>
-                        </div>
-                        <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px' }}
+                        <div style={{ fontSize: 11, marginBottom: 6, fontWeight: 600, color: '#8a7fd6' }}>🔄 Ваше предложение</div>
+                        {tradeOfferGiftSide(user?.username || 'вы', o.offered_gifts, o.top_up_ton)}
+                        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
+                        {tradeOfferGiftSide(o.to_username, o.target_gifts, 0)}
+                        <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px', marginTop: 10 }}
                           disabled={busy} onClick={() => handleOfferAction(o, 'cancel')}>
                           {busy ? '⏳' : 'Отменить предложение'}
                         </button>
