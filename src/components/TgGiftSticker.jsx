@@ -6,6 +6,30 @@ const FILE_BASE = 'https://nftmarketbot-production.up.railway.app/api/tg-file'
 
 const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
 
+// Узор фона Telegram-подарка раскладывается КОЛЬЦАМИ вокруг центра (радиально,
+// симметрично), а не равномерной плиткой. Центр закрывает сам стикер, символы
+// идут вокруг и к краям — размер и прозрачность чуть убывают наружу.
+const PATTERN_POINTS = (() => {
+  const pts = []
+  // [радиус% от центра, кол-во, размер% от плитки, прозрачность, угол-сдвиг°]
+  const rings = [
+    [34, 8, 15, 0.5, 0],
+    [49, 14, 12, 0.34, 12.8],
+  ]
+  for (const [radius, count, size, opacity, off] of rings) {
+    for (let i = 0; i < count; i++) {
+      const a = ((off + (360 / count) * i) * Math.PI) / 180
+      pts.push({
+        x: 50 + radius * Math.sin(a),
+        y: 50 - radius * Math.cos(a),
+        size,
+        opacity,
+      })
+    }
+  }
+  return pts
+})()
+
 /**
  * Стикер Telegram-подарка на родном фоне (градиент + узор из данных гифта).
  * Статика — средний кадр векторной анимации (чёткий в любом размере),
@@ -74,14 +98,23 @@ export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback =
       }}
     >
       {bd?.pattern && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `url(${FILE_BASE}/${bd.pattern})`,
-          backgroundSize: '26% 26%',
-          backgroundRepeat: 'repeat',
-          opacity: 0.16,
-        }} />
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+          {PATTERN_POINTS.map((p, i) => (
+            <img
+              key={i}
+              src={`${FILE_BASE}/${bd.pattern}`}
+              alt=""
+              style={{
+                position: 'absolute',
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: `${p.size}%`,
+                transform: 'translate(-50%, -50%)',
+                opacity: p.opacity,
+              }}
+            />
+          ))}
+        </div>
       )}
       <div ref={boxRef} style={{ position: 'absolute', inset: pad }} />
       {!ready && (
