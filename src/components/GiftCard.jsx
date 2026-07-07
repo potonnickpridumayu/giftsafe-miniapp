@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import TgGiftSticker from './TgGiftSticker'
 import GramIcon from './GramIcon'
 
 const RARITY_COLORS = {
@@ -41,9 +40,10 @@ export default function GiftCard({ item, onClick }) {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <TgGiftSticker image={item.image_full || item.image_url} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
-        </div>
+        {item.image_full || item.image_url
+          ? <img src={item.image_full || item.image_url} alt={item.name}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.emoji}</span>}
         <span style={{
           position: 'absolute',
           top: 8,
