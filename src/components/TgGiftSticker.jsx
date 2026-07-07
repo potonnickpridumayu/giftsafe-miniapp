@@ -11,10 +11,13 @@ const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
  * nft.fragment.com) как подложка, а по тапу поверх доигрывается анимация
  * стикера (lottie грузится ЛЕНИВО — только при первом тапе).
  *
- * Во время проигрывания статичную картинку ПРЯЧЕМ (иначе за анимацией виден
- * второй, статичный стикер), показывая под анимацией родной градиент-фон
- * подарка. Узор на время анимации уходит, зато стикер один; по завершении
- * картинка с узором возвращается.
+ * Во время проигрывания статичный стикер из картинки надо спрятать (иначе за
+ * анимацией виден второй, статичный). Но сам узор оставляем: картинку НЕ
+ * прячем, а лишь накрываем ЦЕНТР (где стоит стикер — там узор всё равно
+ * перекрыт стикером) «кляксой» цвета фона. Узор по краям/углам остаётся
+ * виден, а клякса почти целиком закрыта самой анимацией.
+ * Если фон подарка неизвестен (нет backdrop) — на время анимации прячем всю
+ * картинку (запасной вариант, чтобы не было двойного стикера).
  */
 export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%' }) {
   const [playing, setPlaying] = useState(false)
@@ -74,9 +77,16 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
       {image
         ? <img src={image} alt="" style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover', opacity: playing ? 0 : 1,
+            objectFit: 'cover', opacity: (playing && !bd) ? 0 : 1,
           }} />
         : <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{fallback}</span>}
+      {/* Клякса цвета фона поверх центра — прячет статичный стикер, узор по краям остаётся */}
+      {playing && bd && (
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: `radial-gradient(ellipse 42% 50% at 50% 46%, ${intHex(bd.center)} 0%, ${intHex(bd.center)} 62%, transparent 100%)`,
+        }} />
+      )}
       {/* Анимация поверх, видна только во время проигрывания */}
       <div ref={boxRef} style={{ position: 'absolute', inset: pad, opacity: playing ? 1 : 0 }} />
     </div>
