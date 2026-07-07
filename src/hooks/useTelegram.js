@@ -25,6 +25,12 @@ export function useTelegram() {
   const showConfirm = (msg, cb) => tg ? tg.showConfirm(msg, cb) : cb(window.confirm(msg))
   const haptic = (type = 'light') => tg?.HapticFeedback?.impactOccurred(type)
   const close = () => tg?.close()
+  const openLink = (url) => {
+    if (!url) return
+    if (tg?.openTelegramLink && /t\.me\//i.test(url)) tg.openTelegramLink(url)
+    else if (tg?.openLink) tg.openLink(url)
+    else window.open(url, '_blank')
+  }
 
-  return { tg, user, ready, showAlert, showConfirm, haptic, close, initData: tg?.initData || '' }
+  return { tg, user, ready, showAlert, showConfirm, haptic, close, openLink, initData: tg?.initData || '' }
 }

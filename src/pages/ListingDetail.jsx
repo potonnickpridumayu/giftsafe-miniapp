@@ -16,7 +16,7 @@ const FEE_RATE = 0.03
 export default function ListingDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { haptic, showConfirm, user } = useTelegram()
+  const { haptic, showConfirm, user, openLink } = useTelegram()
 
   const [item, setItem] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -29,6 +29,11 @@ export default function ListingDetail() {
   const [withdrawing, setWithdrawing] = useState(false)
   const [withdrawn, setWithdrawn] = useState(false)
   const [withdrawError, setWithdrawError] = useState(null)
+
+  const [editingPrice, setEditingPrice] = useState(false)
+  const [newPrice, setNewPrice] = useState('')
+  const [savingPrice, setSavingPrice] = useState(false)
+  const [priceError, setPriceError] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -120,6 +125,27 @@ export default function ListingDetail() {
     )
   }
 
+  const handleSavePrice = async () => {
+    const p = parseFloat(String(newPrice).replace(',', '.'))
+    if (!p || p <= 0) {
+      setPriceError('Введите цену больше нуля')
+      return
+    }
+    haptic('light')
+    setSavingPrice(true)
+    setPriceError(null)
+    try {
+      await api.changePrice(item.id, p)
+      setEditingPrice(false)
+      await load()
+    } catch (e) {
+      setPriceError(e.message || 'Не удалось изменить цену')
+      haptic('heavy')
+    } finally {
+      setSavingPrice(false)
+    }
+  }
+
   return (
     <div className="page">
       {/* Back */}
@@ -158,9 +184,19 @@ export default function ListingDetail() {
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
         {item.name} {item.number ? <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{item.number}</span> : null}
       </h2>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: item.gift_link ? 10 : 20 }}>
         Коллекция: {item.collection || '—'}
       </p>
+
+      {/* Ссылка на сам подарок в Telegram */}
+      {item.gift_link && (
+        <button
+          onClick={() => { haptic('light'); openLink(item.gift_link) }}
+          style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 13, cursor: 'pointer', padding: 0, marginBottom: 20, display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-body)' }}
+        >
+          🔗 Посмотреть подарок в Telegram
+        </button>
+      )}
 
       {/* Атрибуты подарка */}
       {(attrs.model_name || attrs.backdrop_name || attrs.symbol_name) && (
@@ -248,6 +284,41 @@ export default function ListingDetail() {
                 ⚠️ {withdrawError}
               </div>
             )}
+
+            {editingPrice ? (
+              <div className="card" style={{ padding: '12px 14px', marginBottom: 12 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>Новая цена (GRAM)</div>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                  placeholder={String(item.price)}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', fontSize: 15, marginBottom: 10 }}
+                />
+                {priceError && (
+                  <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {priceError}</div>
+                )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSavePrice} disabled={savingPrice}>
+                    {savingPrice ? '⏳ Сохраняем...' : 'Сохранить'}
+                  </button>
+                  <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => { setEditingPrice(false); setPriceError(null) }} disabled={savingPrice}>
+                    Отмена
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="btn btn-ghost btn-full"
+                style={{ marginBottom: 12 }}
+                onClick={() => { setNewPrice(String(item.price)); setPriceError(null); setEditingPrice(true) }}
+                disabled={soldOut}
+              >
+                Изменить цену
+              </button>
+            )}
+
             <button
               className="btn btn-ghost btn-full"
               onClick={handleWithdraw}

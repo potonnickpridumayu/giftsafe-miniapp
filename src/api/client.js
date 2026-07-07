@@ -42,6 +42,8 @@ function normalizeListing(x) {
     tg_backdrop: x.tg_backdrop || '',
     rarity: x.rarity,
     price: x.price_ton,
+    nft_address: x.nft_address || '',
+    gift_link: x.nft_address ? `https://t.me/nft/${x.nft_address}` : '',
     seller: x.seller_username,
     seller_id: x.seller_id,
     views: x.views,
@@ -73,6 +75,8 @@ export const api = {
     return normalizeListing(res.listing || res)
   },
   buyListing: (id) => request(`/listings/${id}/buy`, { method: 'POST' }),
+  changePrice: (id, price) =>
+    request(`/listings/${id}/price`, { method: 'POST', body: JSON.stringify({ price }) }),
 
   // Auctions — TODO: нормализовать под реальный ответ, когда увидим /api/auctions
   getAuctions: async () => {
