@@ -56,13 +56,30 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
         },
       })
       anim.goToAndStop(0, true)
+
+      // Бинаризуем альфу силуэта: любой ненулевой пиксель → полностью
+      // непрозрачный. Иначе полупрозрачные края (антиалиасинг) вырезают не до
+      // конца и сквозь них проступает цвет статичного стикера из JPG.
+      const scx = sc.getContext('2d')
+      const px = scx.getImageData(0, 0, inner, inner)
+      const d = px.data
+      for (let i = 3; i < d.length; i += 4) if (d[i] > 10) d[i] = 255
+      scx.putImageData(px, 0, 0)
+
       const m = document.createElement('canvas'); m.width = S; m.height = S
       const mx = m.getContext('2d')
       mx.fillStyle = '#000'; mx.fillRect(0, 0, S, S)
       mx.globalCompositeOperation = 'destination-out'
-      // лёгкое расширение силуэта (~4%), чтобы наверняка скрыть статичный стикер из JPG
-      const g = Math.round(inner * 0.04)
-      mx.drawImage(sc, off - g, off - g, inner + 2 * g, inner + 2 * g)
+      // Настоящая дилатация: штампуем силуэт по кругу смещений, чтобы вырез
+      // раздулся равномерно во все стороны (в т.ч. на тонких деталях типа
+      // ремешков/капель) — гарантированно скрывает статичный стикер из JPG.
+      const g = Math.max(6, Math.round(inner * 0.10))
+      const steps = 10
+      for (let k = 0; k < steps; k++) {
+        const a = (k / steps) * Math.PI * 2
+        mx.drawImage(sc, off + Math.round(Math.cos(a) * g), off + Math.round(Math.sin(a) * g))
+      }
+      mx.drawImage(sc, off, off)
       anim.destroy()
       return m.toDataURL()
     } catch { return '' }
