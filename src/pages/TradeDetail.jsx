@@ -289,6 +289,11 @@ export default function TradeDetail() {
           {proposeError && (
             <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {proposeError}</div>
           )}
+          {myGifts && myGifts.length > 0 && !selectedGiftId && (
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
+              Сначала выбери свой подарок выше
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-primary" style={{ flex: 1 }} onClick={handlePropose} disabled={proposing || !selectedGiftId}>

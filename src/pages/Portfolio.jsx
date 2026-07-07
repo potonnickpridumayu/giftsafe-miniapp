@@ -36,6 +36,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
   const [address, setAddress] = useState('')
   const [price, setPrice] = useState('')
   const [note, setNote] = useState('')
+  const [newPrice, setNewPrice] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -88,6 +89,23 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
     }
   }
 
+  const savePrice = async () => {
+    const p = parseFloat(String(newPrice).replace(',', '.'))
+    if (!p || p <= 0) { setError('Введите цену больше нуля'); return }
+    setBusy(true)
+    setError('')
+    try {
+      await api.changePrice(gift.listing_id, p)
+      haptic('medium')
+      setBusy(false)
+      setPanel(null)
+      onListed(gift.gift_id)
+    } catch (e) {
+      setError(e.message)
+      setBusy(false)
+    }
+  }
+
   const listForTrade = async () => {
     setBusy(true)
     setError('')
@@ -106,7 +124,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
 
   return (
     <div className="card" style={{ padding: '14px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: canTrade ? 10 : 0 }}>
         <div style={{
           width: 52, height: 52,
           borderRadius: 'var(--radius-md)',
@@ -124,7 +142,10 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14 }}>
+            <span style={{
+              fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
               {gift.gift_name}{gift.gift_number ? ` #${gift.gift_number}` : ''}
             </span>
           </div>
@@ -137,40 +158,74 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             </div>
           )}
         </div>
-        {canTrade && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            {gift.on_sale ? (
-              <span className="badge badge-gold" style={{ fontSize: 11 }}>На продаже</span>
-            ) : gift.on_trade ? (
-              <span className="badge badge-gold" style={{ fontSize: 11 }}>На обмене</span>
-            ) : (
-              <>
-                <button
-                  className="btn btn-primary"
-                  style={{ fontSize: 12, padding: '8px 12px' }}
-                  onClick={() => togglePanel('sell')}
-                >
-                  {panel === 'sell' ? 'Скрыть' : 'Продать'}
-                </button>
-                <button
-                  className="btn btn-ghost"
-                  style={{ fontSize: 12, padding: '8px 12px' }}
-                  onClick={() => togglePanel('trade')}
-                >
-                  {panel === 'trade' ? 'Скрыть' : 'Обменять'}
-                </button>
-              </>
-            )}
+        {gift.on_sale ? (
+          <span className="badge badge-gold" style={{ fontSize: 11, flexShrink: 0 }}>На продаже</span>
+        ) : gift.on_trade ? (
+          <span className="badge badge-gold" style={{ fontSize: 11, flexShrink: 0 }}>На обмене</span>
+        ) : null}
+      </div>
+
+      {canTrade && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {gift.on_sale ? (
             <button
               className="btn btn-ghost"
               style={{ fontSize: 12, padding: '8px 12px' }}
-              onClick={() => togglePanel('withdraw')}
+              onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}
             >
-              {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+              {panel === 'editPrice' ? 'Скрыть' : '✏️ Изменить цену'}
             </button>
-          </div>
-        )}
-      </div>
+          ) : gift.on_trade ? null : (
+            <>
+              <button
+                className="btn btn-primary"
+                style={{ fontSize: 12, padding: '8px 12px' }}
+                onClick={() => togglePanel('sell')}
+              >
+                {panel === 'sell' ? 'Скрыть' : 'Продать'}
+              </button>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: 12, padding: '8px 12px' }}
+                onClick={() => togglePanel('trade')}
+              >
+                {panel === 'trade' ? 'Скрыть' : 'Обменять'}
+              </button>
+            </>
+          )}
+          <button
+            className="btn btn-ghost"
+            style={{ fontSize: 12, padding: '8px 12px' }}
+            onClick={() => togglePanel('withdraw')}
+          >
+            {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+          </button>
+        </div>
+      )}
+
+      {panel === 'editPrice' && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          <input
+            className="input"
+            value={newPrice}
+            onChange={e => { setNewPrice(e.target.value.replace(/[^\d.,]/g, '')); setError('') }}
+            placeholder="Новая цена в GRAM"
+            inputMode="decimal"
+            disabled={busy}
+            style={{ fontSize: 13, marginBottom: 8 }}
+          />
+          {error && (
+            <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
+          )}
+          <button
+            className="btn btn-primary btn-full"
+            disabled={busy || !(parseFloat(String(newPrice).replace(',', '.')) > 0)}
+            onClick={savePrice}
+          >
+            {busy ? 'Сохраняем…' : 'Сохранить цену'}
+          </button>
+        </div>
+      )}
 
       {panel === 'sell' && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
