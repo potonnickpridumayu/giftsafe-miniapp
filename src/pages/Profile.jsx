@@ -534,59 +534,65 @@ export default function Profile() {
                   const isFrom = tx.from_user_id === user?.id
                   const counterpart = isFrom ? tx.to_username : tx.from_username
                   const gaveName = isFrom ? tx.offered_gift_name : tx.target_gift_name
+                  const gaveNumber = isFrom ? tx.offered_gift_number : tx.target_gift_number
+                  const gaveNft = isFrom ? tx.offered_nft_address : tx.target_nft_address
                   const gotName = isFrom ? tx.target_gift_name : tx.offered_gift_name
                   const gotNumber = isFrom ? tx.target_gift_number : tx.offered_gift_number
                   const gotNft = isFrom ? tx.target_nft_address : tx.offered_nft_address
-                  const slug = giftSlug(gotName, gotNumber, gotNft)
-                  const thumb = fragmentImage(gotName, gotNumber, gotNft)
-                  const giftLink = slug ? `https://t.me/nft/${slug}` : ''
+                  const gaveSlug = giftSlug(gaveName, gaveNumber, gaveNft)
+                  const gaveThumb = fragmentImage(gaveName, gaveNumber, gaveNft)
+                  const gaveLink = gaveSlug ? `https://t.me/nft/${gaveSlug}` : ''
+                  const gotSlug = giftSlug(gotName, gotNumber, gotNft)
+                  const gotThumb = fragmentImage(gotName, gotNumber, gotNft)
+                  const gotLink = gotSlug ? `https://t.me/nft/${gotSlug}` : ''
                   const topUp = tx.top_up_ton || 0
-                  return (
+                  const giftRow = (name, number, thumb, link) => (
                     <div
-                      key={`t${j}`} className="card"
-                      style={{ padding: '10px 16px', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10, cursor: giftLink ? 'pointer' : 'default' }}
-                      onClick={giftLink ? () => { haptic('light'); openLink(giftLink) } : undefined}
+                      style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: link ? 'pointer' : 'default' }}
+                      onClick={link ? () => { haptic('light'); openLink(link) } : undefined}
                     >
                       <div style={{
-                        width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                        width: 34, height: 34, borderRadius: 'var(--radius-md)', overflow: 'hidden',
                         flexShrink: 0, background: 'var(--bg-card-hover)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {thumb
                           ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <span style={{ fontSize: 18 }}>🔄</span>}
+                          : <span style={{ fontSize: 16 }}>🎁</span>}
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          fontSize: 13, fontWeight: 500,
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        }}>
-                          {gotName}{gotNumber ? ` #${gotNumber}` : ''}
-                        </div>
-                        <div style={{
-                          fontSize: 11, marginTop: 2,
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        }}>
-                          <span style={{ fontWeight: 600, color: '#8a7fd6' }}>🔄 Обмен</span>
-                          {counterpart && <span style={{ color: 'var(--text-primary)' }}>: @{counterpart}</span>}
-                          <span style={{ color: 'var(--text-muted)' }}> · отдал {gaveName}</span>
-                        </div>
+                      <div style={{
+                        fontSize: 13, fontWeight: 500, flex: 1, minWidth: 0,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {name}{number ? ` #${number}` : ''}
+                      </div>
+                    </div>
+                  )
+                  return (
+                    <div key={`t${j}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                      <div style={{
+                        fontSize: 11, marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 4,
+                      }}>
+                        <span style={{ fontWeight: 600, color: '#8a7fd6' }}>🔄 Обмен</span>
+                        {counterpart && <span style={{ color: 'var(--text-primary)' }}>: @{counterpart}</span>}
                         {tx.completed_at && (
-                          <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
+                          <span style={{ color: 'var(--text-muted)', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
                             {new Date(tx.completed_at).toLocaleDateString('ru-RU')}
                             {' '}
                             {new Date(tx.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                          </div>
+                          </span>
                         )}
                       </div>
-                      {topUp > 0 && (
-                        <div style={{
-                          fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
-                          color: isFrom ? 'var(--text-secondary)' : 'var(--gold)',
-                        }}>
-                          {isFrom ? '−' : '+'}{fmtGram(topUp)} <GramIcon size={11} />
-                        </div>
-                      )}
+                      {giftRow(gaveName, gaveNumber, gaveThumb, gaveLink)}
+                      <div style={{
+                        textAlign: 'center', fontSize: 12, fontWeight: 700, margin: '4px 0',
+                        color: topUp > 0 ? (isFrom ? 'var(--text-secondary)' : 'var(--gold)') : 'var(--text-muted)',
+                      }}>
+                        {topUp > 0
+                          ? <>{isFrom ? '−' : '+'}{fmtGram(topUp)} <GramIcon size={11} /></>
+                          : '⇅'}
+                      </div>
+                      {giftRow(gotName, gotNumber, gotThumb, gotLink)}
                     </div>
                   )
                 }
