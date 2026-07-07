@@ -35,6 +35,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
   const [panel, setPanel] = useState(null)
   const [address, setAddress] = useState('')
   const [price, setPrice] = useState('')
+  const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -87,6 +88,22 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
     }
   }
 
+  const listForTrade = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await api.createTrade(gift.gift_id, note)
+      haptic('medium')
+      setBusy(false)
+      setPanel(null)
+      setNote('')
+      onListed(gift.gift_id)
+    } catch (e) {
+      setError(e.message)
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="card" style={{ padding: '14px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -121,27 +138,36 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
           )}
         </div>
         {canTrade && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {gift.on_sale ? (
               <span className="badge badge-gold" style={{ fontSize: 11 }}>На продаже</span>
+            ) : gift.on_trade ? (
+              <span className="badge badge-gold" style={{ fontSize: 11 }}>На обмене</span>
             ) : (
-              <button
-                className="btn btn-primary"
-                style={{ fontSize: 12, padding: '8px 12px' }}
-                onClick={() => togglePanel('sell')}
-              >
-                {panel === 'sell' ? 'Скрыть' : 'Продать'}
-              </button>
+              <>
+                <button
+                  className="btn btn-primary"
+                  style={{ fontSize: 12, padding: '8px 12px' }}
+                  onClick={() => togglePanel('sell')}
+                >
+                  {panel === 'sell' ? 'Скрыть' : 'Продать'}
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  style={{ fontSize: 12, padding: '8px 12px' }}
+                  onClick={() => togglePanel('trade')}
+                >
+                  {panel === 'trade' ? 'Скрыть' : 'Обменять'}
+                </button>
+              </>
             )}
-            {canTrade && (
-              <button
-                className="btn btn-ghost"
-                style={{ fontSize: 12, padding: '8px 12px' }}
-                onClick={() => togglePanel('withdraw')}
-              >
-                {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
-              </button>
-            )}
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: 12, padding: '8px 12px' }}
+              onClick={() => togglePanel('withdraw')}
+            >
+              {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+            </button>
           </div>
         )}
       </div>
@@ -170,6 +196,32 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
             onClick={sell}
           >
             {busy ? 'Выставляем…' : 'Выставить на продажу'}
+          </button>
+        </div>
+      )}
+
+      {panel === 'trade' && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+            Лот появится во вкладке «Обмен» без цены. Другие пользователи предложат свой подарок (+ доплату, если захотят) — вы примете или отклоните.
+          </div>
+          <input
+            className="input"
+            value={note}
+            onChange={e => { setNote(e.target.value); setError('') }}
+            placeholder="Комментарий (необязательно)"
+            disabled={busy}
+            style={{ fontSize: 13, marginBottom: 8 }}
+          />
+          {error && (
+            <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
+          )}
+          <button
+            className="btn btn-primary btn-full"
+            disabled={busy}
+            onClick={listForTrade}
+          >
+            {busy ? 'Выставляем…' : 'Выставить на обмен'}
           </button>
         </div>
       )}
