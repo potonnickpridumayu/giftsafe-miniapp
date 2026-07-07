@@ -7,7 +7,16 @@ async function request(path, options = {}) {
     ...(tg?.initData ? { 'X-Telegram-Init-Data': tg.initData } : {}),
     ...options.headers,
   }
-  const res = await fetch(`${BASE}${path}`, { ...options, headers })
+  let res
+  try {
+    res = await fetch(`${BASE}${path}`, { ...options, headers })
+  } catch {
+    // fetch бросает TypeError "Failed to fetch" при сетевом сбое:
+    // нет связи, сервер перезапускается (деплой), VPN моргнул и т.п.
+    const err = new Error('Нет связи с сервером. Проверь интернет и попробуй ещё раз')
+    err.network = true
+    throw err
+  }
   if (!res.ok) {
     let detail = `HTTP ${res.status}`
     try { const j = await res.json(); if (j?.detail) detail = j.detail } catch {}
