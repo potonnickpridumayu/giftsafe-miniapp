@@ -11,8 +11,10 @@ const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
  * nft.fragment.com), а поверх по запросу доигрывается анимация стикера.
  *  - autoPlay: проиграть один раз при появлении (страница товара).
  *  - тап: проиграть снова (страница товара, портфель).
- * На время проигрывания картинку прячем (иначе за анимацией виден второй,
- * статичный стикер) — под анимацией остаётся родной градиент-фон подарка.
+ * На время проигрывания официальную картинку прячем (иначе за анимацией виден
+ * второй, статичный стикер), но под ней ПОСТОЯННО лежит воссозданный узор
+ * (цвет-символ сквозь mask-image узора-стикера) — поэтому при тапе узор НЕ
+ * исчезает, остаётся только градиент-фон + узор + анимация.
  * lottie грузится ЛЕНИВО (при первом проигрыше).
  */
 export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%', autoPlay = false }) {
@@ -28,6 +30,11 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
   const gradient = bd
     ? `radial-gradient(circle at 50% 42%, ${intHex(bd.center)}, ${intHex(bd.edge)})`
     : 'var(--bg-card-hover)'
+
+  // Воссозданный узор фона: тайлим монохромные силуэты (цвет symbol сквозь
+  // маску-миниатюру узора). Лежит под официальной картинкой, поэтому в покое
+  // не виден (картинка непрозрачная), а во время анимации остаётся на месте.
+  const patternUrl = bd && bd.pattern ? `${FILE_BASE}/${bd.pattern}` : ''
 
   const startPlay = async () => {
     if (!stickerId) return
@@ -77,6 +84,18 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
         background: gradient,
       }}
     >
+      {/* Воссозданный узор — постоянный слой под картинкой (виден во время тапа) */}
+      {patternUrl && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundColor: intHex(bd.symbol),
+          maskImage: `url(${patternUrl})`,
+          WebkitMaskImage: `url(${patternUrl})`,
+          maskRepeat: 'repeat', WebkitMaskRepeat: 'repeat',
+          maskSize: '22%', WebkitMaskSize: '22%',
+          opacity: 0.22,
+        }} />
+      )}
       {image
         ? <img src={image} alt="" style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
