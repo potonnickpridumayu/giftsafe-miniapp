@@ -75,6 +75,31 @@ function normalizeListing(x) {
   }
 }
 
+function normalizeTrade(x) {
+  const _slug = giftSlug(x.gift_name, x.gift_number, x.nft_address)
+  return {
+    id: x.trade_id,
+    gift_id: x.gift_id,
+    name: x.gift_name,
+    collection: x.collection_name,
+    number: x.gift_number,
+    emoji: RARITY_EMOJI[x.rarity] || '🎁',
+    image_url: x.image_url || '',
+    tg_sticker: x.tg_sticker || '',
+    tg_thumb: x.tg_thumb || '',
+    tg_backdrop: x.tg_backdrop || '',
+    rarity: x.rarity,
+    note: x.note || '',
+    nft_address: x.nft_address || '',
+    gift_link: _slug ? `https://t.me/nft/${_slug}` : '',
+    image_full: fragmentImage(x.gift_name, x.gift_number, x.nft_address),
+    owner: x.owner_username,
+    owner_id: x.owner_id,
+    status: x.status,
+    listed_at: x.created_at ? new Date(x.created_at).getTime() : Date.now(),
+  }
+}
+
 // на случай, если ответ обёрнут в {listings: [...]} / {items: [...]} / просто массив
 function toArray(res, key) {
   if (Array.isArray(res)) return res
@@ -100,18 +125,32 @@ export const api = {
   changePrice: (id, price) =>
     request(`/listings/${id}/price`, { method: 'POST', body: JSON.stringify({ price }) }),
 
-  // Auctions — TODO: нормализовать под реальный ответ, когда увидим /api/auctions
-  getAuctions: async () => {
-    const res = await request('/auctions')
-    return toArray(res, 'auctions')
+  // Обмен
+  getTrades: async (params = {}) => {
+    const q = new URLSearchParams(params).toString()
+    const res = await request(`/trades${q ? '?' + q : ''}`)
+    return toArray(res, 'trades').map(normalizeTrade)
   },
-  placeBid: (id, amount) =>
-    request(`/auctions/${id}/bid`, { method: 'POST', body: JSON.stringify({ amount }) }),
+  getTrade: async (id) => {
+    const res = await request(`/trades/${id}`)
+    return normalizeTrade(res.trade || res)
+  },
+  createTrade: (gift_id, note = '') =>
+    request('/trades', { method: 'POST', body: JSON.stringify({ gift_id, note }) }),
+  cancelTrade: (id) => request(`/trades/${id}`, { method: 'DELETE' }),
+  proposeTradeOffer: (tradeId, offered_gift_id, top_up_ton = 0) =>
+    request(`/trades/${tradeId}/offer`, {
+      method: 'POST', body: JSON.stringify({ offered_gift_id, top_up_ton }),
+    }),
+  getMyTradeOffers: () => request('/trades/offers/mine'),
+  acceptTradeOffer: (offerId) => request(`/trades/offers/${offerId}/accept`, { method: 'POST' }),
+  declineTradeOffer: (offerId) => request(`/trades/offers/${offerId}/decline`, { method: 'POST' }),
+  cancelTradeOffer: (offerId) => request(`/trades/offers/${offerId}/cancel`, { method: 'POST' }),
 
-  // Portfolio — TODO: нормализовать под реальный ответ
-  getPortfolio: async () => {
+  // Portfolio
+  getMyGifts: async () => {
     const res = await request('/portfolio')
-    return toArray(res, 'portfolio')
+    return res.gifts || []
   },
 
   // Profile

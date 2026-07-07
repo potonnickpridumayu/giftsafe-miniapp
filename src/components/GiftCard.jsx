@@ -69,7 +69,11 @@ export default function GiftCard({ item, onClick }) {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span className="price price-sm">{item.price} <GramIcon size={12} /></span>
+          {item.price != null
+            ? <span className="price price-sm">{item.price} <GramIcon size={12} /></span>
+            : <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                {item.owner ? `@${item.owner}` : 'На обмен'}
+              </span>}
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {timeAgo(item.listed_at)}
           </span>

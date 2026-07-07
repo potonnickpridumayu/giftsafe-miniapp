@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
-import { IconBuildingStore, IconGavel, IconBriefcase, IconUser } from '@tabler/icons-react'
+import { IconBuildingStore, IconArrowsExchange, IconBriefcase, IconUser } from '@tabler/icons-react'
 
 // Иконки как в утверждённом макете (Tabler outline). Активная — розовая
 // с неоновым свечением через drop-shadow (не box-shadow: он квадратный).
 const tabs = [
   { path: '/', Icon: IconBuildingStore, label: 'Маркет' },
-  { path: '/auctions', Icon: IconGavel, label: 'Аукцион' },
+  { path: '/trade', Icon: IconArrowsExchange, label: 'Обмен' },
   { path: '/portfolio', Icon: IconBriefcase, label: 'Портфель' },
   { path: '/profile', Icon: IconUser, label: 'Профиль' },
 ]
