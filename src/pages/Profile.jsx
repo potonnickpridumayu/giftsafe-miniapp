@@ -22,6 +22,10 @@ export default function Profile() {
   const [showWithdraw, setShowWithdraw] = useState(false)
   const [withdrawStatus, setWithdrawStatus] = useState(null)
   const [showHistory, setShowHistory] = useState(false)
+  const [offers, setOffers] = useState(null)
+  const [showOffers, setShowOffers] = useState(false)
+  const [offerBusyId, setOfferBusyId] = useState(null)
+  const [offerError, setOfferError] = useState(null)
 
   const SUPPORT_USERNAME = 'giftruby_support'
 
@@ -116,14 +120,41 @@ export default function Profile() {
     }
   }
 
+  const reloadOffers = async () => {
+    try {
+      const res = await api.getMyTradeOffers()
+      setOffers(res)
+    } catch {}
+  }
+
   useEffect(() => {
     let alive = true
     api.getProfile()
       .then(res => { if (alive) setProfile(res) })
       .catch(e => { if (alive) setError(e.message || 'Ошибка загрузки') })
       .finally(() => { if (alive) setLoading(false) })
+    reloadOffers()
     return () => { alive = false }
   }, [])
+
+  const handleOfferAction = async (offerId, action) => {
+    haptic('light')
+    setOfferBusyId(offerId)
+    setOfferError(null)
+    try {
+      if (action === 'accept') await api.acceptTradeOffer(offerId)
+      else if (action === 'decline') await api.declineTradeOffer(offerId)
+      else await api.cancelTradeOffer(offerId)
+      haptic(action === 'accept' ? 'medium' : 'light')
+      await reloadOffers()
+      if (action === 'accept') await reloadProfile()
+    } catch (e) {
+      setOfferError(e.message || 'Не удалось выполнить действие')
+      haptic('heavy')
+    } finally {
+      setOfferBusyId(null)
+    }
+  }
 
   const dbUser = profile?.user || null
   const txs = profile?.transactions || []
@@ -334,6 +365,14 @@ export default function Profile() {
           onClick: () => { haptic('light'); navigate('/referral') },
         },
         {
+          icon: '🔄', label: 'Офферы',
+          sub: offers
+            ? `${offers.incoming.length} входящих · ${offers.outgoing.length} исходящих`
+            : 'Предложения обмена',
+          badge: offers?.incoming.length || 0,
+          onClick: () => { haptic('light'); setShowOffers(v => !v) },
+        },
+        {
           icon: '📊', label: 'История сделок',
           sub: `${txs.length} завершённых транзакций`,
           onClick: () => { haptic('light'); setShowHistory(v => !v) },
@@ -363,10 +402,101 @@ export default function Profile() {
               <div style={{ fontSize: 14, fontWeight: 500 }}>{item.label}</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{item.sub}</div>
             </div>
+            {item.badge > 0 && (
+              <span style={{
+                background: 'var(--gold)', color: '#1a0f14', fontSize: 11, fontWeight: 700,
+                borderRadius: 999, minWidth: 18, height: 18, padding: '0 5px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {item.badge}
+              </span>
+            )}
             <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>
-              {item.label === 'История сделок' ? (showHistory ? '⌄' : '›') : '›'}
+              {item.label === 'История сделок' ? (showHistory ? '⌄' : '›')
+                : item.label === 'Офферы' ? (showOffers ? '⌄' : '›') : '›'}
             </span>
           </div>
+          {item.label === 'Офферы' && showOffers && (
+            <div style={{ marginBottom: 8 }}>
+              {offerError && (
+                <div className="card" style={{ padding: '10px 14px', marginBottom: 6, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
+                  ⚠️ {offerError}
+                </div>
+              )}
+              {!offers || (offers.incoming.length === 0 && offers.outgoing.length === 0) ? (
+                <div className="card" style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Офферов пока нет
+                </div>
+              ) : (
+                <>
+                  {offers.incoming.map(o => {
+                    const thumb = fragmentImage(o.offered_gift_name, o.offered_gift_number, o.offered_nft_address)
+                    const busy = offerBusyId === o.offer_id
+                    return (
+                      <div key={o.offer_id} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
+                            {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 18 }}>🎁</span>}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {o.offered_gift_name}{o.offered_gift_number ? ` #${o.offered_gift_number}` : ''}
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                              за {o.target_gift_name}{o.target_gift_number ? ` #${o.target_gift_number}` : ''}
+                              {o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>
+                              От: @{o.from_username}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
+                            disabled={busy} onClick={() => handleOfferAction(o.offer_id, 'accept')}>
+                            {busy ? '⏳' : 'Принять'}
+                          </button>
+                          <button className="btn btn-ghost" style={{ flex: 1, fontSize: 12, padding: '8px' }}
+                            disabled={busy} onClick={() => handleOfferAction(o.offer_id, 'decline')}>
+                            {busy ? '⏳' : 'Отклонить'}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {offers.outgoing.map(o => {
+                    const thumb = fragmentImage(o.offered_gift_name, o.offered_gift_number, o.offered_nft_address)
+                    const busy = offerBusyId === o.offer_id
+                    return (
+                      <div key={o.offer_id} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
+                            {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 18 }}>🎁</span>}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {o.offered_gift_name}{o.offered_gift_number ? ` #${o.offered_gift_number}` : ''}
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                              за {o.target_gift_name}{o.target_gift_number ? ` #${o.target_gift_number}` : ''}
+                              {o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>
+                              Кому: @{o.to_username}
+                            </div>
+                          </div>
+                        </div>
+                        <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px' }}
+                          disabled={busy} onClick={() => handleOfferAction(o.offer_id, 'cancel')}>
+                          {busy ? '⏳' : 'Отменить предложение'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </>
+              )}
+            </div>
+          )}
           {item.label === 'История сделок' && showHistory && (
             <div style={{ marginBottom: 8 }}>
               {txs.length === 0 ? (
