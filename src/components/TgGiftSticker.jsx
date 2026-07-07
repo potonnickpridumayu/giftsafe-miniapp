@@ -4,118 +4,63 @@ import { ungzip } from 'pako'
 
 const FILE_BASE = 'https://nftmarketbot-production.up.railway.app/api/tg-file'
 
-const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
-
 /**
- * Стикер Telegram-подарка на родном фоне (градиент + узор из данных гифта).
- * Статика — средний кадр векторной анимации (чёткий в любом размере),
- * мыльная превьюшка видна только пока грузится tgs. Тап — проигрывание.
- * Файлы идут через бэкенд-прокси (прямые ссылки Telegram раскрывают токен).
+ * Подарок Telegram: статичная официальная картинка (фон + узор + стикер с
+ * nft.fragment.com) как подложка, а по тапу поверх доигрывается анимация
+ * стикера (lottie грузится ЛЕНИВО — только при первом тапе, чтобы не тянуть
+ * анимации всех карточек маркета зря). Пока не играем — видна картинка.
  */
-export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback = '🎁', pad = '20%' }) {
-  const [ready, setReady] = useState(false)
-  const [failed, setFailed] = useState(false)
+export default function TgGiftSticker({ stickerId, image = '', fallback = '🎁', pad = '20%' }) {
+  const [playing, setPlaying] = useState(false)
   const instRef = useRef(null)
   const boxRef = useRef(null)
+  const loadingRef = useRef(false)
 
-  let bd = null
-  if (backdrop) {
-    try { bd = typeof backdrop === 'string' ? JSON.parse(backdrop) : backdrop } catch { /* без фона */ }
-  }
-
-  useEffect(() => {
-    if (!stickerId || !boxRef.current) return
-    let cancelled = false
-    let inst = null
-    ;(async () => {
-      try {
-        const res = await fetch(`${FILE_BASE}/${stickerId}`)
-        if (!res.ok) throw new Error()
-        const buf = new Uint8Array(await res.arrayBuffer())
-        const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
-        const data = JSON.parse(new TextDecoder().decode(raw))
-        if (cancelled || !boxRef.current) return
-        inst = lottie.loadAnimation({
-          container: boxRef.current,
-          renderer: 'svg',
-          loop: false,
-          autoplay: false,
-          animationData: data,
-        })
-        inst.addEventListener('complete', () => inst.goToAndStop(0, true))
-        inst.goToAndStop(0, true)
-        instRef.current = inst
-        setReady(true)
-      } catch {
-        if (!cancelled) setFailed(true)
-      }
-    })()
-    return () => { cancelled = true; if (inst) inst.destroy(); instRef.current = null }
+  useEffect(() => () => {
+    if (instRef.current) { instRef.current.destroy(); instRef.current = null }
   }, [stickerId])
 
-  const play = (e) => {
-    if (!instRef.current) return
+  const play = async (e) => {
+    if (!stickerId) return
     e.stopPropagation()
-    instRef.current.goToAndPlay(0, true)
+    if (instRef.current) {
+      setPlaying(true)
+      instRef.current.goToAndPlay(0, true)
+      return
+    }
+    if (loadingRef.current || !boxRef.current) return
+    loadingRef.current = true
+    try {
+      const res = await fetch(`${FILE_BASE}/${stickerId}`)
+      if (!res.ok) throw new Error()
+      const buf = new Uint8Array(await res.arrayBuffer())
+      const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
+      const data = JSON.parse(new TextDecoder().decode(raw))
+      if (!boxRef.current) return
+      const inst = lottie.loadAnimation({
+        container: boxRef.current, renderer: 'svg',
+        loop: false, autoplay: false, animationData: data,
+      })
+      inst.addEventListener('complete', () => { inst.goToAndStop(0, true); setPlaying(false) })
+      instRef.current = inst
+      setPlaying(true)
+      inst.goToAndPlay(0, true)
+    } catch { /* без анимации — остаётся статичная картинка */ }
   }
 
   return (
     <div
       onClick={play}
       style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        cursor: stickerId ? 'pointer' : 'default',
-        background: bd
-          ? `radial-gradient(circle at 50% 42%, ${intHex(bd.center)}, ${intHex(bd.edge)})`
-          : 'transparent',
-        overflow: 'hidden',
+        position: 'relative', width: '100%', height: '100%',
+        overflow: 'hidden', cursor: stickerId ? 'pointer' : 'default',
       }}
     >
-      {bd?.pattern && (
-        // Узор как у Telegram/Portals: одноцветные силуэты символа в цвете
-        // symbol_color (через CSS-маску), мелко и приглушённо, равномерно
-        // по всей плитке. Центр закрывает сам стикер.
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: intHex(bd.symbol),
-          WebkitMaskImage: `url(${FILE_BASE}/${bd.pattern})`,
-          maskImage: `url(${FILE_BASE}/${bd.pattern})`,
-          WebkitMaskSize: '22%',
-          maskSize: '22%',
-          WebkitMaskRepeat: 'repeat',
-          maskRepeat: 'repeat',
-          WebkitMaskPosition: 'center',
-          maskPosition: 'center',
-          opacity: 0.22,
-          pointerEvents: 'none',
-        }} />
-      )}
-      <div ref={boxRef} style={{ position: 'absolute', inset: pad }} />
-      {!ready && (
-        thumbId && !failed ? (
-          <img
-            src={`${FILE_BASE}/${thumbId}`}
-            alt=""
-            onError={() => setFailed(true)}
-            style={{ position: 'absolute', inset: pad, width: `calc(100% - 2*${pad})`, height: `calc(100% - 2*${pad})`, objectFit: 'contain' }}
-          />
-        ) : failed && !thumbId ? (
-          <span style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>{fallback}</span>
-        ) : null
-      )}
-      {failed && thumbId && !ready && (
-        <img
-          src={`${FILE_BASE}/${thumbId}`}
-          alt=""
-          style={{ position: 'absolute', inset: pad, width: `calc(100% - 2*${pad})`, height: `calc(100% - 2*${pad})`, objectFit: 'contain' }}
-        />
-      )}
+      {image
+        ? <img src={image} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        : <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{fallback}</span>}
+      {/* Анимация поверх картинки, видна только во время проигрывания */}
+      <div ref={boxRef} style={{ position: 'absolute', inset: pad, opacity: playing ? 1 : 0, transition: 'opacity .1s' }} />
     </div>
   )
 }

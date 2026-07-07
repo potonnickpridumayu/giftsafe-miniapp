@@ -30,7 +30,6 @@ export default function ListingDetail() {
   const [withdrawn, setWithdrawn] = useState(false)
   const [withdrawError, setWithdrawError] = useState(null)
 
-  const [imgFail, setImgFail] = useState(false)
   const [editingPrice, setEditingPrice] = useState(false)
   const [newPrice, setNewPrice] = useState('')
   const [savingPrice, setSavingPrice] = useState(false)
@@ -173,16 +172,9 @@ export default function ListingDetail() {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {item.image_full && !imgFail
-          ? <img src={item.image_full} alt={item.name} onError={() => setImgFail(true)}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          : item.tg_thumb
-            ? <div style={{ position: 'absolute', inset: 0 }}>
-                <TgGiftSticker thumbId={item.tg_thumb} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
-              </div>
-            : item.image_url
-              ? <img src={item.image_url} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
-              : <span>{item.emoji}</span>}
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <TgGiftSticker image={item.image_full || item.image_url} stickerId={item.tg_sticker} fallback={item.emoji} />
+        </div>
       </div>
 
       {/* Title */}

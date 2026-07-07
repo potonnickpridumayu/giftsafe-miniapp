@@ -37,12 +37,19 @@ const RARITY_EMOJI = {
   Common: '🎁',
 }
 
+// Слаг подарка: nft_address, а если пусто (Rubuy Bank) — из имени и номера.
+export function giftSlug(name, number, nftAddress) {
+  const num = String(number || '').replace(/[#\s]/g, '')
+  return nftAddress || ((name && num) ? `${String(name).replace(/\s+/g, '')}-${num}` : '')
+}
+// Официальный рендер подарка (фон+узор+стикер) от Telegram/Fragment.
+export function fragmentImage(name, number, nftAddress) {
+  const slug = giftSlug(name, number, nftAddress)
+  return slug ? `https://nft.fragment.com/gift/${slug.toLowerCase()}.medium.jpg` : ''
+}
+
 function normalizeListing(x) {
-  // Слаг для ссылки t.me/nft/... : берём nft_address, а если пусто
-  // (подарки из Rubuy Bank) — собираем из имени и номера.
-  const _num = String(x.gift_number || '').replace(/[#\s]/g, '')
-  const _slug = x.nft_address
-    || ((x.gift_name && _num) ? `${String(x.gift_name).replace(/\s+/g, '')}-${_num}` : '')
+  const _slug = giftSlug(x.gift_name, x.gift_number, x.nft_address)
   return {
     id: x.listing_id,
     gift_id: x.gift_id,
@@ -58,8 +65,7 @@ function normalizeListing(x) {
     price: x.price_ton,
     nft_address: x.nft_address || '',
     gift_link: _slug ? `https://t.me/nft/${_slug}` : '',
-    // Официальный рендер подарка от Telegram/Fragment (стикер+фон+узор) — как у Portals
-    image_full: _slug ? `https://nft.fragment.com/gift/${_slug.toLowerCase()}.medium.jpg` : '',
+    image_full: fragmentImage(x.gift_name, x.gift_number, x.nft_address),
     seller: x.seller_username,
     seller_id: x.seller_id,
     views: x.views,

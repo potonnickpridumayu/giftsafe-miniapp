@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
-import { api } from '../api/client'
+import { api, fragmentImage } from '../api/client'
 import { TonConnectButton } from '@tonconnect/ui-react';
 import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
@@ -98,11 +98,11 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 26, flexShrink: 0, overflow: 'hidden',
         }}>
-          {gift.tg_thumb
-            ? <TgGiftSticker thumbId={gift.tg_thumb} stickerId={gift.tg_sticker} backdrop={gift.tg_backdrop} pad="17%" />
-            : gift.image_url
-              ? <img src={gift.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : '🎁'}
+          <TgGiftSticker
+            image={fragmentImage(gift.gift_name, gift.gift_number, gift.nft_address) || gift.image_url}
+            stickerId={gift.tg_sticker}
+            pad="17%"
+          />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
