@@ -70,11 +70,12 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
       const mx = m.getContext('2d')
       mx.fillStyle = '#000'; mx.fillRect(0, 0, S, S)
       mx.globalCompositeOperation = 'destination-out'
-      // Настоящая дилатация: штампуем силуэт по кругу смещений, чтобы вырез
-      // раздулся равномерно во все стороны (в т.ч. на тонких деталях типа
-      // ремешков/капель) — гарантированно скрывает статичный стикер из JPG.
-      const g = Math.max(6, Math.round(inner * 0.10))
-      const steps = 10
+      // Лёгкая дилатация: штампуем силуэт по кругу смещений на несколько
+      // пикселей — только чтобы добить тонкую антиалиас-кайму, не больше.
+      // Слишком большое раздутие делает вырез шире самой анимации, и вокруг
+      // стикера во время игры видна пустая заливка вместо узора — было хуже.
+      const g = Math.min(5, Math.max(2, Math.round(inner * 0.015)))
+      const steps = 8
       for (let k = 0; k < steps; k++) {
         const a = (k / steps) * Math.PI * 2
         mx.drawImage(sc, off + Math.round(Math.cos(a) * g), off + Math.round(Math.sin(a) * g))
