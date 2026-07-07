@@ -546,11 +546,18 @@ export default function Profile() {
                   const gotThumb = fragmentImage(gotName, gotNumber, gotNft)
                   const gotLink = gotSlug ? `https://t.me/nft/${gotSlug}` : ''
                   const topUp = tx.top_up_ton || 0
-                  const giftRow = (name, number, thumb, link) => (
+                  const myUsername = user?.username || 'вы'
+                  const giftRow = (username, name, number, thumb, link) => (
                     <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: link ? 'pointer' : 'default' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: link ? 'pointer' : 'default' }}
                       onClick={link ? () => { haptic('light'); openLink(link) } : undefined}
                     >
+                      <div style={{
+                        width: 68, flexShrink: 0, fontSize: 11, color: 'var(--text-muted)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        @{username}
+                      </div>
                       <div style={{
                         width: 34, height: 34, borderRadius: 'var(--radius-md)', overflow: 'hidden',
                         flexShrink: 0, background: 'var(--bg-card-hover)',
@@ -574,7 +581,6 @@ export default function Profile() {
                         fontSize: 11, marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 4,
                       }}>
                         <span style={{ fontWeight: 600, color: '#8a7fd6' }}>🔄 Обмен</span>
-                        {counterpart && <span style={{ color: 'var(--text-primary)' }}>: @{counterpart}</span>}
                         {tx.completed_at && (
                           <span style={{ color: 'var(--text-muted)', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
                             {new Date(tx.completed_at).toLocaleDateString('ru-RU')}
@@ -583,7 +589,7 @@ export default function Profile() {
                           </span>
                         )}
                       </div>
-                      {giftRow(gaveName, gaveNumber, gaveThumb, gaveLink)}
+                      {giftRow(myUsername, gaveName, gaveNumber, gaveThumb, gaveLink)}
                       <div style={{
                         textAlign: 'center', fontSize: 12, fontWeight: 700, margin: '4px 0',
                         color: topUp > 0 ? (isFrom ? 'var(--text-secondary)' : 'var(--gold)') : 'var(--text-muted)',
@@ -592,7 +598,7 @@ export default function Profile() {
                           ? <>{isFrom ? '−' : '+'}{fmtGram(topUp)} <GramIcon size={11} /></>
                           : '⇅'}
                       </div>
-                      {giftRow(gotName, gotNumber, gotThumb, gotLink)}
+                      {giftRow(counterpart, gotName, gotNumber, gotThumb, gotLink)}
                     </div>
                   )
                 }
