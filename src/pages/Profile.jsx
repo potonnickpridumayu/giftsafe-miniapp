@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
-import { api } from '../api/client'
+import { api, fragmentImage, giftSlug } from '../api/client'
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
@@ -9,7 +9,7 @@ import { fmtGram } from '../utils/format'
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { user, haptic } = useTelegram()
+  const { user, haptic, openLink } = useTelegram()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -373,21 +373,51 @@ export default function Profile() {
                 <div className="card" style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-muted)' }}>
                   Сделок пока нет
                 </div>
-              ) : txs.map((tx, j) => (
-                <div key={j} className="card" style={{ padding: '10px 16px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 500 }}>
-                      {tx.buyer_id === user?.id ? '🛒 Покупка' : '💰 Продажа'}
+              ) : txs.map((tx, j) => {
+                const isBuy = tx.buyer_id === user?.id
+                const counterpart = isBuy ? tx.seller_username : tx.buyer_username
+                const slug = giftSlug(tx.gift_name, tx.gift_number, tx.nft_address)
+                const thumb = fragmentImage(tx.gift_name, tx.gift_number, tx.nft_address)
+                const giftLink = slug ? `https://t.me/nft/${slug}` : ''
+                return (
+                  <div
+                    key={j} className="card"
+                    style={{ padding: '10px 16px', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10, cursor: giftLink ? 'pointer' : 'default' }}
+                    onClick={giftLink ? () => { haptic('light'); openLink(giftLink) } : undefined}
+                  >
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                      flexShrink: 0, background: 'var(--bg-card-hover)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {thumb
+                        ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <span style={{ fontSize: 18 }}>🎁</span>}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                      {tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ru-RU') : ''}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 13, fontWeight: 500,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {isBuy ? '🛒' : '💰'} {tx.gift_name}{tx.gift_number ? ` #${tx.gift_number}` : ''}
+                      </div>
+                      <div style={{
+                        fontSize: 11, color: 'var(--text-muted)', marginTop: 2,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {counterpart ? `${isBuy ? 'от' : 'кому'} @${counterpart} · ` : ''}
+                        {tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ru-RU') : ''}
+                      </div>
+                    </div>
+                    <div style={{
+                      fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
+                      color: isBuy ? 'var(--text-secondary)' : 'var(--gold)',
+                    }}>
+                      {isBuy ? '−' : '+'}{fmtGram(tx.amount_ton)} <GramIcon size={11} />
                     </div>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: tx.buyer_id === user?.id ? 'var(--text-secondary)' : 'var(--gold)' }}>
-                    {tx.buyer_id === user?.id ? '−' : '+'}{fmtGram(tx.amount_ton)} <GramIcon size={11} />
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
