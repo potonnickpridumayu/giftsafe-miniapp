@@ -31,11 +31,10 @@ async function apiCall(path, options = {}) {
 const FEE_RATE = 0.03
 const round4 = (n) => Math.round((n + Number.EPSILON) * 1e4) / 1e4
 
-function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
+function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const [panel, setPanel] = useState(null)
   const [address, setAddress] = useState('')
   const [price, setPrice] = useState('')
-  const [note, setNote] = useState('')
   const [newPrice, setNewPrice] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -120,22 +119,6 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
     }
   }
 
-  const listForTrade = async () => {
-    setBusy(true)
-    setError('')
-    try {
-      await api.createTrade(gift.gift_id, note)
-      haptic('medium')
-      setBusy(false)
-      setPanel(null)
-      setNote('')
-      onListed(gift.gift_id)
-    } catch (e) {
-      setError(e.message)
-      setBusy(false)
-    }
-  }
-
   return (
     <div className="card" style={{ padding: '14px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: canTrade ? 10 : 0 }}>
@@ -211,9 +194,9 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
               <button
                 className="btn btn-ghost"
                 style={{ fontSize: 12, padding: '8px 12px' }}
-                onClick={() => togglePanel('trade')}
+                onClick={() => { haptic('light'); onStartTrade(gift.gift_id) }}
               >
-                {panel === 'trade' ? 'Скрыть' : 'Обменять'}
+                Обменять
               </button>
             </>
           )}
@@ -283,32 +266,6 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
         </div>
       )}
 
-      {panel === 'trade' && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-            Лот появится во вкладке «Обмен» без цены. Другие пользователи предложат свой подарок (+ доплату, если захотят) — вы примете или отклоните.
-          </div>
-          <input
-            className="input"
-            value={note}
-            onChange={e => { setNote(e.target.value); setError('') }}
-            placeholder="Комментарий (необязательно)"
-            disabled={busy}
-            style={{ fontSize: 13, marginBottom: 8 }}
-          />
-          {error && (
-            <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
-          )}
-          <button
-            className="btn btn-primary btn-full"
-            disabled={busy}
-            onClick={listForTrade}
-          >
-            {busy ? 'Выставляем…' : 'Выставить на обмен'}
-          </button>
-        </div>
-      )}
-
       {panel === 'withdraw' && isTgGift && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
@@ -363,6 +320,12 @@ export default function Portfolio() {
   const [gifts, setGifts] = useState(null)
   const [error, setError] = useState('')
 
+  const [tradePicker, setTradePicker] = useState(false)
+  const [tradeSelected, setTradeSelected] = useState(() => new Set())
+  const [tradeNote, setTradeNote] = useState('')
+  const [tradeBusy, setTradeBusy] = useState(false)
+  const [tradeError, setTradeError] = useState('')
+
   const load = useCallback(async () => {
     try {
       const data = await apiCall('/api/portfolio')
@@ -385,6 +348,42 @@ export default function Portfolio() {
   }
 
   const onSaleCount = (gifts || []).filter(g => g.on_sale).length
+  const tradeableGifts = (gifts || []).filter(g => !g.on_sale && !g.on_trade)
+
+  const openTradePicker = (giftId) => {
+    setTradeError('')
+    setTradeSelected(giftId ? new Set([giftId]) : new Set())
+    setTradePicker(true)
+  }
+
+  const toggleTradeGift = (giftId) => {
+    haptic('light')
+    setTradeSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(giftId)) next.delete(giftId)
+      else next.add(giftId)
+      return next
+    })
+  }
+
+  const submitTrade = async () => {
+    if (tradeSelected.size === 0) return
+    setTradeBusy(true)
+    setTradeError('')
+    try {
+      await api.createTrade(Array.from(tradeSelected), tradeNote)
+      haptic('medium')
+      setTradePicker(false)
+      setTradeSelected(new Set())
+      setTradeNote('')
+      load()
+    } catch (e) {
+      setTradeError(e.message || 'Не удалось выставить на обмен')
+      haptic('heavy')
+    } finally {
+      setTradeBusy(false)
+    }
+  }
 
   return (
     <div className="page">
@@ -428,6 +427,82 @@ export default function Portfolio() {
         >
           + Закинуть подарок
         </button>
+
+        {tradeableGifts.length > 0 && (
+          <button
+            className="btn btn-ghost btn-full"
+            style={{ marginTop: 8 }}
+            onClick={() => { haptic('medium'); openTradePicker(null) }}
+          >
+            🔄 Выставить на обмен
+          </button>
+        )}
+
+        {tradePicker && (
+          <div className="card" style={{ padding: '14px 16px', marginTop: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>
+              Выбери подарки для обмена {tradeSelected.size > 0 ? `(${tradeSelected.size})` : ''}
+            </div>
+            {tradeableGifts.length === 0 ? (
+              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                Нет свободных подарков (все на продаже/обмене).
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto', marginBottom: 12 }}>
+                {tradeableGifts.map(g => (
+                  <div
+                    key={g.gift_id}
+                    onClick={() => toggleTradeGift(g.gift_id)}
+                    className="card"
+                    style={{
+                      padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+                      border: tradeSelected.has(g.gift_id) ? '1px solid var(--gold)' : '1px solid var(--border)',
+                    }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
+                      <img
+                        src={fragmentImage(g.gift_name, g.gift_number, g.nft_address) || g.image_url}
+                        alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {g.gift_name}{g.gift_number ? ` #${g.gift_number}` : ''}
+                    </div>
+                    {tradeSelected.has(g.gift_id) && <span style={{ color: 'var(--gold)' }}>✓</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <input
+              className="input"
+              value={tradeNote}
+              onChange={e => setTradeNote(e.target.value)}
+              placeholder="Комментарий (необязательно)"
+              disabled={tradeBusy}
+              style={{ fontSize: 13, marginBottom: 8 }}
+            />
+            {tradeError && (
+              <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{tradeError}</div>
+            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn btn-primary" style={{ flex: 1 }}
+                disabled={tradeBusy || tradeSelected.size === 0}
+                onClick={submitTrade}
+              >
+                {tradeBusy ? 'Выставляем…' : `Выставить${tradeSelected.size > 0 ? ` (${tradeSelected.size})` : ''}`}
+              </button>
+              <button
+                className="btn btn-ghost" style={{ flex: 1 }}
+                disabled={tradeBusy}
+                onClick={() => setTradePicker(false)}
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {gifts === null ? (
@@ -446,7 +521,7 @@ export default function Portfolio() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {gifts.map(gift => (
-            <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} haptic={haptic} />
+            <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
           ))}
         </div>
       )}

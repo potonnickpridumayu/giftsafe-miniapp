@@ -52,6 +52,15 @@ export default function GiftCard({ item, onClick, onOffer }) {
           fontSize: 14,
           opacity: 0.5,
         }}>{item.symbol}</span>
+        {item.giftCount > 1 && (
+          <span style={{
+            position: 'absolute', top: 8, left: 8, fontSize: 11, fontWeight: 700,
+            background: 'rgba(0,0,0,0.55)', color: '#fff', borderRadius: 999,
+            padding: '2px 7px',
+          }}>
+            ×{item.giftCount}
+          </span>
+        )}
       </div>
 
       {/* Info */}

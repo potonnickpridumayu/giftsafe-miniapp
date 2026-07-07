@@ -75,24 +75,44 @@ function normalizeListing(x) {
   }
 }
 
+// Обогащает подарок из "сырого" ответа бэка (json_agg-объект) удобными
+// клиентскими полями — слаг, полная картинка, ссылка на Telegram.
+function normalizeGift(g) {
+  const _slug = giftSlug(g.gift_name, g.gift_number, g.nft_address)
+  return {
+    ...g,
+    name: g.gift_name,
+    number: g.gift_number,
+    collection: g.collection_name,
+    emoji: RARITY_EMOJI[g.rarity] || '🎁',
+    gift_link: _slug ? `https://t.me/nft/${_slug}` : '',
+    image_full: fragmentImage(g.gift_name, g.gift_number, g.nft_address),
+  }
+}
+
 function normalizeTrade(x) {
-  const _slug = giftSlug(x.gift_name, x.gift_number, x.nft_address)
+  const gifts = (x.gifts || []).map(normalizeGift)
+  const first = gifts[0] || {}
   return {
     id: x.trade_id,
-    gift_id: x.gift_id,
-    name: x.gift_name,
-    collection: x.collection_name,
-    number: x.gift_number,
-    emoji: RARITY_EMOJI[x.rarity] || '🎁',
-    image_url: x.image_url || '',
-    tg_sticker: x.tg_sticker || '',
-    tg_thumb: x.tg_thumb || '',
-    tg_backdrop: x.tg_backdrop || '',
-    rarity: x.rarity,
+    gifts,
+    giftCount: gifts.length,
+    // поля первого подарка — чтобы карточки/списки, ждущие один подарок
+    // (сетка обмена, бейджи), продолжали работать без переделки
+    gift_id: first.gift_id,
+    name: gifts.length > 1 ? `${first.name} +${gifts.length - 1}` : first.name,
+    collection: first.collection,
+    number: first.number,
+    emoji: first.emoji || '🎁',
+    image_url: first.image_url || '',
+    tg_sticker: first.tg_sticker || '',
+    tg_thumb: first.tg_thumb || '',
+    tg_backdrop: first.tg_backdrop || '',
+    rarity: first.rarity,
     note: x.note || '',
-    nft_address: x.nft_address || '',
-    gift_link: _slug ? `https://t.me/nft/${_slug}` : '',
-    image_full: fragmentImage(x.gift_name, x.gift_number, x.nft_address),
+    nft_address: first.nft_address || '',
+    gift_link: first.gift_link || '',
+    image_full: first.image_full || '',
     owner: x.owner_username,
     owner_id: x.owner_id,
     status: x.status,
@@ -143,12 +163,12 @@ export const api = {
     const res = await request(`/trades/${id}`)
     return normalizeTrade(res.trade || res)
   },
-  createTrade: (gift_id, note = '') =>
-    request('/trades', { method: 'POST', body: JSON.stringify({ gift_id, note }) }),
+  createTrade: (gift_ids, note = '') =>
+    request('/trades', { method: 'POST', body: JSON.stringify({ gift_ids, note }) }),
   cancelTrade: (id) => request(`/trades/${id}`, { method: 'DELETE' }),
-  proposeTradeOffer: (tradeId, offered_gift_id, top_up_ton = 0) =>
+  proposeTradeOffer: (tradeId, offered_gift_ids, top_up_ton = 0) =>
     request(`/trades/${tradeId}/offer`, {
-      method: 'POST', body: JSON.stringify({ offered_gift_id, top_up_ton }),
+      method: 'POST', body: JSON.stringify({ offered_gift_ids, top_up_ton }),
     }),
   getMyTradeOffers: () => request('/trades/offers/mine'),
   acceptTradeOffer: (offerId) => request(`/trades/offers/${offerId}/accept`, { method: 'POST' }),

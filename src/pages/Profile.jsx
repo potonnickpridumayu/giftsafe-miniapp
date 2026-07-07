@@ -444,15 +444,18 @@ export default function Profile() {
                 <>
                   {offers.incoming.map(o => {
                     const isListing = o.kind === 'listing'
+                    const giftLabel = (arr) => (arr || []).map(
+                      g => `${g.gift_name}${g.gift_number ? ` #${g.gift_number}` : ''}`
+                    ).join(', ')
                     const thumb = isListing
                       ? fragmentImage(o.gift_name, o.gift_number, o.nft_address)
-                      : fragmentImage(o.offered_gift_name, o.offered_gift_number, o.offered_nft_address)
+                      : fragmentImage(o.offered_gifts?.[0]?.gift_name, o.offered_gifts?.[0]?.gift_number, o.offered_gifts?.[0]?.nft_address)
                     const title = isListing
                       ? `${o.gift_name}${o.gift_number ? ` #${o.gift_number}` : ''}`
-                      : `${o.offered_gift_name}${o.offered_gift_number ? ` #${o.offered_gift_number}` : ''}`
+                      : giftLabel(o.offered_gifts)
                     const sub = isListing
                       ? <>Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} /></>
-                      : <>за {o.target_gift_name}{o.target_gift_number ? ` #${o.target_gift_number}` : ''}{o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}</>
+                      : <>за {giftLabel(o.target_gifts)}{o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}</>
                     const busy = offerBusyId === o.offer_id
                     return (
                       <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
@@ -485,15 +488,18 @@ export default function Profile() {
                   })}
                   {offers.outgoing.map(o => {
                     const isListing = o.kind === 'listing'
+                    const giftLabel = (arr) => (arr || []).map(
+                      g => `${g.gift_name}${g.gift_number ? ` #${g.gift_number}` : ''}`
+                    ).join(', ')
                     const thumb = isListing
                       ? fragmentImage(o.gift_name, o.gift_number, o.nft_address)
-                      : fragmentImage(o.offered_gift_name, o.offered_gift_number, o.offered_nft_address)
+                      : fragmentImage(o.offered_gifts?.[0]?.gift_name, o.offered_gifts?.[0]?.gift_number, o.offered_gifts?.[0]?.nft_address)
                     const title = isListing
                       ? `${o.gift_name}${o.gift_number ? ` #${o.gift_number}` : ''}`
-                      : `${o.offered_gift_name}${o.offered_gift_number ? ` #${o.offered_gift_number}` : ''}`
+                      : giftLabel(o.offered_gifts)
                     const sub = isListing
                       ? <>Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} /></>
-                      : <>за {o.target_gift_name}{o.target_gift_number ? ` #${o.target_gift_number}` : ''}{o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}</>
+                      : <>за {giftLabel(o.target_gifts)}{o.top_up_ton > 0 && <> + {fmtGram(o.top_up_ton)} <GramIcon size={10} /></>}</>
                     const busy = offerBusyId === o.offer_id
                     return (
                       <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
@@ -530,55 +536,54 @@ export default function Profile() {
                 </div>
               ) : txs.map((tx, j) => {
                 if (tx.kind === 'trade') {
-                  // isFrom: я тот, кто предложил обмен (отдал offered_gift, получил target_gift).
+                  // isFrom: я тот, кто предложил обмен (отдал offered_gifts, получил target_gifts).
                   const isFrom = tx.from_user_id === user?.id
                   const counterpart = isFrom ? tx.to_username : tx.from_username
-                  const gaveName = isFrom ? tx.offered_gift_name : tx.target_gift_name
-                  const gaveNumber = isFrom ? tx.offered_gift_number : tx.target_gift_number
-                  const gaveNft = isFrom ? tx.offered_nft_address : tx.target_nft_address
-                  const gotName = isFrom ? tx.target_gift_name : tx.offered_gift_name
-                  const gotNumber = isFrom ? tx.target_gift_number : tx.offered_gift_number
-                  const gotNft = isFrom ? tx.target_nft_address : tx.offered_nft_address
-                  const gaveSlug = giftSlug(gaveName, gaveNumber, gaveNft)
-                  const gaveThumb = fragmentImage(gaveName, gaveNumber, gaveNft)
-                  const gaveLink = gaveSlug ? `https://t.me/nft/${gaveSlug}` : ''
-                  const gotSlug = giftSlug(gotName, gotNumber, gotNft)
-                  const gotThumb = fragmentImage(gotName, gotNumber, gotNft)
-                  const gotLink = gotSlug ? `https://t.me/nft/${gotSlug}` : ''
+                  const gaveGifts = isFrom ? (tx.offered_gifts || []) : (tx.target_gifts || [])
+                  const gotGifts = isFrom ? (tx.target_gifts || []) : (tx.offered_gifts || [])
                   const topUp = tx.top_up_ton || 0
                   const myUsername = user?.username || 'вы'
-                  const giftRow = (username, name, number, thumb, link, paidTopUp) => (
-                    <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: link ? 'pointer' : 'default' }}
-                      onClick={link ? () => { haptic('light'); openLink(link) } : undefined}
-                    >
-                      <div style={{
-                        width: 68, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-primary)',
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      }}>
+                  const giftSide = (username, gifts, paidTopUp) => (
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
                         @{username}
                       </div>
-                      <div style={{
-                        width: 34, height: 34, borderRadius: 'var(--radius-md)', overflow: 'hidden',
-                        flexShrink: 0, background: 'var(--bg-card-hover)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        {thumb
-                          ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <span style={{ fontSize: 16 }}>🎁</span>}
-                      </div>
-                      <div style={{
-                        fontSize: 13, fontWeight: 500, flex: 1, minWidth: 0,
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      }}>
-                        {name}{number ? ` #${number}` : ''}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {gifts.map((g, i) => {
+                          const slug = giftSlug(g.gift_name, g.gift_number, g.nft_address)
+                          const thumb = fragmentImage(g.gift_name, g.gift_number, g.nft_address)
+                          const link = slug ? `https://t.me/nft/${slug}` : ''
+                          return (
+                            <div
+                              key={i}
+                              onClick={link ? () => { haptic('light'); openLink(link) } : undefined}
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: link ? 'pointer' : 'default' }}
+                            >
+                              <div style={{
+                                width: 34, height: 34, borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                                flexShrink: 0, background: 'var(--bg-card-hover)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                {thumb
+                                  ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  : <span style={{ fontSize: 16 }}>🎁</span>}
+                              </div>
+                              <div style={{
+                                fontSize: 13, fontWeight: 500, flex: 1, minWidth: 0,
+                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                              }}>
+                                {g.gift_name}{g.gift_number ? ` #${g.gift_number}` : ''}
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
                       {paidTopUp > 0 && (
-                        <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-muted)', lineHeight: 1 }}>доплатил(а)</div>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
+                        <div style={{ textAlign: 'right', marginTop: 4 }}>
+                          <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>доплатил(а) </span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
                             +{fmtGram(paidTopUp)} <GramIcon size={10} />
-                          </div>
+                          </span>
                         </div>
                       )}
                     </div>
@@ -597,9 +602,9 @@ export default function Profile() {
                           </span>
                         )}
                       </div>
-                      {giftRow(myUsername, gaveName, gaveNumber, gaveThumb, gaveLink, isFrom ? topUp : 0)}
-                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '3px 0' }}>⇅</div>
-                      {giftRow(counterpart, gotName, gotNumber, gotThumb, gotLink, !isFrom ? topUp : 0)}
+                      {giftSide(myUsername, gaveGifts, isFrom ? topUp : 0)}
+                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
+                      {giftSide(counterpart, gotGifts, !isFrom ? topUp : 0)}
                     </div>
                   )
                 }
