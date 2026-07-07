@@ -13,7 +13,7 @@ async function request(path, options = {}) {
   } catch {
     // fetch бросает TypeError "Failed to fetch" при сетевом сбое:
     // нет связи, сервер перезапускается (деплой), VPN моргнул и т.п.
-    const err = new Error('Нет связи с сервером. Проверь интернет и попробуй ещё раз')
+    const err = new Error('Нет связи с сервером. Попробуй ещё раз')
     err.network = true
     throw err
   }
