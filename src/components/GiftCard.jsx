@@ -42,7 +42,7 @@ export default function GiftCard({ item, onClick }) {
         overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', inset: 0 }}>
-          <TgGiftSticker image={item.image_full || item.image_url} stickerId={item.tg_sticker} fallback={item.emoji} />
+          <TgGiftSticker image={item.image_full || item.image_url} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
         </div>
         <span style={{
           position: 'absolute',

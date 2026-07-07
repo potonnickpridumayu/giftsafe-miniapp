@@ -4,17 +4,31 @@ import { ungzip } from 'pako'
 
 const FILE_BASE = 'https://nftmarketbot-production.up.railway.app/api/tg-file'
 
+const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
+
 /**
  * Подарок Telegram: статичная официальная картинка (фон + узор + стикер с
  * nft.fragment.com) как подложка, а по тапу поверх доигрывается анимация
- * стикера (lottie грузится ЛЕНИВО — только при первом тапе, чтобы не тянуть
- * анимации всех карточек маркета зря). Пока не играем — видна картинка.
+ * стикера (lottie грузится ЛЕНИВО — только при первом тапе).
+ *
+ * Во время проигрывания статичную картинку ПРЯЧЕМ (иначе за анимацией виден
+ * второй, статичный стикер), показывая под анимацией родной градиент-фон
+ * подарка. Узор на время анимации уходит, зато стикер один; по завершении
+ * картинка с узором возвращается.
  */
-export default function TgGiftSticker({ stickerId, image = '', fallback = '🎁', pad = '20%' }) {
+export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%' }) {
   const [playing, setPlaying] = useState(false)
   const instRef = useRef(null)
   const boxRef = useRef(null)
   const loadingRef = useRef(false)
+
+  let bd = null
+  if (backdrop) {
+    try { bd = typeof backdrop === 'string' ? JSON.parse(backdrop) : backdrop } catch { /* без фона */ }
+  }
+  const gradient = bd
+    ? `radial-gradient(circle at 50% 42%, ${intHex(bd.center)}, ${intHex(bd.edge)})`
+    : 'var(--bg-card-hover)'
 
   useEffect(() => () => {
     if (instRef.current) { instRef.current.destroy(); instRef.current = null }
@@ -54,13 +68,17 @@ export default function TgGiftSticker({ stickerId, image = '', fallback = '🎁'
       style={{
         position: 'relative', width: '100%', height: '100%',
         overflow: 'hidden', cursor: stickerId ? 'pointer' : 'default',
+        background: gradient,
       }}
     >
       {image
-        ? <img src={image} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        ? <img src={image} alt="" style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', opacity: playing ? 0 : 1,
+          }} />
         : <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{fallback}</span>}
-      {/* Анимация поверх картинки, видна только во время проигрывания */}
-      <div ref={boxRef} style={{ position: 'absolute', inset: pad, opacity: playing ? 1 : 0, transition: 'opacity .1s' }} />
+      {/* Анимация поверх, видна только во время проигрывания */}
+      <div ref={boxRef} style={{ position: 'absolute', inset: pad, opacity: playing ? 1 : 0 }} />
     </div>
   )
 }

@@ -101,6 +101,7 @@ function GiftCard({ gift, onWithdrawn, onListed, haptic }) {
           <TgGiftSticker
             image={fragmentImage(gift.gift_name, gift.gift_number, gift.nft_address) || gift.image_url}
             stickerId={gift.tg_sticker}
+            backdrop={gift.tg_backdrop}
             pad="17%"
           />
         </div>
