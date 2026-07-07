@@ -170,6 +170,7 @@ export default function ListingDetail() {
         fontSize: 80,
         border: `1px solid ${rarityColor}33`,
         position: 'relative',
+        overflow: 'hidden',
       }}>
         {item.tg_thumb
           ? <div style={{ position: 'absolute', inset: 0 }}>
