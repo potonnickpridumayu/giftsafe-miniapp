@@ -404,14 +404,18 @@ export default function Profile() {
                         fontSize: 13, fontWeight: 500,
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
-                        {isBuy ? '🛒' : '💰'} {tx.gift_name}{tx.gift_number ? ` #${tx.gift_number}` : ''}
+                        {tx.gift_name}{tx.gift_number ? ` #${tx.gift_number}` : ''}
                       </div>
                       <div style={{
-                        fontSize: 11, color: 'var(--text-muted)', marginTop: 2,
+                        fontSize: 11, marginTop: 2,
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
-                        {counterpart ? `${isBuy ? 'от' : 'кому'} @${counterpart} · ` : ''}
-                        {tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ru-RU') : ''}
+                        <span style={{ fontWeight: 600, color: isBuy ? 'var(--text-secondary)' : 'var(--gold)' }}>
+                          {isBuy ? 'Покупка' : 'Продажа'}
+                        </span>
+                        <span style={{ color: 'var(--text-muted)' }}>
+                          {counterpart ? `: @${counterpart}` : ''} · {tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ru-RU') : ''}
+                        </span>
                       </div>
                     </div>
                     <div style={{
