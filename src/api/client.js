@@ -29,6 +29,11 @@ const RARITY_EMOJI = {
 }
 
 function normalizeListing(x) {
+  // Слаг для ссылки t.me/nft/... : берём nft_address, а если пусто
+  // (подарки из Rubuy Bank) — собираем из имени и номера.
+  const _num = String(x.gift_number || '').replace(/[#\s]/g, '')
+  const _slug = x.nft_address
+    || ((x.gift_name && _num) ? `${String(x.gift_name).replace(/\s+/g, '')}-${_num}` : '')
   return {
     id: x.listing_id,
     gift_id: x.gift_id,
@@ -43,7 +48,7 @@ function normalizeListing(x) {
     rarity: x.rarity,
     price: x.price_ton,
     nft_address: x.nft_address || '',
-    gift_link: x.nft_address ? `https://t.me/nft/${x.nft_address}` : '',
+    gift_link: _slug ? `https://t.me/nft/${_slug}` : '',
     seller: x.seller_username,
     seller_id: x.seller_id,
     views: x.views,
