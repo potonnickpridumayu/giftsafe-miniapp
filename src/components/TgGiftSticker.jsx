@@ -12,7 +12,7 @@ const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
  * мыльная превьюшка видна только пока грузится tgs. Тап — проигрывание.
  * Файлы идут через бэкенд-прокси (прямые ссылки Telegram раскрывают токен).
  */
-export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback = '🎁', pad = '9%' }) {
+export default function TgGiftSticker({ thumbId, stickerId, backdrop, fallback = '🎁', pad = '20%' }) {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const instRef = useRef(null)
