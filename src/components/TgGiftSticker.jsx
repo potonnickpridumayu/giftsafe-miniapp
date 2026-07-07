@@ -74,7 +74,7 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
       // пикселей — только чтобы добить тонкую антиалиас-кайму, не больше.
       // Слишком большое раздутие делает вырез шире самой анимации, и вокруг
       // стикера во время игры видна пустая заливка вместо узора — было хуже.
-      const g = Math.min(8, Math.max(4, Math.round(inner * 0.022)))
+      const g = Math.min(8, Math.max(4, Math.round(inner * 0.025)))
       const steps = 8
       for (let k = 0; k < steps; k++) {
         const a = (k / steps) * Math.PI * 2
