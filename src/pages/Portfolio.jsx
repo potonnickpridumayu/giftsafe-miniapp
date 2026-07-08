@@ -1,17 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
-import { api, fragmentImage } from '../api/client'
+import { api, fragmentImage, rarityTierColor } from '../api/client'
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { IconPencil } from '@tabler/icons-react'
 import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
 import BrandLogo from '../components/BrandLogo'
-
-
-const RARITY_COLORS = {
-  Common: '#a390a0', Rare: '#7f9df5', Epic: '#c084f0', Legendary: '#f0b47e',
-}
 
 const API_BASE = 'https://nftmarketbot-production.up.railway.app'
 
@@ -33,6 +28,14 @@ async function apiCall(path, options = {}) {
 const FEE_RATE = 0.03
 const round4 = (n) => Math.round((n + Number.EPSILON) * 1e4) / 1e4
 
+// Три кнопки действий должны помещаться в один ряд на карточке подарка —
+// сжимаем паддинг/шрифт и режем текст многоточием, если совсем не влезает.
+const rowBtnStyle = {
+  flex: 1, minWidth: 0, fontSize: 11.5, padding: '8px 6px',
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+}
+const ellipsisStyle = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+
 function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const [panel, setPanel] = useState(null)
   const [address, setAddress] = useState('')
@@ -41,7 +44,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  const rarityColor = RARITY_COLORS[gift.rarity] || '#a390a0'
+  const rarityColor = rarityTierColor(gift.tg_backdrop)
   const onChain = Boolean(gift.nft_address)
   const isTgGift = Boolean(gift.tg_owned_gift_id)
   const canTrade = onChain || isTgGift
@@ -140,7 +143,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       <div style={{
         position: 'relative',
         width: '100%',
-        aspectRatio: '16 / 10',
+        aspectRatio: '1',
         borderRadius: 'var(--radius-md)',
         background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -178,59 +181,59 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       </div>
 
       {canTrade && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 5 }}>
           {gift.on_sale ? (
             <>
               <button
                 className="btn btn-ghost"
-                style={{ fontSize: 12, padding: '8px 12px', display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                style={rowBtnStyle}
                 onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}
               >
-                <IconPencil size={13} stroke={2} />
-                {panel === 'editPrice' ? 'Скрыть' : 'Изменить цену'}
+                <IconPencil size={12} stroke={2} style={{ flexShrink: 0 }} />
+                <span style={ellipsisStyle}>{panel === 'editPrice' ? 'Скрыть' : 'Изменить цену'}</span>
               </button>
               <button
                 className="btn btn-ghost"
-                style={{ fontSize: 12, padding: '8px 12px' }}
+                style={rowBtnStyle}
                 disabled={busy}
                 onClick={delist}
               >
-                {busy ? '⏳' : 'Снять с продажи'}
+                <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с продажи'}</span>
               </button>
             </>
           ) : gift.on_trade ? (
             <button
               className="btn btn-ghost"
-              style={{ fontSize: 12, padding: '8px 12px' }}
+              style={rowBtnStyle}
               disabled={busy}
               onClick={cancelTrade}
             >
-              {busy ? '⏳' : 'Снять с обмена'}
+              <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с обмена'}</span>
             </button>
           ) : (
             <>
               <button
                 className="btn btn-primary"
-                style={{ fontSize: 12, padding: '8px 12px' }}
+                style={rowBtnStyle}
                 onClick={() => togglePanel('sell')}
               >
-                {panel === 'sell' ? 'Скрыть' : 'Продать'}
+                <span style={ellipsisStyle}>{panel === 'sell' ? 'Скрыть' : 'Продать'}</span>
               </button>
               <button
                 className="btn btn-ghost"
-                style={{ fontSize: 12, padding: '8px 12px' }}
+                style={rowBtnStyle}
                 onClick={() => { haptic('light'); onStartTrade(gift.gift_id) }}
               >
-                Обменять
+                <span style={ellipsisStyle}>Обменять</span>
               </button>
             </>
           )}
           <button
             className="btn btn-ghost"
-            style={{ fontSize: 12, padding: '8px 12px' }}
+            style={rowBtnStyle}
             onClick={() => togglePanel('withdraw')}
           >
-            {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+            <span style={ellipsisStyle}>{panel === 'withdraw' ? 'Скрыть' : 'Вывести'}</span>
           </button>
         </div>
       )}

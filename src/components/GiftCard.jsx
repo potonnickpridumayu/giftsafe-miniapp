@@ -1,12 +1,6 @@
 import { IconMessageDollar } from '@tabler/icons-react'
 import GramIcon from './GramIcon'
-
-const RARITY_COLORS = {
-  Common: '#a390a0',
-  Rare: '#7f9df5',
-  Epic: '#c084f0',
-  Legendary: '#f0b47e',
-}
+import { rarityTierColor } from '../api/client'
 
 function timeAgo(ts) {
   const diff = (Date.now() - ts) / 1000
@@ -17,7 +11,7 @@ function timeAgo(ts) {
 }
 
 export default function GiftCard({ item, onClick, onOffer }) {
-  const rarityColor = RARITY_COLORS[item.rarity] || '#a390a0'
+  const rarityColor = rarityTierColor(item.tg_backdrop)
 
   return (
     <div className="poster-card" onClick={onClick} style={{ background: 'var(--bg-card-hover)' }}>

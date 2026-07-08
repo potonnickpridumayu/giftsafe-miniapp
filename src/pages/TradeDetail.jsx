@@ -1,14 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
-import { api, fragmentImage } from '../api/client'
+import { api, fragmentImage, rarityTierColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
 import { fmtGram } from '../utils/format'
-
-const RARITY_COLORS = {
-  Common: '#8888aa', Rare: '#5e9cf5', Epic: '#a855f7', Legendary: '#d4af37',
-}
 
 // Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
 // берётся только с доплаты при принятии оффера.
@@ -138,7 +134,7 @@ export default function TradeDetail() {
     </div>
   )
 
-  const rarityColor = RARITY_COLORS[item.rarity] || '#8888aa'
+  const rarityColor = rarityTierColor(item.tg_backdrop)
   let attrs = {}
   if (item.tg_backdrop) {
     try { attrs = JSON.parse(item.tg_backdrop) } catch { /* без атрибутов */ }

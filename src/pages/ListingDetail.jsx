@@ -1,13 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
-import { api } from '../api/client'
+import { api, rarityTierColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
-
-const RARITY_COLORS = {
-  Common: '#8888aa', Rare: '#5e9cf5', Epic: '#a855f7', Legendary: '#d4af37',
-}
 
 // Должна совпадать с MARKET_FEE на бэкенде и цифрой в Market.jsx.
 // Итоговая комиссия всё равно приходит в ответе покупки — это лишь предпросмотр.
@@ -72,7 +68,7 @@ export default function ListingDetail() {
     </div>
   )
 
-  const rarityColor = RARITY_COLORS[item.rarity] || '#8888aa'
+  const rarityColor = rarityTierColor(item.tg_backdrop)
   let attrs = {}
   if (item.tg_backdrop) {
     try { attrs = JSON.parse(item.tg_backdrop) } catch { /* без атрибутов */ }

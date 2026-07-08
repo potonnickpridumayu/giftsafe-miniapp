@@ -37,6 +37,23 @@ const RARITY_EMOJI = {
   Common: '🎁',
 }
 
+// Цвет "редкости" по реальным данным Telegram (model/backdrop/symbol
+// rarity_per_mille — доли процента, чем меньше число, тем реже атрибут).
+// Строкового item.rarity ("Legendary" и т.п.) от бэкенда никогда не приходит —
+// это поле было только в моках, поэтому раньше все точки были одного серого цвета.
+// Берём самый редкий из трёх атрибутов и делим на 4 уровня.
+export function rarityTierColor(tgBackdrop) {
+  let a
+  try { a = typeof tgBackdrop === 'string' ? JSON.parse(tgBackdrop) : tgBackdrop } catch { a = null }
+  const vals = [a?.model_rarity, a?.backdrop_rarity, a?.symbol_rarity].filter(v => typeof v === 'number')
+  if (!vals.length) return '#a390a0'
+  const min = Math.min(...vals)
+  if (min < 10) return '#f0b47e'   // реже 1% — топ редкость
+  if (min < 30) return '#c084f0'
+  if (min < 80) return '#7f9df5'
+  return '#a390a0'
+}
+
 // Слаг подарка: nft_address, а если пусто (Rubuy Bank) — из имени и номера.
 export function giftSlug(name, number, nftAddress) {
   const num = String(number || '').replace(/[#\s]/g, '')
