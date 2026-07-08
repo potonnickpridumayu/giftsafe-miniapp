@@ -7,6 +7,11 @@ import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
 import { fmtGram } from '../utils/format'
 
+// Комиссия площадки с доплаты при обмене — та же, что и на Маркете (MARKET_FEE
+// на бэкенде). Здесь только для превью «сколько получит владелец лота»,
+// реальная сумма фиксируется на бэкенде в момент принятия оффера.
+const TRADE_FEE_RATE = 0.03
+
 export default function Profile() {
   const navigate = useNavigate()
   const { user, haptic, openLink } = useTelegram()
@@ -212,6 +217,9 @@ export default function Profile() {
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
             +{fmtGram(paidTopUp)} <GramIcon size={10} />
           </span>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+            комиссия при принятии {fmtGram(paidTopUp * TRADE_FEE_RATE)} <GramIcon size={8} />
+          </div>
         </div>
       )}
     </div>
@@ -670,7 +678,12 @@ export default function Profile() {
                         grossTopUp > 0 ? (isFrom ? grossTopUp : netTopUp) : 0,
                         isFrom ? 'доплатил(а)' : 'получил(а)'
                       )}
-                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
+                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>
+                        ⇅
+                        {tx.fee_ton > 0 && (
+                          <span> · комиссия {fmtGram(tx.fee_ton)} <GramIcon size={9} /></span>
+                        )}
+                      </div>
                       {giftSide(
                         counterpart, gotGifts,
                         grossTopUp > 0 ? (isFrom ? netTopUp : grossTopUp) : 0,

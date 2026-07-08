@@ -4,10 +4,15 @@ import { api, fragmentImage } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
+import { fmtGram } from '../utils/format'
 
 const RARITY_COLORS = {
   Common: '#8888aa', Rare: '#5e9cf5', Epic: '#a855f7', Legendary: '#d4af37',
 }
+
+// Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
+// берётся только с доплаты при принятии оффера.
+const FEE_RATE = 0.03
 
 export default function TradeDetail() {
   const { id } = useParams()
@@ -58,6 +63,9 @@ export default function TradeDetail() {
       }
     }
   }
+
+  const topUpNum = parseFloat(String(topUp).replace(',', '.')) || 0
+  const topUpFee = topUpNum * FEE_RATE
 
   const toggleGift = (giftId) => {
     haptic('light')
@@ -322,8 +330,14 @@ export default function TradeDetail() {
             onChange={e => setTopUp(e.target.value.replace(/[^\d.,]/g, ''))}
             placeholder="0"
             inputMode="decimal"
-            style={{ fontSize: 13, marginBottom: 10 }}
+            style={{ fontSize: 13, marginBottom: topUpNum > 0 ? 4 : 10 }}
           />
+          {topUpNum > 0 && (
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
+              Комиссия площадки {Math.round(FEE_RATE * 100)}% ({fmtGram(topUpFee)} <GramIcon size={10} />) с доплаты —
+              владелец лота получит {fmtGram(topUpNum - topUpFee)} <GramIcon size={10} />
+            </div>
+          )}
 
           {proposeError && (
             <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {proposeError}</div>
