@@ -340,8 +340,8 @@ export default function Profile() {
           onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
           style={{
             marginTop: 12, padding: '10px 24px', borderRadius: 999,
-            background: 'linear-gradient(135deg, var(--gold), var(--gold-deep))',
-            color: '#fff', fontWeight: 700, fontSize: 14,
+            background: 'var(--gold-radial)', boxShadow: 'var(--gold-glow)',
+            color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px', fontSize: 14,
             border: 'none', cursor: 'pointer',
           }}
         >
@@ -384,8 +384,8 @@ export default function Profile() {
               onClick={handleDeposit}
               style={{
                 padding: '10px 16px', borderRadius: 999,
-                background: 'linear-gradient(135deg, var(--gold), var(--gold-deep))',
-                color: '#fff', fontWeight: 700,
+                background: 'var(--gold-radial)',
+                color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px',
                 border: 'none', cursor: 'pointer', fontSize: 14,
                 boxShadow: 'var(--gold-glow)',
               }}
@@ -421,8 +421,8 @@ export default function Profile() {
               onClick={handleWithdraw}
               style={{
                 padding: '10px 16px', borderRadius: 999,
-                background: 'linear-gradient(135deg, var(--gold), var(--gold-deep))',
-                color: '#fff', fontWeight: 700,
+                background: 'var(--gold-radial)',
+                color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px',
                 border: 'none', cursor: 'pointer', fontSize: 14,
                 boxShadow: 'var(--gold-glow)',
               }}

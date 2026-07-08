@@ -14,7 +14,8 @@
   --gold-light: #ff5c7c;
   --gold-deep: #e01640;
   --gold-dim: rgba(255, 45, 85, 0.14);
-  --gold-glow: 0 0 18px rgba(255, 45, 85, 0.5);
+  --gold-glow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 45, 85, 0.42), 0 0 52px rgba(255, 45, 85, 0.2);
+  --gold-radial: radial-gradient(130% 170% at 28% 15%, var(--gold-light) 0%, var(--gold) 45%, #b30d38 100%);
 
   --money-1: #f2c14e;
   --money-2: #cf8f2e;
@@ -115,9 +116,20 @@ html, body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-  color: #fff;
+  background: var(--gold-radial);
+  color: #fff5f7;
+  font-weight: 600;
+  letter-spacing: 0.2px;
   box-shadow: var(--gold-glow);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), transparent 55%);
+  pointer-events: none;
 }
 .btn-primary:active { transform: scale(0.96); filter: brightness(1.15); }
 
