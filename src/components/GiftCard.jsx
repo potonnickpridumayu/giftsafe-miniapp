@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { IconMessageDollar } from '@tabler/icons-react'
 import GramIcon from './GramIcon'
 
@@ -21,89 +20,49 @@ export default function GiftCard({ item, onClick, onOffer }) {
   const rarityColor = RARITY_COLORS[item.rarity] || '#a390a0'
 
   return (
-    <div
-      className="card"
-      onClick={onClick}
-      style={{ cursor: 'pointer', padding: 12 }}
-    >
-      {/* Gift Preview */}
-      <div style={{
-        width: '100%',
-        aspectRatio: '1',
-        background: `radial-gradient(circle at 40% 35%, ${rarityColor}2e, var(--bg-card-hover))`,
-        borderRadius: 'var(--radius-md)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 48,
-        marginBottom: 10,
-        border: `1px solid ${rarityColor}30`,
-        position: 'relative',
-        overflow: 'hidden',
+    <div className="poster-card" onClick={onClick} style={{ background: 'var(--bg-card-hover)' }}>
+      <div className="poster-art" style={{
+        background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
       }}>
         {item.image_full || item.image_url
-          ? <img src={item.image_full || item.image_url} alt={item.name}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.emoji}</span>}
-        <span style={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          fontSize: 14,
-          opacity: 0.5,
-        }}>{item.symbol}</span>
-        {item.giftCount > 1 && (
-          <span style={{
-            position: 'absolute', top: 8, left: 8, fontSize: 11, fontWeight: 700,
-            background: 'rgba(0,0,0,0.55)', color: '#fff', borderRadius: 999,
-            padding: '2px 7px',
-          }}>
-            ×{item.giftCount}
-          </span>
-        )}
+          ? <img src={item.image_full || item.image_url} alt={item.name} />
+          : item.emoji}
       </div>
 
-      {/* Info */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{
-            fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-display)',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0,
-          }}>
-            {item.name}
-          </span>
-          {item.number && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
-              {String(item.number).startsWith('#') ? item.number : `#${item.number}`}
-            </span>
-          )}
+      <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
+
+      {item.giftCount > 1 && (
+        <span style={{
+          position: 'absolute', top: 8, right: 8, fontSize: 11, fontWeight: 700,
+          background: 'rgba(0,0,0,0.55)', color: '#fff', borderRadius: 999,
+          padding: '2px 7px', zIndex: 1,
+        }}>
+          ×{item.giftCount}
+        </span>
+      )}
+
+      {onOffer && (
+        <button
+          className="poster-offer-btn"
+          onClick={(e) => { e.stopPropagation(); onOffer(item) }}
+          aria-label="Предложить цену"
+        >
+          <IconMessageDollar size={13} stroke={2} />
+        </button>
+      )}
+
+      <div className="poster-scrim">
+        <div className="poster-name">{item.name}</div>
+        <div className="poster-sub">
+          {item.number
+            ? (String(item.number).startsWith('#') ? item.number : `#${item.number}`)
+            : timeAgo(item.listed_at)}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {item.price != null
-              ? <span className="price price-sm">{item.price} <GramIcon size={12} /></span>
-              : <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {item.owner ? `@${item.owner}` : 'На обмен'}
-                </span>}
-            {onOffer && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onOffer(item) }}
-                aria-label="Предложить цену"
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                  background: 'var(--bg-card-hover)', border: '1px solid var(--border)',
-                  color: 'var(--gold)', cursor: 'pointer', padding: 0,
-                }}
-              >
-                <IconMessageDollar size={13} stroke={2} />
-              </button>
-            )}
-          </div>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            {timeAgo(item.listed_at)}
-          </span>
-        </div>
+        {item.price != null
+          ? <div className="poster-price">{item.price} <GramIcon size={11} /></div>
+          : <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
+              {item.owner ? `@${item.owner}` : 'На обмен'}
+            </div>}
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconAdjustments } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
+import BrandLogo from '../components/BrandLogo'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 
@@ -160,21 +161,9 @@ export default function Market() {
   return (
     <div className="page">
       {/* Header */}
-      <div style={{ marginBottom: 16 }}>
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 26,
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          marginBottom: 4,
-        }}>
-          Rubuy <span style={{
-            background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>Маркет</span>
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <BrandLogo />
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           {loading ? 'Загрузка…' : `${listings.length} ${plural(listings.length)}`}
         </p>
       </div>
@@ -255,7 +244,7 @@ export default function Market() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: 12,
+          gap: 9,
         }}>
           {items.map(item => (
             <GiftCard

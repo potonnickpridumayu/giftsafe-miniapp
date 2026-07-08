@@ -5,6 +5,7 @@ import { api, fragmentImage } from '../api/client'
 import { TonConnectButton } from '@tonconnect/ui-react';
 import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
+import BrandLogo from '../components/BrandLogo'
 
 
 const RARITY_COLORS = {
@@ -137,10 +138,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
     <div className="card" style={{ padding: '14px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: canTrade ? 10 : 0 }}>
         <div style={{
-          width: 52, height: 52,
+          position: 'relative',
+          width: 64, height: 64,
           borderRadius: 'var(--radius-md)',
-          background: `${rarityColor}18`,
-          border: `1px solid ${rarityColor}30`,
+          background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 26, flexShrink: 0, overflow: 'hidden',
         }}>
@@ -150,6 +151,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             backdrop={gift.tg_backdrop}
             pad="17%"
           />
+          <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -415,31 +417,18 @@ export default function Portfolio() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           gap: 12, marginBottom: 16,
         }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, margin: 0 }}>
-            Портфель
-          </h1>
+          <BrandLogo />
           <TonConnectButton />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
           {[
             { label: 'Подарков', value: gifts === null ? '…' : gifts.length },
             { label: 'На продаже', value: gifts === null ? '…' : onSaleCount },
           ].map(stat => (
-            <div key={stat.label} style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 10px',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{stat.label}</div>
-              <div style={{
-                fontFamily: 'var(--font-display)', fontWeight: 700,
-                fontSize: 15, color: 'var(--gold)',
-              }}>
-                {stat.value}
-              </div>
+            <div key={stat.label} className="stat-tile">
+              <div className="stat-tile-value">{stat.value}</div>
+              <div className="stat-tile-label">{stat.label}</div>
             </div>
           ))}
         </div>

@@ -5,7 +5,9 @@ import { api, fragmentImage, giftSlug } from '../api/client'
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
+import BrandLogo from '../components/BrandLogo'
 import { fmtGram } from '../utils/format'
+import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight } from '@tabler/icons-react'
 
 // Комиссия площадки с доплаты при обмене — та же, что и на Маркете (MARKET_FEE
 // на бэкенде). Здесь только для превью «сколько получит владелец лота»,
@@ -277,22 +279,27 @@ export default function Profile() {
 
   return (
     <div className="page">
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 20, letterSpacing: '-0.5px' }}>
-        Профиль
-      </h1>
+      <div style={{ marginBottom: 16 }}>
+        <BrandLogo />
+      </div>
 
-      {/* User card */}
+      {/* Hero: аватар + баланс в одной карточке с мягкими световыми пятнами на фоне */}
       <div style={{
+        position: 'relative',
         background: 'var(--bg-card)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-xl)',
-        padding: 20,
+        padding: '22px 20px',
         marginBottom: 16,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 10,
+        overflow: 'hidden',
+        textAlign: 'center',
       }}>
+        <div style={{ position: 'absolute', width: 150, height: 150, borderRadius: '50%', background: 'var(--gold)', opacity: 0.16, filter: 'blur(38px)', top: -55, left: -35, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', background: 'var(--money-1)', opacity: 0.14, filter: 'blur(32px)', bottom: -40, right: -20, pointerEvents: 'none' }} />
         {user?.photo_url ? (
           <img
             src={user.photo_url}
@@ -318,18 +325,8 @@ export default function Profile() {
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>{name}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 2 }}>{username}</div>
         </div>
-      </div>
 
-      {/* Balance */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--gold-dim), var(--bg-card))',
-        border: '1px solid var(--border-active)',
-        borderRadius: 'var(--radius-xl)',
-        padding: 20,
-        marginBottom: 16,
-        textAlign: 'center',
-      }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, letterSpacing: 0.5 }}>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, letterSpacing: 0.5 }}>
           БАЛАНС
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700 }}>
@@ -443,19 +440,11 @@ export default function Profile() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
         {stats.map(s => (
-          <div key={s.label} style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '14px 10px',
-            textAlign: 'center',
-          }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--text-primary)', marginBottom: 4 }}>
-              {s.value}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.label}</div>
+          <div key={s.label} className="stat-tile">
+            <div className="stat-tile-value" style={{ fontSize: 18 }}>{s.value}</div>
+            <div className="stat-tile-label">{s.label}</div>
           </div>
         ))}
       </div>
@@ -463,12 +452,12 @@ export default function Profile() {
       {/* Menu */}
       {[
         {
-          icon: '🔗', label: 'Рефералы',
+          icon: <IconUsers size={18} stroke={1.8} />, label: 'Рефералы',
           sub: 'Приглашайте друзей и зарабатывайте',
           onClick: () => { haptic('light'); navigate('/referral') },
         },
         {
-          icon: '🔄', label: 'Офферы',
+          icon: <IconMessageCircleDollar size={18} stroke={1.8} />, label: 'Офферы',
           sub: offers
             ? `${offers.incoming.length} входящих · ${offers.outgoing.length} исходящих`
             : 'Предложения обмена',
@@ -476,14 +465,14 @@ export default function Profile() {
           onClick: () => { haptic('light'); setShowOffers(v => !v) },
         },
         {
-          icon: '📊', label: 'История сделок',
+          icon: <IconHistory size={18} stroke={1.8} />, label: 'История сделок',
           sub: totalDeals > txs.length
             ? `${totalDeals} завершённых транзакций (показаны последние ${txs.length})`
             : `${totalDeals} завершённых транзакций`,
           onClick: () => { haptic('light'); setShowHistory(v => !v) },
         },
         {
-          icon: '❓', label: 'Поддержка',
+          icon: <IconHelpCircle size={18} stroke={1.8} />, label: 'Поддержка',
           sub: `Написать в @${SUPPORT_USERNAME}`,
           onClick: () => {
             haptic('light')
@@ -497,30 +486,23 @@ export default function Profile() {
         },
       ].map((item, i) => (
         <div key={i}>
-          <div
-            className="card"
-            style={{ padding: '14px 16px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-            onClick={item.onClick}
-          >
-            <span style={{ fontSize: 20, width: 32, textAlign: 'center' }}>{item.icon}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 500 }}>{item.label}</div>
+          <button className="list-row" onClick={item.onClick}>
+            <span className="list-row-icon">{item.icon}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{item.label}</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{item.sub}</div>
             </div>
-            {item.badge > 0 && (
-              <span style={{
-                background: 'var(--gold)', color: '#1a0f14', fontSize: 11, fontWeight: 700,
-                borderRadius: 999, minWidth: 18, height: 18, padding: '0 5px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {item.badge}
-              </span>
-            )}
-            <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>
-              {item.label === 'История сделок' ? (showHistory ? '⌄' : '›')
-                : item.label === 'Офферы' ? (showOffers ? '⌄' : '›') : '›'}
-            </span>
-          </div>
+            {item.badge > 0 && <span className="list-row-badge">{item.badge}</span>}
+            <IconChevronRight
+              size={16}
+              className="list-row-chevron"
+              style={{
+                transform: (item.label === 'История сделок' && showHistory) || (item.label === 'Офферы' && showOffers)
+                  ? 'rotate(90deg)' : 'none',
+                transition: 'transform 0.15s',
+              }}
+            />
+          </button>
           {item.label === 'Офферы' && showOffers && (
             <div style={{ marginBottom: 8 }}>
               {offerError && (
