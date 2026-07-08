@@ -168,12 +168,9 @@ export default function TradeDetail() {
             </div>
           </div>
 
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
-            {item.name} {item.number ? <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{item.number}</span> : null}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, marginBottom: item.gift_link ? 10 : 20 }}>
+            {item.name} {item.number ? <span style={{ fontWeight: 500 }}>{item.number}</span> : null}
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: item.gift_link ? 10 : 20 }}>
-            Коллекция: {item.collection || '—'}
-          </p>
 
           {item.gift_link && (
             <button
