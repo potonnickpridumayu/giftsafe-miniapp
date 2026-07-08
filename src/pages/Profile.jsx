@@ -227,6 +227,7 @@ export default function Profile() {
 
   const dbUser = profile?.user || null
   const txs = profile?.transactions || []
+  const totalDeals = profile?.total_deals ?? txs.length
   const balance = dbUser?.balance_ton ?? 0
   const earned = dbUser?.total_earned ?? 0
   const spent = dbUser?.total_spent ?? 0
@@ -236,7 +237,7 @@ export default function Profile() {
 
   // Реальные метрики из БД (total_earned / total_spent обновляются при каждой сделке)
   const stats = [
-    { label: 'Сделок', value: loading ? '…' : String(txs.length) },
+    { label: 'Сделок', value: loading ? '…' : String(totalDeals) },
     { label: 'Заработано', value: loading ? '…' : <span className="money-text">{fmtGram(earned)}</span> },
     { label: 'Потрачено', value: loading ? '…' : fmtGram(spent) },
   ]
@@ -443,7 +444,9 @@ export default function Profile() {
         },
         {
           icon: '📊', label: 'История сделок',
-          sub: `${txs.length} завершённых транзакций`,
+          sub: totalDeals > txs.length
+            ? `${totalDeals} завершённых транзакций (показаны последние ${txs.length})`
+            : `${totalDeals} завершённых транзакций`,
           onClick: () => { haptic('light'); setShowHistory(v => !v) },
         },
         {
