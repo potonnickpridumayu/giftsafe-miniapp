@@ -288,13 +288,13 @@ export default function TradeDetail() {
       ) : picking ? (
         <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>
-            Выбери свои подарки для обмена {selectedGiftIds.size > 0 ? `(${selectedGiftIds.size})` : ''}
+            Выберите подарки для обмена {selectedGiftIds.size > 0 ? `(${selectedGiftIds.size})` : ''}
           </div>
           {myGifts === null ? (
             <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Загрузка…</div>
           ) : myGifts.length === 0 ? (
             <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              Нет свободных подарков для обмена (все на продаже/обмене или портфель пуст).
+              Нет свободных подарков для обмена (все на продаже/в обмене, либо портфель пуст).
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto', marginBottom: 12 }}>
@@ -344,7 +344,7 @@ export default function TradeDetail() {
           )}
           {myGifts && myGifts.length > 0 && selectedGiftIds.size === 0 && (
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-              Сначала выбери один или несколько подарков выше
+              Сначала выберите один или несколько подарков выше
             </div>
           )}
 

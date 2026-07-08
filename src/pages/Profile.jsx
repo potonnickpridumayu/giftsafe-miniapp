@@ -50,7 +50,7 @@ export default function Profile() {
   if (!amount || amount < 0.1) { setWithdrawStatus('Минимум 0.1 GRAM'); return }
   if (amount > balance) { setWithdrawStatus('Недостаточно средств'); return }
   if (!walletAddress) {
-    setWithdrawStatus('Сначала подключи кошелёк')
+    setWithdrawStatus('Сначала подключите кошелёк')
     tonConnectUI.openModal()
     return
   }
@@ -60,10 +60,10 @@ export default function Profile() {
     try { haptic('medium') } catch {}
     setShowWithdraw(false)
     setWithdrawAmount('')
-    setWithdrawStatus('Отправлено! GRAM придут через ~15 секунд')
+    setWithdrawStatus('Отправлено! GRAM придут в течение 15 секунд')
     await reloadProfile()
   } catch (e) {
-    setWithdrawStatus(e.message || 'Что-то пошло не так, попробуй ещё раз')
+    setWithdrawStatus(e.message || 'Что-то пошло не так, попробуйте ещё раз')
     // При 502 баланс уже списан на бэке (pending) — показываем актуальный,
     // чтобы юзер видел «зависшую» сумму до подтверждения/возврата.
     await reloadProfile()
@@ -74,7 +74,7 @@ export default function Profile() {
     const amount = parseFloat(String(depositAmount).replace(',', '.'))
     if (!amount || amount < 0.1) { setDepositStatus('Минимум 0.1 GRAM'); return }
     if (!walletAddress) {
-      setDepositStatus('Сначала подключи кошелёк')
+      setDepositStatus('Сначала подключите кошелёк')
       tonConnectUI.openModal()
       return
     }
@@ -118,9 +118,9 @@ export default function Profile() {
       if (m.includes('reject') || m.includes('Reject')) {
         setDepositStatus('Отменено')
       } else if (m.includes('was not sent') || m.includes('TON_CONNECT')) {
-        setDepositStatus('Не удалось отправить — открой Tonkeeper и попробуй ещё раз')
+        setDepositStatus('Не удалось отправить — откройте Tonkeeper и попробуйте ещё раз')
       } else {
-        setDepositStatus('Что-то пошло не так, попробуй ещё раз')
+        setDepositStatus('Что-то пошло не так, попробуйте ещё раз')
       }
     }
   }

@@ -158,7 +158,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
         {gift.on_sale ? (
           <span className="badge badge-gold" style={{ fontSize: 11, flexShrink: 0 }}>На продаже</span>
         ) : gift.on_trade ? (
-          <span className="badge badge-gold" style={{ fontSize: 11, flexShrink: 0 }}>На обмене</span>
+          <span className="badge badge-gold" style={{ fontSize: 11, flexShrink: 0 }}>В обмене</span>
         ) : null}
       </div>
 
@@ -441,11 +441,11 @@ export default function Portfolio() {
         {tradePicker && (
           <div className="card" style={{ padding: '14px 16px', marginTop: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>
-              Выбери подарки для обмена {tradeSelected.size > 0 ? `(${tradeSelected.size})` : ''}
+              Выберите подарки для обмена {tradeSelected.size > 0 ? `(${tradeSelected.size})` : ''}
             </div>
             {tradeableGifts.length === 0 ? (
               <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                Нет свободных подарков (все на продаже/обмене).
+                Нет свободных подарков (все на продаже/в обмене).
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto', marginBottom: 12 }}>

@@ -275,7 +275,7 @@ export default function ListingDetail() {
             <div style={{ fontSize: 48, marginBottom: 8 }}>📤</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Лот снят</div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-              Подарок остался в вашем портфеле — можно перевыставить или вывести
+              Подарок снова в вашем портфеле
             </p>
             <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/portfolio')}>
               В портфель

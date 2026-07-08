@@ -236,7 +236,7 @@ export default function Market() {
         <div className="empty-state">
           <div className="empty-icon">📭</div>
           <div className="empty-title">Пока нет объявлений</div>
-          <div className="empty-desc">Будь первым — выставь свой подарок!</div>
+          <div className="empty-desc">Будьте первым — выставьте свой подарок!</div>
           <button
             className="btn btn-primary"
             onClick={() => { haptic('medium'); navigate('/sell') }}
