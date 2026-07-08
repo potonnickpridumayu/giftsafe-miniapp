@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftSlug } from '../api/client'
@@ -11,6 +11,39 @@ import { fmtGram } from '../utils/format'
 // на бэкенде). Здесь только для превью «сколько получит владелец лота»,
 // реальная сумма фиксируется на бэкенде в момент принятия оффера.
 const TRADE_FEE_RATE = 0.03
+
+// Кнопка +/- для суммы: тап делает один шаг, зажатие повторяет шаг
+// каждые 80мс после первой паузы в 400мс.
+function HoldStepButton({ onStep, style, children }) {
+  const timers = useRef({ timeout: null, interval: null })
+
+  const stop = () => {
+    clearTimeout(timers.current.timeout)
+    clearInterval(timers.current.interval)
+    timers.current.timeout = null
+    timers.current.interval = null
+  }
+  const start = () => {
+    onStep()
+    timers.current.timeout = setTimeout(() => {
+      timers.current.interval = setInterval(onStep, 80)
+    }, 400)
+  }
+
+  useEffect(() => stop, [])
+
+  return (
+    <button
+      onPointerDown={e => { e.preventDefault(); start() }}
+      onPointerUp={stop}
+      onPointerLeave={stop}
+      onPointerCancel={stop}
+      style={style}
+    >
+      {children}
+    </button>
+  )
+}
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -326,10 +359,10 @@ export default function Profile() {
         </button>
         {showDeposit && (
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
-              <button
-              onClick={() => setDepositAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
-            >−</button>
+              <HoldStepButton
+              onStep={() => setDepositAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
+            >−</HoldStepButton>
             <input
               type="text"
               inputMode="decimal"
@@ -343,10 +376,10 @@ export default function Profile() {
                 outline: 'none',
               }}
             />
-            <button
-              onClick={() => setDepositAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
-            >+</button>
+            <HoldStepButton
+              onStep={() => setDepositAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
+            >+</HoldStepButton>
             <button
               onClick={handleDeposit}
               style={{
@@ -363,10 +396,10 @@ export default function Profile() {
         )}
         {showWithdraw && (
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
-            <button
-              onClick={() => setWithdrawAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
-            >−</button>
+            <HoldStepButton
+              onStep={() => setWithdrawAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
+            >−</HoldStepButton>
             <input
               type="text"
               inputMode="decimal"
@@ -380,10 +413,10 @@ export default function Profile() {
                 outline: 'none',
               }}
             />
-            <button
-              onClick={() => setWithdrawAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}
-            >+</button>
+            <HoldStepButton
+              onStep={() => setWithdrawAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
+              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
+            >+</HoldStepButton>
             <button
               onClick={handleWithdraw}
               style={{
