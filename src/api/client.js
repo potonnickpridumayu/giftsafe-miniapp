@@ -37,21 +37,21 @@ const RARITY_EMOJI = {
   Common: '🎁',
 }
 
-// Цвет "редкости" по реальным данным Telegram (model/backdrop/symbol
-// rarity_per_mille — доли процента, чем меньше число, тем реже атрибут).
-// Строкового item.rarity ("Legendary" и т.п.) от бэкенда никогда не приходит —
-// это поле было только в моках, поэтому раньше все точки были одного серого цвета.
-// Берём самый редкий из трёх атрибутов и делим на 4 уровня.
-export function rarityTierColor(tgBackdrop) {
-  let a
-  try { a = typeof tgBackdrop === 'string' ? JSON.parse(tgBackdrop) : tgBackdrop } catch { a = null }
-  const vals = [a?.model_rarity, a?.backdrop_rarity, a?.symbol_rarity].filter(v => typeof v === 'number')
-  if (!vals.length) return '#a390a0'
-  const min = Math.min(...vals)
-  if (min < 10) return '#f0b47e'   // реже 1% — топ редкость
-  if (min < 30) return '#c084f0'
-  if (min < 80) return '#7f9df5'
-  return '#a390a0'
+// Точка-акцент над карточкой подарка: раньше бралась из строкового item.rarity
+// ("Legendary" и т.п.), которое бэкенд никогда не присылает (было только в
+// моках) — все точки были одного серого цвета. И попытка вывести цвет из
+// реальных rarity_per_mille (model/backdrop/symbol) на практике тоже не дала
+// заметного разброса. Экспериментальный вариант: стабильный (не мигающий на
+// каждый рендер) псевдослучайный цвет из 8 штук — хэш от id самого подарка.
+const ACCENT_PALETTE = [
+  '#f0b47e', '#c084f0', '#7f9df5', '#a390a0',
+  '#ff5c7c', '#3ddc84', '#ff6b5e', '#4fd1c5',
+]
+export function giftAccentColor(id) {
+  const s = String(id || '')
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0
+  return ACCENT_PALETTE[Math.abs(h) % ACCENT_PALETTE.length]
 }
 
 // Слаг подарка: nft_address, а если пусто (Rubuy Bank) — из имени и номера.

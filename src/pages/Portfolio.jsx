@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
-import { api, fragmentImage, rarityTierColor } from '../api/client'
+import { api, fragmentImage, giftAccentColor } from '../api/client'
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { IconPencil } from '@tabler/icons-react'
 import GramIcon from '../components/GramIcon'
@@ -44,7 +44,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  const rarityColor = rarityTierColor(gift.tg_backdrop)
+  const rarityColor = giftAccentColor(gift.gift_id)
   const onChain = Boolean(gift.nft_address)
   const isTgGift = Boolean(gift.tg_owned_gift_id)
   const canTrade = onChain || isTgGift
@@ -181,59 +181,61 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       </div>
 
       {canTrade && (
-        <div style={{ display: 'flex', gap: 5 }}>
-          {gift.on_sale ? (
-            <>
-              <button
-                className="btn btn-ghost"
-                style={rowBtnStyle}
-                onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}
-              >
-                <IconPencil size={12} stroke={2} style={{ flexShrink: 0 }} />
-                <span style={ellipsisStyle}>{panel === 'editPrice' ? 'Скрыть' : 'Изменить цену'}</span>
-              </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {gift.on_sale ? (
+              <>
+                <button
+                  className="btn btn-ghost"
+                  style={rowBtnStyle}
+                  onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}
+                >
+                  <IconPencil size={12} stroke={2} style={{ flexShrink: 0 }} />
+                  <span style={ellipsisStyle}>{panel === 'editPrice' ? 'Скрыть' : 'Изменить цену'}</span>
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  style={rowBtnStyle}
+                  disabled={busy}
+                  onClick={delist}
+                >
+                  <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с продажи'}</span>
+                </button>
+              </>
+            ) : gift.on_trade ? (
               <button
                 className="btn btn-ghost"
                 style={rowBtnStyle}
                 disabled={busy}
-                onClick={delist}
+                onClick={cancelTrade}
               >
-                <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с продажи'}</span>
+                <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с обмена'}</span>
               </button>
-            </>
-          ) : gift.on_trade ? (
-            <button
-              className="btn btn-ghost"
-              style={rowBtnStyle}
-              disabled={busy}
-              onClick={cancelTrade}
-            >
-              <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с обмена'}</span>
-            </button>
-          ) : (
-            <>
-              <button
-                className="btn btn-primary"
-                style={rowBtnStyle}
-                onClick={() => togglePanel('sell')}
-              >
-                <span style={ellipsisStyle}>{panel === 'sell' ? 'Скрыть' : 'Продать'}</span>
-              </button>
-              <button
-                className="btn btn-ghost"
-                style={rowBtnStyle}
-                onClick={() => { haptic('light'); onStartTrade(gift.gift_id) }}
-              >
-                <span style={ellipsisStyle}>Обменять</span>
-              </button>
-            </>
-          )}
+            ) : (
+              <>
+                <button
+                  className="btn btn-primary"
+                  style={rowBtnStyle}
+                  onClick={() => togglePanel('sell')}
+                >
+                  <span style={ellipsisStyle}>{panel === 'sell' ? 'Скрыть' : 'Продать'}</span>
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  style={rowBtnStyle}
+                  onClick={() => { haptic('light'); onStartTrade(gift.gift_id) }}
+                >
+                  <span style={ellipsisStyle}>Обменять</span>
+                </button>
+              </>
+            )}
+          </div>
           <button
-            className="btn btn-ghost"
-            style={rowBtnStyle}
+            className="btn btn-ghost btn-full"
+            style={{ fontSize: 12 }}
             onClick={() => togglePanel('withdraw')}
           >
-            <span style={ellipsisStyle}>{panel === 'withdraw' ? 'Скрыть' : 'Вывести'}</span>
+            {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
           </button>
         </div>
       )}

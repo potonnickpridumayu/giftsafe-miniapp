@@ -48,6 +48,14 @@ export default function Trade() {
         </p>
       </div>
 
+      <button
+        className="btn btn-primary btn-full"
+        onClick={() => { haptic('medium'); navigate('/portfolio') }}
+        style={{ marginBottom: 16 }}
+      >
+        + Выставить на обмен
+      </button>
+
       <div style={{ marginBottom: 16 }}>
         <input
           className="input"

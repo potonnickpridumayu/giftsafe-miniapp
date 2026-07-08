@@ -1,6 +1,6 @@
 import { IconMessageDollar } from '@tabler/icons-react'
 import GramIcon from './GramIcon'
-import { rarityTierColor } from '../api/client'
+import { giftAccentColor } from '../api/client'
 
 function timeAgo(ts) {
   const diff = (Date.now() - ts) / 1000
@@ -11,7 +11,7 @@ function timeAgo(ts) {
 }
 
 export default function GiftCard({ item, onClick, onOffer }) {
-  const rarityColor = rarityTierColor(item.tg_backdrop)
+  const rarityColor = giftAccentColor(item.gift_id ?? item.id)
 
   return (
     <div className="poster-card" onClick={onClick} style={{ background: 'var(--bg-card-hover)' }}>

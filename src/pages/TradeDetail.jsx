@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
-import { api, fragmentImage, rarityTierColor } from '../api/client'
+import { api, fragmentImage, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
@@ -134,7 +134,7 @@ export default function TradeDetail() {
     </div>
   )
 
-  const rarityColor = rarityTierColor(item.tg_backdrop)
+  const rarityColor = giftAccentColor(item.gift_id ?? item.id)
   let attrs = {}
   if (item.tg_backdrop) {
     try { attrs = JSON.parse(item.tg_backdrop) } catch { /* без атрибутов */ }

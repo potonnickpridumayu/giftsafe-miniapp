@@ -344,7 +344,7 @@ html, body {
 /* ===== POSTER CARD (постер-плашка подарка на весь кадр) ===== */
 .poster-card {
   position: relative;
-  aspect-ratio: 0.82;
+  aspect-ratio: 1;
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
