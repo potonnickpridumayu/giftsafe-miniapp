@@ -102,6 +102,20 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
     }
   }
 
+  const cancelTrade = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await api.cancelTrade(gift.trade_id)
+      haptic('medium')
+      setBusy(false)
+      onListed(gift.gift_id)
+    } catch (e) {
+      setError(e.message)
+      setBusy(false)
+    }
+  }
+
   const savePrice = async () => {
     const p = parseFloat(String(newPrice).replace(',', '.'))
     if (!p || p <= 0) { setError('Введите цену больше нуля'); return }
@@ -182,7 +196,16 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
                 {busy ? '⏳' : 'Снять с продажи'}
               </button>
             </>
-          ) : gift.on_trade ? null : (
+          ) : gift.on_trade ? (
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: 12, padding: '8px 12px' }}
+              disabled={busy}
+              onClick={cancelTrade}
+            >
+              {busy ? '⏳' : 'Снять с обмена'}
+            </button>
+          ) : (
             <>
               <button
                 className="btn btn-primary"
