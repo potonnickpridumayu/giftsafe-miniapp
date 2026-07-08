@@ -603,9 +603,10 @@ export default function Profile() {
                   const counterpart = isFrom ? tx.to_username : tx.from_username
                   const gaveGifts = isFrom ? (tx.offered_gifts || []) : (tx.target_gifts || [])
                   const gotGifts = isFrom ? (tx.target_gifts || []) : (tx.offered_gifts || [])
-                  const topUp = tx.top_up_ton || 0
+                  const grossTopUp = tx.top_up_ton || 0
+                  const netTopUp = grossTopUp - (tx.fee_ton || 0)
                   const myUsername = user?.username || 'вы'
-                  const giftSide = (username, gifts, paidTopUp) => (
+                  const giftSide = (username, gifts, amount, label) => (
                     <div>
                       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
                         @{username}
@@ -640,11 +641,11 @@ export default function Profile() {
                           )
                         })}
                       </div>
-                      {paidTopUp > 0 && (
+                      {amount > 0 && (
                         <div style={{ textAlign: 'right', marginTop: 4 }}>
-                          <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>доплатил(а) </span>
+                          <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{label} </span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
-                            +{fmtGram(paidTopUp)} <GramIcon size={10} />
+                            +{fmtGram(amount)} <GramIcon size={10} />
                           </span>
                         </div>
                       )}
@@ -664,9 +665,17 @@ export default function Profile() {
                           </span>
                         )}
                       </div>
-                      {giftSide(myUsername, gaveGifts, isFrom ? topUp : 0)}
+                      {giftSide(
+                        myUsername, gaveGifts,
+                        grossTopUp > 0 ? (isFrom ? grossTopUp : netTopUp) : 0,
+                        isFrom ? 'доплатил(а)' : 'получил(а)'
+                      )}
                       <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
-                      {giftSide(counterpart, gotGifts, !isFrom ? topUp : 0)}
+                      {giftSide(
+                        counterpart, gotGifts,
+                        grossTopUp > 0 ? (isFrom ? netTopUp : grossTopUp) : 0,
+                        isFrom ? 'получил(а)' : 'доплатил(а)'
+                      )}
                     </div>
                   )
                 }
