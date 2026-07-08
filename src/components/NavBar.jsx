@@ -57,7 +57,7 @@ export default function NavBar() {
               stroke={1.8}
               style={{
                 color: active ? 'var(--gold)' : 'var(--text-muted)',
-                filter: active ? 'drop-shadow(0 0 8px rgba(255, 45, 85, 0.8))' : 'none',
+                filter: active ? 'drop-shadow(0 0 4px rgba(255, 45, 85, 0.55)) drop-shadow(0 0 14px rgba(255, 45, 85, 0.35))' : 'none',
                 transition: 'color 0.2s, filter 0.2s',
               }}
             />

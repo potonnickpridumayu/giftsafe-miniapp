@@ -20,7 +20,8 @@
   --money-1: #f2c14e;
   --money-2: #cf8f2e;
   --money-text: #241505;
-  --money-glow: 0 0 12px rgba(242, 193, 78, 0.35);
+  --money-glow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 0 10px rgba(242, 193, 78, 0.3), 0 0 26px rgba(242, 193, 78, 0.16);
+  --money-radial: radial-gradient(130% 170% at 28% 15%, #f7d478 0%, var(--money-1) 45%, var(--money-2) 100%);
 
   --text-primary: #faf3f5;
   --text-secondary: #8d7580;
@@ -161,8 +162,9 @@ html, body {
   white-space: nowrap;
 }
 .chip.active {
-  background: var(--gold);
-  color: #fff;
+  background: var(--gold-radial);
+  color: #fff5f7;
+  font-weight: 600;
   border-color: transparent;
   box-shadow: var(--gold-glow);
 }
@@ -211,13 +213,22 @@ html, body {
   font-family: var(--font-display);
   font-weight: 700;
   color: var(--money-text);
-  background: linear-gradient(135deg, var(--money-1), var(--money-2));
+  background: var(--money-radial);
   border-radius: 999px;
   padding: 5px 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   box-shadow: var(--money-glow);
+  position: relative;
+  overflow: hidden;
+}
+.price::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent 55%);
+  pointer-events: none;
 }
 
 /* Золотой градиентный текст для крупных сумм (баланс, заработано).
