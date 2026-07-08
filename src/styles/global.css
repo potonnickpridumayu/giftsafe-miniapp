@@ -330,18 +330,6 @@ html, body {
 }
 
 /* ===== BRAND MARK (гранёный рубин) ===== */
-.brand-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 16px rgba(255, 45, 85, 0.28);
-  flex-shrink: 0;
-}
 .brand-word {
   font-family: var(--font-display);
   font-weight: 700;

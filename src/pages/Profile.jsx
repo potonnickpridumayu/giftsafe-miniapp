@@ -333,27 +333,29 @@ export default function Profile() {
           <span className="money-text">{loading ? '…' : fmtGram(balance)}</span>
           {!loading && <GramIcon size={24} style={{ marginLeft: 6, verticalAlign: '-3px' }} />}
         </div>
-        <button
-          onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
-          style={{
-            marginTop: 12, padding: '10px 24px', borderRadius: 999,
-            background: 'var(--gold-radial)', boxShadow: 'var(--gold-glow)',
-            color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px', fontSize: 14,
-            border: 'none', cursor: 'pointer',
-          }}
-        >
-          Пополнить
-        </button>
-        <button
-          onClick={() => { haptic('light'); setShowWithdraw(v => !v); setShowDeposit(false); setWithdrawStatus(null); setWithdrawAmount('0.1') }}
-          style={{
-            marginTop: 12, marginLeft: 8, padding: '10px 24px', borderRadius: 999,
-            background: 'transparent', color: 'var(--gold)', fontWeight: 700, fontSize: 14,
-            border: '1px solid var(--gold)', cursor: 'pointer',
-          }}
-        >
-          Вывести
-        </button>
+        <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 14 }}>
+          <button
+            onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
+            style={{
+              flex: 1, padding: '11px 14px', borderRadius: 999,
+              background: 'var(--gold-radial)', boxShadow: 'var(--gold-glow)',
+              color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px', fontSize: 14,
+              border: 'none', cursor: 'pointer',
+            }}
+          >
+            Пополнить
+          </button>
+          <button
+            onClick={() => { haptic('light'); setShowWithdraw(v => !v); setShowDeposit(false); setWithdrawStatus(null); setWithdrawAmount('0.1') }}
+            style={{
+              flex: 1, padding: '11px 14px', borderRadius: 999,
+              background: 'transparent', color: 'var(--gold)', fontWeight: 700, fontSize: 14,
+              border: '1px solid var(--gold)', cursor: 'pointer',
+            }}
+          >
+            Вывести
+          </button>
+        </div>
         {showDeposit && (
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
               <HoldStepButton
