@@ -431,10 +431,10 @@ export default function Profile() {
             </button>
           </div>
         )}
-        {depositStatus && (
+        {showDeposit && depositStatus && (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{depositStatus}</div>
         )}
-        {withdrawStatus && (
+        {showWithdraw && withdrawStatus && (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{withdrawStatus}</div>
         )}
         {error && (
