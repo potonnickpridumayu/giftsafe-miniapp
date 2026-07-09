@@ -144,6 +144,7 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
         ? <img src={image} alt="" style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', transform: `scale(${imageScale})`,
+            borderRadius: imageScale < 1 ? `calc(var(--radius-md) * ${imageScale})` : 0,
             maskImage: mask, WebkitMaskImage: mask,
             maskSize: '100% 100%', WebkitMaskSize: '100% 100%',
             maskRepeat: 'no-repeat', WebkitMaskRepeat: 'no-repeat',
