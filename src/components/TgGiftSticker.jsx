@@ -22,7 +22,7 @@ const HOLE = 'radial-gradient(circle at 50% 46%, transparent 34%, rgba(0,0,0,0.4
  * а узор на всей остальной площади остаётся 1-в-1 как на статичной карточке —
  * шва не видно. lottie грузится ЛЕНИВО (при первом проигрыше).
  */
-export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%', imageInset = '0%', autoPlay = false }) {
+export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%', autoPlay = false }) {
   const [playing, setPlaying] = useState(false)
   const [maskUrl, setMaskUrl] = useState('')
   const instRef = useRef(null)
@@ -30,8 +30,6 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
   const loadingRef = useRef(false)
 
   const padFrac = (parseFloat(pad) || 0) / 100
-  const imageInsetFrac = (parseFloat(imageInset) || 0) / 100
-  const imageSizePct = `${(1 - imageInsetFrac * 2) * 100}%`
 
   let bd = null
   if (backdrop) {
@@ -144,7 +142,7 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
     >
       {image
         ? <img src={image} alt="" style={{
-            position: 'absolute', inset: imageInset, width: imageSizePct, height: imageSizePct,
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover',
             maskImage: mask, WebkitMaskImage: mask,
             maskSize: '100% 100%', WebkitMaskSize: '100% 100%',

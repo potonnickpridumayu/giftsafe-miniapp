@@ -154,7 +154,6 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
           stickerId={gift.tg_sticker}
           backdrop={gift.tg_backdrop}
           pad="17%"
-          imageInset="10%"
         />
         <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
         {gift.on_sale ? (
