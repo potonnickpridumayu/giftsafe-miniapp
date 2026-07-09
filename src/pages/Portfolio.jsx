@@ -230,15 +230,14 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
               </>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <button
               className="btn btn-ghost"
-              style={rowBtnStyle}
+              style={{ ...rowBtnStyle, flex: 'none', width: 'calc(50% - 3px)' }}
               onClick={() => togglePanel('withdraw')}
             >
               <span style={ellipsisStyle}>{panel === 'withdraw' ? 'Скрыть' : 'Вывести'}</span>
             </button>
-            <div style={{ flex: 1 }} />
           </div>
         </div>
       )}
@@ -381,6 +380,7 @@ export default function Portfolio() {
   }
 
   const onSaleCount = (gifts || []).filter(g => g.on_sale).length
+  const onTradeCount = (gifts || []).filter(g => g.on_trade).length
   const tradeableGifts = (gifts || []).filter(g => !g.on_sale && !g.on_trade)
 
   const openTradePicker = (giftId) => {
@@ -433,6 +433,7 @@ export default function Portfolio() {
           {[
             { label: 'Подарков', value: gifts === null ? '…' : gifts.length },
             { label: 'На продаже', value: gifts === null ? '…' : onSaleCount },
+            { label: 'В обмене', value: gifts === null ? '…' : onTradeCount },
           ].map(stat => (
             <div key={stat.label} className="stat-tile">
               <div className="stat-tile-value">{stat.value}</div>

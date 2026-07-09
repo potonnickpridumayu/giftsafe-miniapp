@@ -5,13 +5,6 @@ import BrandLogo from '../components/BrandLogo'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 
-function plural(n) {
-  const mod10 = n % 10, mod100 = n % 100
-  if (mod10 === 1 && mod100 !== 11) return 'подарок'
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'подарка'
-  return 'подарков'
-}
-
 export default function Trade() {
   const navigate = useNavigate()
   const { haptic } = useTelegram()
@@ -39,13 +32,23 @@ export default function Trade() {
     ? trades.filter(t => t.name?.toLowerCase().includes(search.toLowerCase()))
     : trades
 
+  const giftsTotal = trades.reduce((sum, t) => sum + (t.giftCount || 1), 0)
+
   return (
     <div className="page">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <BrandLogo />
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {loading ? 'Загрузка…' : `${trades.length} ${plural(trades.length)} на обмен`}
-        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+        <div className="stat-tile">
+          <div className="stat-tile-value">{loading ? '…' : trades.length}</div>
+          <div className="stat-tile-label">Лотов на обмен</div>
+        </div>
+        <div className="stat-tile">
+          <div className="stat-tile-value">{loading ? '…' : giftsTotal}</div>
+          <div className="stat-tile-label">Подарков</div>
+        </div>
       </div>
 
       <button
