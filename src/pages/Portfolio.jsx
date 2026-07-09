@@ -242,7 +242,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'editPrice' && (
-        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{
+          marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)',
+          scrollMarginBottom: 'calc(var(--nav-h) + 20px + var(--safe-bottom))',
+        }}>
           <input
             className="input"
             value={newPrice}
@@ -266,7 +269,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'sell' && (
-        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{
+          marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)',
+          scrollMarginBottom: 'calc(var(--nav-h) + 20px + var(--safe-bottom))',
+        }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Лот появится на маркете. Комиссия {Math.round(FEE_RATE * 100)}%
             {priceNum > 0 ? <> — вы получите {youGet} <GramIcon size={11} /></> : ''}.
@@ -294,7 +300,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'withdraw' && isTgGift && (
-        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{
+          marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)',
+          scrollMarginBottom: 'calc(var(--nav-h) + 20px + var(--safe-bottom))',
+        }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Подарок вернётся в ваш аккаунт Telegram обычной посылкой.
             Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.2 <GramIcon size={11} /></span>, спишется с баланса.
@@ -313,7 +322,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'withdraw' && !isTgGift && (
-        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{
+          marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)',
+          scrollMarginBottom: 'calc(var(--nav-h) + 20px + var(--safe-bottom))',
+        }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             NFT уйдёт на указанный TON-адрес. Проверьте адрес перед отправкой.
           </div>
@@ -542,7 +554,7 @@ export default function Portfolio() {
           </div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, alignItems: 'start' }}>
           {gifts.map(gift => (
             <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
           ))}
