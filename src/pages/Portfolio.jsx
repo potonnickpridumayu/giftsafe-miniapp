@@ -554,9 +554,11 @@ export default function Portfolio() {
           </div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, alignItems: 'start' }}>
+        <div style={{ columnCount: 2, columnGap: 9 }}>
           {gifts.map(gift => (
-            <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
+            <div key={gift.gift_id} style={{ breakInside: 'avoid', marginBottom: 9 }}>
+              <GiftCard gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
+            </div>
           ))}
         </div>
       )}
