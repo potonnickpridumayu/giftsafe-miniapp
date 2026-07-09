@@ -169,7 +169,7 @@ export default function ListingDetail() {
         overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', inset: 0 }}>
-          <TgGiftSticker image={item.image_full || item.image_url} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} autoPlay />
+          <TgGiftSticker image={item.image_full || item.image_url} stickerId={item.tg_sticker} backdrop={item.tg_backdrop} fallback={item.emoji} />
         </div>
       </div>
 

@@ -230,13 +230,16 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
               </>
             )}
           </div>
-          <button
-            className="btn btn-ghost btn-full"
-            style={{ fontSize: 12 }}
-            onClick={() => togglePanel('withdraw')}
-          >
-            {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              className="btn btn-ghost"
+              style={rowBtnStyle}
+              onClick={() => togglePanel('withdraw')}
+            >
+              <span style={ellipsisStyle}>{panel === 'withdraw' ? 'Скрыть' : 'Вывести'}</span>
+            </button>
+            <div style={{ flex: 1 }} />
+          </div>
         </div>
       )}
 
