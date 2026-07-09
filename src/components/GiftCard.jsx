@@ -46,19 +46,19 @@ export default function GiftCard({ item, onClick, onOffer }) {
       </div>
 
       <div className="poster-info">
-        <div className="poster-name">{item.name}</div>
-        <div className="poster-meta-line">
+        <div className="poster-name-line">
+          <span className="poster-name">{item.name}</span>
           <span className="poster-num">
             {item.number
               ? (String(item.number).startsWith('#') ? item.number : `#${item.number}`)
               : timeAgo(item.listed_at)}
           </span>
-          {item.price != null
-            ? <div className="poster-price">{item.price} <GramIcon size={11} /></div>
-            : <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
-                {item.owner ? `@${item.owner}` : 'На обмен'}
-              </div>}
         </div>
+        {item.price != null
+          ? <div className="poster-price" style={{ flexShrink: 0 }}>{item.price} <GramIcon size={9} /></div>
+          : <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
+              {item.owner ? `@${item.owner}` : 'На обмен'}
+            </div>}
       </div>
     </div>
   )
