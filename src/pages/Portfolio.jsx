@@ -28,11 +28,11 @@ async function apiCall(path, options = {}) {
 const FEE_RATE = 0.03
 const round4 = (n) => Math.round((n + Number.EPSILON) * 1e4) / 1e4
 
-// Три кнопки действий должны помещаться в один ряд на карточке подарка —
-// сжимаем паддинг/шрифт и режем текст многоточием, если совсем не влезает.
+// Карточки теперь в 2 колонки (как на маркете) — узко для двух кнопок в
+// ряд, поэтому кнопки действий идут в столбик, каждая на всю ширину.
 const rowBtnStyle = {
-  flex: 1, minWidth: 0, fontSize: 11.5, padding: '8px 6px',
-  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+  width: '100%', minWidth: 0, fontSize: 12, padding: '8px 6px',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
 }
 const ellipsisStyle = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 
@@ -139,50 +139,41 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   }
 
   return (
-    <div className="card" style={{ padding: 12 }}>
+    <div className="card" style={{ padding: 8 }}>
       <div style={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '1',
-        borderRadius: 'var(--radius-md)',
-        background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 40, overflow: 'hidden', marginBottom: 10,
+        position: 'relative', display: 'flex', flexDirection: 'column',
+        overflow: 'hidden', borderRadius: 'var(--radius-md)', marginBottom: 8,
       }}>
-        <TgGiftSticker
-          image={fragmentImage(gift.gift_name, gift.gift_number, gift.nft_address) || gift.image_url}
-          stickerId={gift.tg_sticker}
-          backdrop={gift.tg_backdrop}
-          pad="17%"
-        />
-        <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
-        {gift.on_sale ? (
-          <div className="poster-ribbon">НА ПРОДАЖЕ</div>
-        ) : gift.on_trade ? (
-          <div className="poster-ribbon" style={{ background: 'var(--blue)' }}>В ОБМЕНЕ</div>
-        ) : null}
-      </div>
-
-      <div style={{ marginBottom: canTrade ? 10 : 0 }}>
-        <div style={{
-          fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        <div className="poster-art" style={{
+          background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
         }}>
-          {gift.gift_name}{gift.gift_number ? ` #${gift.gift_number}` : ''}
+          <TgGiftSticker
+            image={fragmentImage(gift.gift_name, gift.gift_number, gift.nft_address) || gift.image_url}
+            stickerId={gift.tg_sticker}
+            backdrop={gift.tg_backdrop}
+            pad="17%"
+          />
+          <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
+          {gift.on_sale ? (
+            <div className="poster-ribbon">НА ПРОДАЖЕ</div>
+          ) : gift.on_trade ? (
+            <div className="poster-ribbon" style={{ background: 'var(--blue)' }}>В ОБМЕНЕ</div>
+          ) : null}
         </div>
-        {!onChain && !isTgGift && (
-          <div style={{
-            fontSize: 12, color: 'var(--text-muted)', marginTop: 2,
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>
-            {gift.collection_name || 'Подарок'}
+
+        <div className="poster-info">
+          <div className="poster-name-line">
+            <span className="poster-name">{gift.gift_name}</span>
+            {gift.gift_number && <span className="poster-num">#{gift.gift_number}</span>}
           </div>
-        )}
+          {gift.on_sale && gift.price_ton != null && (
+            <div className="poster-price" style={{ flexShrink: 0 }}>{gift.price_ton} <GramIcon size={9} /></div>
+          )}
+        </div>
       </div>
 
       {canTrade && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ display: 'flex', gap: 6 }}>
             {gift.on_sale ? (
               <>
                 <button
@@ -229,7 +220,6 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
                 </button>
               </>
             )}
-          </div>
           <button
             className="btn btn-ghost btn-full"
             style={{ fontSize: 12 }}
@@ -538,7 +528,7 @@ export default function Portfolio() {
           </div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
           {gifts.map(gift => (
             <GiftCard key={gift.gift_id} gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
           ))}
