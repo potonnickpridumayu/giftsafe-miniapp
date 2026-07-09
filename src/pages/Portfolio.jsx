@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
@@ -43,6 +43,13 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const [newPrice, setNewPrice] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const panelRef = useRef(null)
+
+  useEffect(() => {
+    if (panel && panelRef.current) {
+      panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [panel])
 
   const rarityColor = giftAccentColor(gift.gift_id)
   const onChain = Boolean(gift.nft_address)
@@ -221,8 +228,8 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
               </>
             )}
           <button
-            className="btn btn-ghost btn-full"
-            style={{ fontSize: 12 }}
+            className="btn btn-ghost"
+            style={rowBtnStyle}
             onClick={() => togglePanel('withdraw')}
           >
             {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
@@ -235,7 +242,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'editPrice' && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <input
             className="input"
             value={newPrice}
@@ -259,7 +266,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'sell' && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Лот появится на маркете. Комиссия {Math.round(FEE_RATE * 100)}%
             {priceNum > 0 ? <> — вы получите {youGet} <GramIcon size={11} /></> : ''}.
@@ -287,7 +294,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'withdraw' && isTgGift && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Подарок вернётся в ваш аккаунт Telegram обычной посылкой.
             Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.2 <GramIcon size={11} /></span>, спишется с баланса.
@@ -306,7 +313,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       )}
 
       {panel === 'withdraw' && !isTgGift && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div ref={panelRef} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             NFT уйдёт на указанный TON-адрес. Проверьте адрес перед отправкой.
           </div>
@@ -345,6 +352,13 @@ export default function Portfolio() {
   const [tradeNote, setTradeNote] = useState('')
   const [tradeBusy, setTradeBusy] = useState(false)
   const [tradeError, setTradeError] = useState('')
+  const tradePickerRef = useRef(null)
+
+  useEffect(() => {
+    if (tradePicker && tradePickerRef.current) {
+      tradePickerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [tradePicker])
 
   const load = useCallback(async () => {
     try {
@@ -448,7 +462,7 @@ export default function Portfolio() {
         )}
 
         {tradePicker && (
-          <div className="card" style={{ padding: '14px 16px', marginTop: 12 }}>
+          <div ref={tradePickerRef} className="card" style={{ padding: '14px 16px', marginTop: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>
               Выберите подарки для обмена {tradeSelected.size > 0 ? `(${tradeSelected.size})` : ''}
             </div>
