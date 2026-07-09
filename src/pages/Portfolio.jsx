@@ -441,7 +441,7 @@ export default function Portfolio() {
         </div>
 
         <button
-          className="btn btn-primary btn-full"
+          className="btn btn-dark-glow btn-full"
           onClick={() => { haptic('medium'); navigate('/sell') }}
         >
           + Закинуть подарок

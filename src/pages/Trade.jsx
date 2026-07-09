@@ -52,7 +52,7 @@ export default function Trade() {
       </div>
 
       <button
-        className="btn btn-primary btn-full"
+        className="btn btn-dark-glow btn-full"
         onClick={() => { haptic('medium'); navigate('/portfolio') }}
         style={{ marginBottom: 16 }}
       >
