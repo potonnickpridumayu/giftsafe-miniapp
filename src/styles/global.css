@@ -354,16 +354,20 @@ html, body {
 /* ===== POSTER CARD (постер-плашка подарка на весь кадр) ===== */
 .poster-card {
   position: relative;
-  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.15s;
+  background: var(--bg-card-hover);
 }
 .poster-card:active { transform: scale(0.97); }
 .poster-art {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -378,15 +382,25 @@ html, body {
   height: 8px;
   border-radius: 50%;
 }
-.poster-scrim {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 30%;
-  background: linear-gradient(to bottom, transparent, transparent 20%, rgba(10, 6, 8, 0.85) 55%, rgba(10, 6, 8, 0.98) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.poster-info {
+  position: relative;
+  z-index: 1;
+  margin-top: -22px;
   padding: 6px 9px;
+  background: rgba(20, 10, 14, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.poster-name-line {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
 }
 .poster-name {
   font-family: var(--font-display);
@@ -397,8 +411,10 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
-.poster-sub { font-size: 10px; line-height: 1.2; color: var(--text-muted); }
+.poster-num { font-size: 10.5px; color: rgba(255, 255, 255, 0.6); flex-shrink: 0; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85); }
+.poster-sub { font-size: 10px; line-height: 1.2; color: var(--text-secondary); flex-shrink: 0; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85); }
 .poster-price {
   font-family: var(--font-display);
   font-weight: 700;
