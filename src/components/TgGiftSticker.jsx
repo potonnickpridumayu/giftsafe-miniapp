@@ -6,15 +6,36 @@ const FILE_BASE = 'https://nftmarketbot-production.up.railway.app/api/tg-file'
 
 const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
 
-// Гашение узора к центру карточки (там стикер) — как на рендере Telegram.
-const FADE = 'radial-gradient(circle at 50% 46%, transparent 26%, #000 55%)'
+// Официальная раскладка узора с t.me/nft/{slug}: 18 иконок, координаты /
+// масштаб / прозрачность скопированы из телеграмовского SVG (canvas 420x280,
+// иконка 100x100). Одинакова для всех подарков — меняются только цвета и
+// сама иконка. НЕ подбирать руками — это точные значения Telegram.
+const PATTERN_SPOTS = [
+  [140.5761, 13.79, 0.3, 0.2129],
+  [249.465, 13.79, 0.3, 0.2129],
+  [291.8539, 102.7918, 0.3, 0.2239],
+  [98.1872, 102.7918, 0.3, 0.2239],
+  [276.2551, 176.2043, 0.277, 0.2216],
+  [196.144, 188.6412, 0.277, 0.123],
+  [116.0329, 176.2043, 0.277, 0.2216],
+  [355.0988, 79.3286, 0.2247, 0.1896],
+  [292.0988, 52.1228, 0.2247, 0.2609],
+  [334.0988, 17.5326, 0.2247, 0.1464],
+  [198.7654, -5.7866, 0.2247, 0.1531],
+  [63.4321, 17.5326, 0.2247, 0.1453],
+  [105.4321, 52.1228, 0.2247, 0.2609],
+  [42.4321, 79.3286, 0.2247, 0.1659],
+  [72.7654, 155.8935, 0.2247, 0.1659],
+  [49.4321, 205.6413, 0.2247, 0.105],
+  [344.2099, 205.6413, 0.2247, 0.105],
+  [337.2099, 155.8935, 0.2247, 0.1527],
+]
 
 /**
- * Карточка подарка в стиле Telegram/Portals: фон собирается из атрибутов
- * подарка (градиент из цветов фона + узор из иконки-символа), поверх — сам
- * стикер из Telegram, по умолчанию остановленный на ПЕРВОМ КАДРЕ анимации.
- * Статика и анимация — один и тот же рендер, поэтому при проигрывании ничего
- * не меняется и не замыливается.
+ * Карточка подарка, собранная как на официальной странице t.me/nft/{slug}:
+ * телеграмовский радиальный градиент + их же раскладка узора (SVG выше) +
+ * сам стикер из Telegram, по умолчанию остановленный на ПЕРВОМ КАДРЕ
+ * анимации. Статика и анимация — один и тот же рендер.
  *  - тап (interactive): проиграть анимацию один раз;
  *  - autoPlay: проиграть один раз сразу после загрузки;
  *  - interactive={false} (гриды Маркета/Обмена): тап не перехватывается,
@@ -23,9 +44,11 @@ const FADE = 'radial-gradient(circle at 50% 46%, transparent 26%, #000 55%)'
  */
 export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%', autoPlay = false, interactive = true }) {
   const [ready, setReady] = useState(false)
-  const [patternTile, setPatternTile] = useState('')
   const instRef = useRef(null)
   const boxRef = useRef(null)
+  // SVG-id глобальны на всю страницу — на гриде карточек много, id должны
+  // быть уникальны, иначе все карточки возьмут градиент/узор первой.
+  const uid = useRef('tgs' + Math.random().toString(36).slice(2, 8)).current
 
   let bd = null
   if (backdrop) {
@@ -40,28 +63,6 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
   useEffect(() => {
     if (!stickerId) return undefined
     let dead = false
-
-    // Плитка узора: маленькая иконка в шахматном порядке с промежутками.
-    // crossOrigin обязателен — иначе canvas «грязный» и toDataURL не отдаст.
-    if (patternUrl) {
-      const im = new Image()
-      im.crossOrigin = 'anonymous'
-      im.onload = () => {
-        if (dead) return
-        try {
-          const S = 256
-          const c = document.createElement('canvas'); c.width = S; c.height = S
-          const x = c.getContext('2d')
-          const isz = S * 0.42
-          for (const [cx, cy] of [[S * 0.25, S * 0.25], [S * 0.75, S * 0.75]]) {
-            x.drawImage(im, cx - isz / 2, cy - isz / 2, isz, isz)
-          }
-          setPatternTile(c.toDataURL())
-        } catch { /* без узора — просто градиент */ }
-      }
-      im.src = patternUrl
-    }
-
     ;(async () => {
       try {
         const res = await fetch(`${FILE_BASE}/${stickerId}`)
@@ -82,7 +83,6 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
         if (autoPlay) inst.goToAndPlay(0, true)
       } catch { /* tgs не загрузился — остаёмся на статичном JPG */ }
     })()
-
     return () => {
       dead = true
       if (instRef.current) { instRef.current.destroy(); instRef.current = null }
@@ -106,19 +106,36 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
         background: gradient,
       }}
     >
-      {ready && patternTile && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          maskImage: FADE, WebkitMaskImage: FADE,
-        }}>
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: patternColor, opacity: 0.3,
-            maskImage: `url(${patternTile})`, WebkitMaskImage: `url(${patternTile})`,
-            maskSize: '25% 25%', WebkitMaskSize: '25% 25%',
-            maskRepeat: 'repeat', WebkitMaskRepeat: 'repeat',
-          }} />
-        </div>
+      {/* Фон 1-в-1 как на t.me/nft: их градиент + их раскладка узора.
+          slice кроппит горизонтальный холст 420x280 до нашего квадрата. */}
+      {ready && bd && (
+        <svg
+          viewBox="0 0 420 280" preserveAspectRatio="xMidYMid slice"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        >
+          <defs>
+            <radialGradient id={uid + 'g'} cx="50%" cy="50%" fx="50%" fy="50%" r="69.65%" gradientTransform="translate(0.5, 0.5), scale(0.6667, 1), rotate(90), translate(-0.5, -0.5)">
+              <stop stopColor={intHex(bd.center)} offset="0%" />
+              <stop stopColor={intHex(bd.edge)} offset="100%" />
+            </radialGradient>
+            <filter id={uid + 'f'}>
+              <feFlood floodColor={patternColor} />
+              <feComposite in2="SourceGraphic" operator="in" />
+            </filter>
+            {patternUrl && <image id={uid + 'i'} x="0" y="0" width="100" height="100" href={patternUrl} />}
+          </defs>
+          <rect x="0" y="0" width="420" height="280" fill={`url(#${uid}g)`} />
+          {patternUrl && (
+            <g filter={`url(#${uid}f)`}>
+              {PATTERN_SPOTS.map(([x, y, s, o], i) => (
+                <g key={i} opacity={o} transform={`translate(${x}, ${y})`}>
+                  <use href={`#${uid}i`} transform={`scale(${s})`} />
+                </g>
+              ))}
+            </g>
+          )}
+        </svg>
       )}
       {/* Фолбэк, пока стикер не готов: официальная картинка или эмодзи */}
       {!ready && (image
