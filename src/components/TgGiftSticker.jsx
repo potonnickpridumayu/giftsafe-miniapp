@@ -21,9 +21,11 @@ const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
  */
 export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%', autoPlay = false }) {
   const [playing, setPlaying] = useState(false)
+  const [patternTile, setPatternTile] = useState('')
   const instRef = useRef(null)
   const boxRef = useRef(null)
   const loadingRef = useRef(false)
+  const tileRef = useRef('')
 
   let bd = null
   if (backdrop) {
@@ -35,6 +37,31 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
   const patternUrl = bd?.pattern ? `${FILE_BASE}/${bd.pattern}` : ''
   const patternColor = bd?.symbol != null ? intHex(bd.symbol) : 'rgba(255,255,255,0.8)'
 
+  // Плитка узора как на официальной карточке Fragment: маленькая иконка в
+  // шахматном порядке с промежутками (2 иконки по диагонали плитки). Голый
+  // repeat самой иконки даёт слишком крупный и плотный узор — не как в TG.
+  // Обязательно crossOrigin: canvas с «грязной» картинкой не отдаст toDataURL,
+  // а CSS mask-image и так грузится в CORS-режиме.
+  const buildPatternTile = () => new Promise((resolve) => {
+    if (!patternUrl) return resolve('')
+    const im = new Image()
+    im.crossOrigin = 'anonymous'
+    im.onload = () => {
+      try {
+        const S = 256
+        const c = document.createElement('canvas'); c.width = S; c.height = S
+        const x = c.getContext('2d')
+        const isz = S * 0.42
+        for (const [cx, cy] of [[S * 0.25, S * 0.25], [S * 0.75, S * 0.75]]) {
+          x.drawImage(im, cx - isz / 2, cy - isz / 2, isz, isz)
+        }
+        resolve(c.toDataURL())
+      } catch { resolve('') }
+    }
+    im.onerror = () => resolve('')
+    im.src = patternUrl
+  })
+
   const startPlay = async () => {
     if (!stickerId) return
     if (instRef.current) {
@@ -44,11 +71,11 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
     }
     if (loadingRef.current || !boxRef.current) return
     loadingRef.current = true
-    // Пока качается lottie, параллельно греем кеш иконки узора, чтобы фон не
-    // «допоявлялся» после старта анимации. Обязательно в CORS-режиме
-    // (crossOrigin) — CSS mask-image грузится именно так, а закешированный
-    // не-CORS ответ ломает последующую загрузку маски по тому же URL.
-    if (patternUrl) { const im = new Image(); im.crossOrigin = 'anonymous'; im.src = patternUrl }
+    // Пока качается lottie, параллельно собираем плитку узора, чтобы фон не
+    // «допоявлялся» после старта анимации.
+    if (!tileRef.current) {
+      buildPatternTile().then((t) => { tileRef.current = t; setPatternTile(t) })
+    }
     try {
       const res = await fetch(`${FILE_BASE}/${stickerId}`)
       if (!res.ok) throw new Error()
@@ -92,7 +119,7 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
       {/* Узор из иконки-символа — виден только пока играет анимация.
           Внешний слой гасит узор к центру (там стикер), внутренний тонирует
           альфу иконки символьным цветом. */}
-      {playing && patternUrl && (
+      {playing && patternTile && (
         <div style={{
           position: 'absolute', inset: 0,
           maskImage: 'radial-gradient(circle at 50% 46%, transparent 26%, #000 55%)',
@@ -100,9 +127,9 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
         }}>
           <div style={{
             position: 'absolute', inset: 0,
-            background: patternColor, opacity: 0.4,
-            maskImage: `url(${patternUrl})`, WebkitMaskImage: `url(${patternUrl})`,
-            maskSize: '22% 22%', WebkitMaskSize: '22% 22%',
+            background: patternColor, opacity: 0.3,
+            maskImage: `url(${patternTile})`, WebkitMaskImage: `url(${patternTile})`,
+            maskSize: '25% 25%', WebkitMaskSize: '25% 25%',
             maskRepeat: 'repeat', WebkitMaskRepeat: 'repeat',
           }} />
         </div>
