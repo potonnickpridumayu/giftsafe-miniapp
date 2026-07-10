@@ -281,10 +281,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             className="input"
             value={price}
             onChange={e => { setPrice(e.target.value.replace(/[^\d.,]/g, '')); setError('') }}
-            placeholder="Цена в GRAM, например 10.5"
+            placeholder="Укажите цену в GRAM"
             inputMode="decimal"
             disabled={busy}
-            style={{ fontSize: 13, marginBottom: 8 }}
+            style={{ fontSize: 12, marginBottom: 8 }}
           />
           {error && (
             <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
@@ -306,7 +306,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
         }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Подарок вернётся в ваш аккаунт Telegram обычной посылкой.
-            Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.2 <GramIcon size={11} /></span>, спишется с баланса.
+            Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.25 <GramIcon size={11} /></span>, спишется с баланса.
           </div>
           {error && (
             <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
