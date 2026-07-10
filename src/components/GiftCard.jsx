@@ -1,5 +1,6 @@
 import { IconMessageDollar } from '@tabler/icons-react'
 import GramIcon from './GramIcon'
+import TgGiftSticker from './TgGiftSticker'
 import { giftAccentColor } from '../api/client'
 
 function timeAgo(ts) {
@@ -18,9 +19,17 @@ export default function GiftCard({ item, onClick, onOffer }) {
       <div className="poster-art" style={{
         background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
       }}>
-        {item.image_full || item.image_url
-          ? <img src={item.image_full || item.image_url} alt={item.name} />
-          : item.emoji}
+        {item.tg_sticker
+          ? <TgGiftSticker
+              image={item.image_full || item.image_url}
+              stickerId={item.tg_sticker}
+              backdrop={item.tg_backdrop}
+              fallback={item.emoji}
+              interactive={false}
+            />
+          : item.image_full || item.image_url
+            ? <img src={item.image_full || item.image_url} alt={item.name} />
+            : item.emoji}
 
         <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
 
