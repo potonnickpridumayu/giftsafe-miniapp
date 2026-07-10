@@ -127,7 +127,10 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
           </defs>
           <rect x="0" y="0" width="420" height="280" fill={`url(#${uid}g)`} />
           {patternUrl && (
-            <g filter={`url(#${uid}f)`}>
+            /* Официальная раскладка сделана под банер с подписью снизу и
+               смещена вверх; для квадратной карточки опускаем узор на 20
+               единиц (~7% высоты), чтобы он стоял по центру. */
+            <g filter={`url(#${uid}f)`} transform="translate(0, 20)">
               {PATTERN_SPOTS.map(([x, y, s, o], i) => (
                 <g key={i} opacity={o} transform={`translate(${x}, ${y})`}>
                   <use href={`#${uid}i`} transform={`scale(${s})`} />
