@@ -6,30 +6,24 @@ const FILE_BASE = 'https://nftmarketbot-production.up.railway.app/api/tg-file'
 
 const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
 
-// Запасная маска, если силуэт построить не удалось: круглая дырка по центру,
-// узор хотя бы по краям остаётся.
-const HOLE = 'radial-gradient(circle at 50% 46%, transparent 34%, rgba(0,0,0,0.4) 48%, #000 60%)'
-
 /**
  * Подарок Telegram: статичная официальная картинка (фон+узор+стикер с
- * nft.fragment.com), а поверх по тапу доигрывается анимация стикера.
+ * nft.fragment.com), а по тапу проигрывается анимация стикера.
  *  - autoPlay: проиграть один раз при появлении (страница товара).
  *  - тап: проиграть снова (страница товара, портфель).
  *
- * Проблема: в JPG узор и стикер слиты, отдельного узора «за стикером» нет.
- * Решение — ТОЧНЫЙ ВЫРЕЗ ПО КОНТУРУ: из lottie (кадр 0) строим силуэт стикера
- * и вырезаем в картинке дырку РОВНО этой формы. Анимация встаёт в тот же контур,
- * а узор на всей остальной площади остаётся 1-в-1 как на статичной карточке —
- * шва не видно. lottie грузится ЛЕНИВО (при первом проигрыше).
+ * На время анимации JPG прячется ЦЕЛИКОМ, а фон собирается заново из атрибутов
+ * подарка, как это делает сам Telegram (и Portals): градиент из цветов фона +
+ * узор из иконки-символа (webp-миниатюра, затонированная символьным цветом
+ * через CSS-маску). Всё рисуется нативно в разрешении экрана, поэтому во время
+ * анимации ничего не замыливается — в отличие от прежнего подхода с вырезанием
+ * дырки в низкорезном JPG. lottie грузится ЛЕНИВО (при первом проигрыше).
  */
 export default function TgGiftSticker({ stickerId, image = '', backdrop = null, fallback = '🎁', pad = '20%', autoPlay = false }) {
   const [playing, setPlaying] = useState(false)
-  const [maskUrl, setMaskUrl] = useState('')
   const instRef = useRef(null)
   const boxRef = useRef(null)
   const loadingRef = useRef(false)
-
-  const padFrac = (parseFloat(pad) || 0) / 100
 
   let bd = null
   if (backdrop) {
@@ -38,53 +32,8 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
   const gradient = bd
     ? `radial-gradient(circle at 50% 42%, ${intHex(bd.center)}, ${intHex(bd.edge)})`
     : 'var(--bg-card-hover)'
-
-  // Строим маску-силуэт стикера: непрозрачно везде, кроме формы стикера (дырка).
-  const buildMask = (data) => {
-    try {
-      const S = 300
-      const off = Math.round(S * padFrac)
-      const inner = S - 2 * off
-      // рендерим кадр 0 стикера на свой канвас (тем же fit, что и видимая svg-анимация)
-      const sc = document.createElement('canvas')
-      sc.width = inner; sc.height = inner
-      const anim = lottie.loadAnimation({
-        renderer: 'canvas', loop: false, autoplay: false, animationData: data,
-        rendererSettings: {
-          context: sc.getContext('2d'),
-          clearCanvas: true, preserveAspectRatio: 'xMidYMid meet',
-        },
-      })
-      anim.goToAndStop(0, true)
-
-      // Бинаризуем альфу силуэта: любой ненулевой пиксель → полностью
-      // непрозрачный. Иначе полупрозрачные края (антиалиасинг) вырезают не до
-      // конца и сквозь них проступает цвет статичного стикера из JPG.
-      const scx = sc.getContext('2d')
-      const px = scx.getImageData(0, 0, inner, inner)
-      const d = px.data
-      for (let i = 3; i < d.length; i += 4) if (d[i] > 10) d[i] = 255
-      scx.putImageData(px, 0, 0)
-
-      const m = document.createElement('canvas'); m.width = S; m.height = S
-      const mx = m.getContext('2d')
-      mx.fillStyle = '#000'; mx.fillRect(0, 0, S, S)
-      mx.globalCompositeOperation = 'destination-out'
-      // Лёгкая дилатация: штампуем силуэт по кругу смещений на несколько
-      // пикселей — только чтобы добить тонкую антиалиас-кайму, не больше.
-      // Слишком большое раздутие делает вырез шире самой анимации, и вокруг
-      // стикера во время игры видна пустая заливка вместо узора — было хуже.
-      const g = Math.min(8, Math.max(4, Math.round(inner * 0.025)))
-      const steps = 8
-      for (let k = 0; k < steps; k++) {
-        const a = (k / steps) * Math.PI * 2
-        mx.drawImage(sc, off + Math.round(Math.cos(a) * g), off + Math.round(Math.sin(a) * g))
-      }
-      mx.drawImage(sc, off, off)
-      anim.destroy()
-      return m.toDataURL()
-    } catch { return '' }
-  }
+  const patternUrl = bd?.pattern ? `${FILE_BASE}/${bd.pattern}` : ''
+  const patternColor = bd?.symbol != null ? intHex(bd.symbol) : 'rgba(255,255,255,0.8)'
 
   const startPlay = async () => {
     if (!stickerId) return
@@ -95,6 +44,11 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
     }
     if (loadingRef.current || !boxRef.current) return
     loadingRef.current = true
+    // Пока качается lottie, параллельно греем кеш иконки узора, чтобы фон не
+    // «допоявлялся» после старта анимации. Обязательно в CORS-режиме
+    // (crossOrigin) — CSS mask-image грузится именно так, а закешированный
+    // не-CORS ответ ломает последующую загрузку маски по тому же URL.
+    if (patternUrl) { const im = new Image(); im.crossOrigin = 'anonymous'; im.src = patternUrl }
     try {
       const res = await fetch(`${FILE_BASE}/${stickerId}`)
       if (!res.ok) throw new Error()
@@ -102,7 +56,6 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
       const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
       const data = JSON.parse(new TextDecoder().decode(raw))
       if (!boxRef.current) return
-      setMaskUrl(buildMask(data))
       const inst = lottie.loadAnimation({
         container: boxRef.current, renderer: 'svg',
         loop: false, autoplay: false, animationData: data,
@@ -127,10 +80,6 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
     startPlay()
   }
 
-  // Во время проигрывания вырезаем в картинке контур стикера (или круг, если
-  // силуэт не построился) — узор остаётся, статичный стикер спрятан.
-  const mask = !playing ? 'none' : (maskUrl ? `url(${maskUrl})` : HOLE)
-
   return (
     <div
       onClick={play}
@@ -140,13 +89,29 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
         background: gradient,
       }}
     >
+      {/* Узор из иконки-символа — виден только пока играет анимация.
+          Внешний слой гасит узор к центру (там стикер), внутренний тонирует
+          альфу иконки символьным цветом. */}
+      {playing && patternUrl && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          maskImage: 'radial-gradient(circle at 50% 46%, transparent 26%, #000 55%)',
+          WebkitMaskImage: 'radial-gradient(circle at 50% 46%, transparent 26%, #000 55%)',
+        }}>
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: patternColor, opacity: 0.4,
+            maskImage: `url(${patternUrl})`, WebkitMaskImage: `url(${patternUrl})`,
+            maskSize: '22% 22%', WebkitMaskSize: '22% 22%',
+            maskRepeat: 'repeat', WebkitMaskRepeat: 'repeat',
+          }} />
+        </div>
+      )}
       {image
         ? <img src={image} alt="" style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover',
-            maskImage: mask, WebkitMaskImage: mask,
-            maskSize: '100% 100%', WebkitMaskSize: '100% 100%',
-            maskRepeat: 'no-repeat', WebkitMaskRepeat: 'no-repeat',
+            opacity: playing ? 0 : 1,
           }} />
         : <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{fallback}</span>}
       {/* Анимация поверх, видна только во время проигрывания */}
