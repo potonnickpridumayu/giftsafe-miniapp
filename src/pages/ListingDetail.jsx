@@ -4,7 +4,7 @@ import { api, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
-import { fmtGram } from '../utils/format'
+import { fmtGram, fmtPercent } from '../utils/format'
 
 // Должна совпадать с MARKET_FEE на бэкенде и цифрой в Market.jsx.
 // Итоговая комиссия всё равно приходит в ответе покупки — это лишь предпросмотр.
@@ -206,7 +206,7 @@ export default function ListingDetail() {
                 {value}
                 {rarity != null && (
                   <span style={{ color: 'var(--gold)', fontWeight: 600, marginLeft: 6 }}>
-                    {(rarity / 10).toFixed(1)}%
+                    {fmtPercent(rarity)}%
                   </span>
                 )}
               </span>

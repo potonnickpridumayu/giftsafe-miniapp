@@ -4,7 +4,7 @@ import { api, fragmentImage, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
-import { fmtGram } from '../utils/format'
+import { fmtGram, fmtPercent } from '../utils/format'
 
 // Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
 // берётся только с доплаты при принятии оффера.
@@ -189,7 +189,7 @@ export default function TradeDetail() {
                   <span style={{ fontSize: 13, fontWeight: 600 }}>
                     {value}
                     {rarity != null && (
-                      <span style={{ color: 'var(--gold)', fontWeight: 600, marginLeft: 6 }}>{(rarity / 10).toFixed(1)}%</span>
+                      <span style={{ color: 'var(--gold)', fontWeight: 600, marginLeft: 6 }}>{fmtPercent(rarity)}%</span>
                     )}
                   </span>
                 </div>
