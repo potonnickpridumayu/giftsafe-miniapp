@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconAdjustments } from '@tabler/icons-react'
+import { IconAdjustments, IconShoppingCart } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import { fmtGram } from '../utils/format'
+import { useCartIds, toggleCart } from '../utils/cart'
 
 function plural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -47,6 +48,8 @@ export default function Market() {
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const cartIds = useCartIds()
 
   const [offerTarget, setOfferTarget] = useState(null)
   const [offerAmount, setOfferAmount] = useState('')
@@ -164,9 +167,32 @@ export default function Market() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <BrandLogo />
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {loading ? 'Загрузка…' : `${listings.length} ${plural(listings.length)}`}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            {loading ? 'Загрузка…' : `${listings.length} ${plural(listings.length)}`}
+          </p>
+          <button
+            onClick={() => { haptic('light'); navigate('/cart') }}
+            aria-label="Корзина"
+            style={{
+              position: 'relative', background: 'none', border: 'none',
+              color: 'var(--text-primary)', cursor: 'pointer', padding: 4,
+              display: 'flex', alignItems: 'center',
+            }}
+          >
+            <IconShoppingCart size={22} stroke={1.8} />
+            {cartIds.length > 0 && (
+              <span style={{
+                position: 'absolute', top: -3, right: -5,
+                minWidth: 16, height: 16, borderRadius: 999, padding: '0 4px',
+                background: 'var(--gold)', color: '#fff5f7',
+                fontSize: 10, fontWeight: 700, lineHeight: '16px', textAlign: 'center',
+              }}>
+                {cartIds.length}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Search + filter button */}
@@ -253,6 +279,8 @@ export default function Market() {
               item={item}
               onClick={() => { haptic('light'); navigate(`/listing/${item.id}`) }}
               onOffer={item.seller_id !== user?.id ? openOffer : undefined}
+              onCartToggle={item.seller_id !== user?.id ? (it) => { haptic('light'); toggleCart(it.id) } : undefined}
+              inCart={cartIds.includes(item.id)}
             />
           ))}
         </div>

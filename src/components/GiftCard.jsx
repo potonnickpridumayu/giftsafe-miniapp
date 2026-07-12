@@ -1,4 +1,4 @@
-import { IconMessageDollar } from '@tabler/icons-react'
+import { IconMessageDollar, IconShoppingCartPlus, IconCheck } from '@tabler/icons-react'
 import GramIcon from './GramIcon'
 import TgGiftSticker from './TgGiftSticker'
 import { giftAccentColor } from '../api/client'
@@ -12,7 +12,7 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}д назад`
 }
 
-export default function GiftCard({ item, onClick, onOffer }) {
+export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart }) {
   const rarityColor = giftAccentColor(item.gift_id ?? item.id)
 
   return (
@@ -51,6 +51,16 @@ export default function GiftCard({ item, onClick, onOffer }) {
             aria-label="Предложить цену"
           >
             <IconMessageDollar size={13} stroke={2} />
+          </button>
+        )}
+
+        {onCartToggle && (
+          <button
+            className={`poster-cart-btn${inCart ? ' active' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onCartToggle(item) }}
+            aria-label={inCart ? 'Убрать из корзины' : 'В корзину'}
+          >
+            {inCart ? <IconCheck size={13} stroke={2.5} /> : <IconShoppingCartPlus size={13} stroke={2} />}
           </button>
         )}
       </div>

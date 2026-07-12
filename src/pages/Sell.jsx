@@ -178,9 +178,9 @@ export default function Sell() {
           <div className="card" style={{ padding: 4, marginBottom: 18 }}>
             {[
               { n: 1, t: <>Откройте чат с <b style={{ color: 'var(--gold)' }}>@{BANK_USERNAME}</b></> },
-              { n: 2, t: <>Напишите ему <b>«прив 👋»</b> — так Telegram разрешит передачу</> },
-              { n: 3, t: <>Отправьте нужный подарок прямо в этот чат</> },
-              { n: 4, t: <>Готово — подарок появится в разделе «Портфель»</> },
+              { n: 2, t: <>Напишите ему <b>«прив»</b> — так Telegram разрешит передачу</> },
+              { n: 3, t: <>Отправьте нужный подарок <b style={{ color: 'var(--gold)' }}>@{BANK_USERNAME}</b></> },
+              { n: 4, t: <>Готово — подарок появится в вашем Портфеле</> },
             ].map((s, i, arr) => (
               <div key={s.n} style={{
                 display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 14px',
