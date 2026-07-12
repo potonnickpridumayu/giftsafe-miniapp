@@ -2,11 +2,12 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
-import { TonConnectButton } from '@tonconnect/ui-react';
 import { IconPencil } from '@tabler/icons-react'
 import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
 import BrandLogo from '../components/BrandLogo'
+import WalletButton from '../components/WalletButton'
+import { fmtGram } from '../utils/format'
 
 const API_BASE = 'https://nftmarketbot-production.up.railway.app'
 
@@ -174,7 +175,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             {gift.gift_number && <span className="poster-num">#{gift.gift_number}</span>}
           </div>
           {gift.on_sale && gift.price_ton != null && (
-            <div className="poster-price" style={{ flexShrink: 0 }}>{gift.price_ton} <GramIcon size={9} /></div>
+            <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(gift.price_ton)} <GramIcon size={9} /></div>
           )}
         </div>
       </div>
@@ -225,15 +226,17 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
                 >
                   <span style={ellipsisStyle}>Обменять</span>
                 </button>
+                {/* Вывод доступен только для свободного подарка — на продаже/в
+                    обмене он заблокирован на бэке, поэтому кнопку не показываем */}
+                <button
+                  className="btn btn-ghost"
+                  style={rowBtnStyle}
+                  onClick={() => togglePanel('withdraw')}
+                >
+                  {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+                </button>
               </>
             )}
-          <button
-            className="btn btn-ghost"
-            style={rowBtnStyle}
-            onClick={() => togglePanel('withdraw')}
-          >
-            {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
-          </button>
         </div>
       )}
 
@@ -275,7 +278,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
         }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Лот появится на маркете. Комиссия {Math.round(FEE_RATE * 100)}%
-            {priceNum > 0 ? <> — вы получите {youGet} <GramIcon size={11} /></> : ''}.
+            {priceNum > 0 ? <> — вы получите {fmtGram(youGet)} <GramIcon size={11} /></> : ''}.
           </div>
           <input
             className="input"
@@ -440,7 +443,7 @@ export default function Portfolio() {
           gap: 12, marginBottom: 16,
         }}>
           <BrandLogo />
-          <TonConnectButton />
+          <WalletButton />
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
@@ -460,7 +463,7 @@ export default function Portfolio() {
           className="btn btn-dark-glow btn-full"
           onClick={() => { haptic('medium'); navigate('/sell') }}
         >
-          + Закинуть подарок
+          + Добавить подарок
         </button>
 
         {tradeableGifts.length > 0 && (
@@ -550,7 +553,7 @@ export default function Portfolio() {
           <div className="empty-icon">💼</div>
           <div className="empty-title">Портфель пуст</div>
           <div className="empty-desc">
-            {error ? `Не удалось загрузить: ${error}` : 'Закиньте свой подарок или купите на маркете'}
+            {error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
           </div>
         </div>
       ) : (

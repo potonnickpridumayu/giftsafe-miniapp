@@ -3,12 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
+import { fmtGram } from '../utils/format'
 
 // Должна совпадать с FEE_RATE в ListingDetail.jsx, "Комиссия 3%" в Market.jsx
 // и MARKET_FEE на бэкенде. Весь маркет работает в TON, не в Stars.
 const FEE_RATE = 0.03
 const round4 = (n) => Math.round((n + Number.EPSILON) * 1e4) / 1e4
 const POLL_MS = 10000 // как часто спрашиваем бэкенд, дошёл ли NFT
+// Аккаунт-сейф Rubuy: пользователь отправляет сюда свой TG-подарок обычной
+// передачей, бэкенд ловит его по бизнес-подключению и кладёт в портфель.
+const BANK_USERNAME = 'twentop'
 
 // Копирование с фолбэком для старых Telegram-webview
 async function copyText(text) {
@@ -34,7 +38,7 @@ async function copyText(text) {
 
 export default function Sell() {
   const navigate = useNavigate()
-  const { haptic, showConfirm } = useTelegram()
+  const { haptic, showConfirm, openLink } = useTelegram()
 
   // step: intro → deposit → deposited → price → done
   const [step, setStep] = useState('intro')
@@ -102,7 +106,7 @@ export default function Sell() {
     }
     haptic('medium')
     showConfirm(
-      `Выставить подарок за ${priceNum} GRAM? Вы получите ${youGet} GRAM.`,
+      `Выставить подарок за ${fmtGram(priceNum)} GRAM? Вы получите ${fmtGram(youGet)} GRAM.`,
       async (ok) => {
         if (!ok) return
         setBusy(true)
@@ -161,40 +165,76 @@ export default function Sell() {
       </button>
 
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
-        Закинуть <span style={{ color: 'var(--gold)' }}>подарок</span>
+        Добавить <span style={{ color: 'var(--gold)' }}>подарок</span>
       </h1>
 
-      {/* ── Шаг 1: интро ── */}
+      {/* ── Шаг 1: интро — отправка TG-подарка на аккаунт-сейф Rubuy ── */}
       {step === 'intro' && (
         <>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
-            Закиньте подарок — он будет надёжно храниться в Rubuy
+            Отправьте свой Telegram-подарок — он сам появится в вашем портфеле.
           </p>
-          <div className="card" style={{ padding: '16px', marginBottom: 20, fontSize: 13, lineHeight: 1.7 }}>
-            <div>1️⃣ Получите адрес сейфа и ваш код</div>
-            <div>2️⃣ Отправьте NFT на адрес, указав код в комментарии</div>
-            <div>3️⃣ Мы увидим депозит и предложим назначить цену</div>
+
+          <div className="card" style={{ padding: 4, marginBottom: 18 }}>
+            {[
+              { n: 1, t: <>Откройте чат с <b style={{ color: 'var(--gold)' }}>@{BANK_USERNAME}</b></> },
+              { n: 2, t: <>Напишите ему <b>«прив 👋»</b> — так Telegram разрешит передачу</> },
+              { n: 3, t: <>Отправьте нужный подарок прямо в этот чат</> },
+              { n: 4, t: <>Готово — подарок появится в разделе «Портфель»</> },
+            ].map((s, i, arr) => (
+              <div key={s.n} style={{
+                display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 14px',
+                borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
+              }}>
+                <div style={{
+                  flexShrink: 0, width: 24, height: 24, borderRadius: '50%',
+                  background: 'var(--gold-radial)', color: '#fff5f7', fontSize: 13, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>{s.n}</div>
+                <div style={{ fontSize: 13.5, lineHeight: 1.5, paddingTop: 2 }}>{s.t}</div>
+              </div>
+            ))}
           </div>
+
           <div style={{
-            padding: '12px 14px', marginBottom: 20,
-            background: 'rgba(94,156,245,0.08)', border: '1px solid rgba(94,156,245,0.25)',
-            borderRadius: 'var(--radius-lg)', fontSize: 13, color: '#5e9cf5', lineHeight: 1.5,
+            fontSize: 12, color: 'var(--text-muted)', textAlign: 'center',
+            marginBottom: 18, lineHeight: 1.5,
           }}>
-            🔒 NFT физически лежит на сейфе Rubuy — покупатель гарантированно его получит,
-            а при снятии лота подарок вернётся вам.
+            Обычно подарок появляется за несколько секунд после отправки.
           </div>
+
           {error && (
             <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
               ⚠️ {error}
             </div>
           )}
+
           <button
             className="btn btn-primary btn-full"
+            onClick={() => { haptic('medium'); openLink(`https://t.me/${BANK_USERNAME}`) }}
+            style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
+          >
+            Открыть чат с @{BANK_USERNAME}
+          </button>
+          <button
+            className="btn btn-ghost btn-full"
+            style={{ marginTop: 10 }}
+            onClick={() => { haptic('light'); navigate('/portfolio') }}
+          >
+            Перейти в портфель
+          </button>
+
+          {/* Запасной путь для on-chain NFT (в TON-кошельке) — второстепенно */}
+          <button
             onClick={startDeposit}
             disabled={busy}
-            style={{ fontSize: 15, padding: '14px', boxShadow: busy ? 'none' : 'var(--gold-glow)', opacity: busy ? 0.5 : 1 }}
+            style={{
+              background: 'none', border: 'none', color: 'var(--text-muted)',
+              fontSize: 12, cursor: 'pointer', display: 'block', margin: '18px auto 0',
+              textDecoration: 'underline', textUnderlineOffset: 3, opacity: busy ? 0.5 : 1,
+            }}
           >
-            {busy ? '⏳ Готовим адрес…' : 'Начать депозит'}
+            {busy ? 'Готовим адрес…' : 'У меня NFT в TON-кошельке →'}
           </button>
         </>
       )}
@@ -301,18 +341,18 @@ export default function Sell() {
           <div className="card" style={{ padding: '14px 16px', marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Цена покупателя</span>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{priceNum || 0} <GramIcon size={12} /></span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(priceNum)} <GramIcon size={12} /></span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 Комиссия Rubuy ({Math.round(FEE_RATE * 100)}%)
               </span>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fee} <GramIcon size={12} /></span>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fmtGram(fee)} <GramIcon size={12} /></span>
             </div>
             <div className="divider" style={{ margin: '10px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 600 }}>Вы получите</span>
-              <span className="price price-md">{youGet} <GramIcon size={13} /></span>
+              <span className="price price-md">{fmtGram(youGet)} <GramIcon size={13} /></span>
             </div>
           </div>
 

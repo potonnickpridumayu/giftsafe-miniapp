@@ -5,6 +5,7 @@ import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
+import { fmtGram } from '../utils/format'
 
 function plural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -65,7 +66,7 @@ export default function Market() {
     const amount = parseFloat(String(offerAmount).replace(',', '.'))
     const min = offerTarget.price * 0.5
     if (!amount || amount < min) {
-      setOfferError(`Минимум ${min.toFixed(2)} GRAM (50% цены)`)
+      setOfferError(`Минимум ${fmtGram(min)} GRAM (50% цены)`)
       return
     }
     haptic('medium')
@@ -293,19 +294,19 @@ export default function Market() {
                   Предложить цену
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
-                  {offerTarget.name}{offerTarget.number ? ` ${offerTarget.number}` : ''} · цена лота {offerTarget.price} GRAM
+                  {offerTarget.name}{offerTarget.number ? ` ${offerTarget.number}` : ''} · цена лота {fmtGram(offerTarget.price)} GRAM
                 </div>
                 <input
                   className="input"
                   value={offerAmount}
                   onChange={e => { setOfferAmount(e.target.value.replace(/[^\d.,]/g, '')); setOfferError(null) }}
-                  placeholder={`От ${(offerTarget.price * 0.5).toFixed(2)} GRAM`}
+                  placeholder={`От ${fmtGram(offerTarget.price * 0.5)} GRAM`}
                   inputMode="decimal"
                   disabled={offerBusy}
                   style={{ fontSize: 13, marginBottom: 8 }}
                 />
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
-                  Минимум 50% цены лота — {(offerTarget.price * 0.5).toFixed(2)} GRAM
+                  Минимум 50% цены лота — {fmtGram(offerTarget.price * 0.5)} GRAM
                 </div>
                 {offerError && (
                   <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {offerError}</div>

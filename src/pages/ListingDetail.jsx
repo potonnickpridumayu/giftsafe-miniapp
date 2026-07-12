@@ -4,6 +4,7 @@ import { api, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
+import { fmtGram } from '../utils/format'
 
 // Должна совпадать с MARKET_FEE на бэкенде и цифрой в Market.jsx.
 // Итоговая комиссия всё равно приходит в ответе покупки — это лишь предпросмотр.
@@ -81,7 +82,7 @@ export default function ListingDetail() {
   const handleBuy = () => {
     haptic('medium')
     showConfirm(
-      `Купить «${item.name}» за ${item.price} GRAM?`,
+      `Купить «${item.name}» за ${fmtGram(item.price)} GRAM?`,
       async (ok) => {
         if (!ok) return
         setBuying(true)
@@ -230,16 +231,16 @@ export default function ListingDetail() {
       <div className="card" style={{ padding: '14px 16px', marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Цена</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>{item.price} <GramIcon size={12} /></span>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(item.price)} <GramIcon size={12} /></span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия Rubuy ({Math.round(FEE_RATE * 100)}%)</span>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fee} <GramIcon size={12} /></span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fmtGram(fee)} <GramIcon size={12} /></span>
         </div>
         <div className="divider" style={{ margin: '10px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontWeight: 600 }}>Итого</span>
-          <span className="price price-md">{total} <GramIcon size={13} /></span>
+          <span className="price price-md">{fmtGram(total)} <GramIcon size={13} /></span>
         </div>
       </div>
 
@@ -336,7 +337,7 @@ export default function ListingDetail() {
           disabled={buying}
           style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
         >
-          {buying ? '⏳ Обработка...' : <>Купить за {total} <GramIcon size={14} /></>}
+          {buying ? '⏳ Обработка...' : <>Купить за {fmtGram(total)} <GramIcon size={14} /></>}
         </button>
       )}
     </div>

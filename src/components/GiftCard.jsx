@@ -2,6 +2,7 @@ import { IconMessageDollar } from '@tabler/icons-react'
 import GramIcon from './GramIcon'
 import TgGiftSticker from './TgGiftSticker'
 import { giftAccentColor } from '../api/client'
+import { fmtGram } from '../utils/format'
 
 function timeAgo(ts) {
   const diff = (Date.now() - ts) / 1000
@@ -64,7 +65,7 @@ export default function GiftCard({ item, onClick, onOffer }) {
           </span>
         </div>
         {item.price != null
-          ? <div className="poster-price" style={{ flexShrink: 0 }}>{item.price} <GramIcon size={9} /></div>
+          ? <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(item.price)} <GramIcon size={9} /></div>
           : <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
               {item.owner ? `@${item.owner}` : 'На обмен'}
             </div>}
