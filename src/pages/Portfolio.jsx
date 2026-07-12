@@ -308,8 +308,9 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
           scrollMarginBottom: 'calc(var(--nav-h) + 20px + var(--safe-bottom))',
         }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-            Подарок вернётся в ваш аккаунт Telegram обычной посылкой.
-            Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.25 <GramIcon size={11} /></span>, спишется с баланса.
+            twentop автоматически отправит подарок на ваш Telegram аккаунт.
+            <br />
+            Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.25 <GramIcon size={11} /></span>
           </div>
           {error && (
             <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>
@@ -361,6 +362,7 @@ export default function Portfolio() {
   const { haptic } = useTelegram()
   const [gifts, setGifts] = useState(null)
   const [error, setError] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all') // all | sale | trade | free
 
   const [tradePicker, setTradePicker] = useState(false)
   const [tradeSelected, setTradeSelected] = useState(() => new Set())
@@ -399,6 +401,22 @@ export default function Portfolio() {
   const onSaleCount = (gifts || []).filter(g => g.on_sale).length
   const onTradeCount = (gifts || []).filter(g => g.on_trade).length
   const tradeableGifts = (gifts || []).filter(g => !g.on_sale && !g.on_trade)
+
+  // Порядок в сетке: сначала на продаже, потом в обмене, потом свободные
+  const statusRank = (g) => (g.on_sale ? 0 : g.on_trade ? 1 : 2)
+  const visibleGifts = (gifts || [])
+    .filter(g => statusFilter === 'all'
+      || (statusFilter === 'sale' && g.on_sale)
+      || (statusFilter === 'trade' && g.on_trade)
+      || (statusFilter === 'free' && !g.on_sale && !g.on_trade))
+    .sort((a, b) => statusRank(a) - statusRank(b))
+
+  const STATUS_FILTERS = [
+    { label: 'Все', value: 'all' },
+    { label: 'На продаже', value: 'sale' },
+    { label: 'В обмене', value: 'trade' },
+    { label: 'Свободные', value: 'free' },
+  ]
 
   const openTradePicker = (giftId) => {
     setTradeError('')
@@ -466,14 +484,18 @@ export default function Portfolio() {
           + Добавить подарок
         </button>
 
-        {tradeableGifts.length > 0 && (
-          <button
-            className="btn btn-ghost btn-full"
-            style={{ marginTop: 8 }}
-            onClick={() => { haptic('medium'); openTradePicker(null) }}
-          >
-            🔄 Выставить на обмен
-          </button>
+        {(gifts || []).length > 0 && (
+          <div className="chips-row" style={{ marginTop: 12 }}>
+            {STATUS_FILTERS.map(f => (
+              <button
+                key={f.value}
+                onClick={() => { haptic('light'); setStatusFilter(f.value) }}
+                className={`chip${statusFilter === f.value ? ' active' : ''}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         )}
 
         {tradePicker && (
@@ -556,9 +578,15 @@ export default function Portfolio() {
             {error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
           </div>
         </div>
+      ) : visibleGifts.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <div className="empty-title">Таких подарков нет</div>
+          <div className="empty-desc">Попробуйте другой фильтр</div>
+        </div>
       ) : (
         <div style={{ columnCount: 2, columnGap: 9 }}>
-          {gifts.map(gift => (
+          {visibleGifts.map(gift => (
             <div key={gift.gift_id} style={{ breakInside: 'avoid', marginBottom: 9 }}>
               <GiftCard gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
             </div>
