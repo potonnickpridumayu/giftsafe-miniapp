@@ -222,7 +222,7 @@ export default function ListingDetail() {
           <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(item.price)} <GramIcon size={12} /></span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия Rubuy ({Math.round(FEE_RATE * 100)}%)</span>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия ruby ({Math.round(FEE_RATE * 100)}%)</span>
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fmtGram(fee)} <GramIcon size={12} /></span>
         </div>
         <div className="divider" style={{ margin: '10px 0' }} />

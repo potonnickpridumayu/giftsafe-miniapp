@@ -293,7 +293,7 @@ export default function Sell() {
               NFT получен!
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6, lineHeight: 1.6 }}>
-              Подарок уже в вашем портфеле и хранится в сейфе Rubuy.
+              Подарок уже в вашем портфеле и хранится в сейфе ruby.
               Выставить на продажу можно сейчас или позже — из портфеля.
             </p>
           </div>
@@ -318,7 +318,7 @@ export default function Sell() {
       {step === 'price' && gift && (
         <>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
-            ✅ Подарок получен и хранится в Rubuy. Назначьте цену.
+            ✅ Подарок получен и хранится в ruby. Назначьте цену.
           </p>
 
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
@@ -341,7 +341,7 @@ export default function Sell() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                Комиссия Rubuy ({Math.round(FEE_RATE * 100)}%)
+                Комиссия ruby ({Math.round(FEE_RATE * 100)}%)
               </span>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fmtGram(fee)} <GramIcon size={12} /></span>
             </div>

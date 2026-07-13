@@ -44,7 +44,7 @@ export default function Referral() {
 
   const share = () => {
     haptic('medium')
-    const text = 'Залетай на Rubuy — маркет подарков Telegram 💎'
+    const text = 'Залетай на ruby — маркет подарков Telegram 💎'
     const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`
     if (window.Telegram?.WebApp?.openTelegramLink) {
       window.Telegram.WebApp.openTelegramLink(url)
