@@ -15,19 +15,24 @@ import Cart from './pages/Cart'
 export default function App() {
   // Прячем сплэш из index.html, когда смонтировался React И предзагрузились
   // данные вкладок (маркет/обмен/портфель) — вкладки открываются сразу с
-  // контентом. Минимум 600мс показа (не мигает), максимум ждём данные 2.5с
-  // (сплэш никогда не зависает — при медленной сети догрузится уже внутри).
+  // контентом. Минимум показа задаёт index.html (__splashMin: 600мс для
+  // CSS-фолбэка, 1500мс когда играет видео — и он может вырасти уже после
+  // старта таймера, поэтому перепроверяем в момент срабатывания). Данные
+  // ждём максимум 2.5с — сплэш никогда не зависает.
   useEffect(() => {
     const el = document.getElementById('splash')
     if (!el) return
-    const shownFor = Date.now() - (window.__splashAt || Date.now())
-    const minShow = new Promise(r => setTimeout(r, Math.max(0, 600 - shownFor)))
-    const data = Promise.race([prefetchAll(), new Promise(r => setTimeout(r, 2500))])
     let gone = false
-    Promise.all([minShow, data]).then(() => {
-      if (gone) return
-      el.classList.add('hide')
-      setTimeout(() => el.remove(), 400)
+    const data = Promise.race([prefetchAll(), new Promise(r => setTimeout(r, 2500))])
+    data.then(() => {
+      const tryHide = () => {
+        if (gone) return
+        const left = (window.__splashMin || 600) - (Date.now() - (window.__splashAt || Date.now()))
+        if (left > 0) { setTimeout(tryHide, left); return }
+        el.classList.add('hide')
+        setTimeout(() => el.remove(), 400)
+      }
+      tryHide()
     })
     return () => { gone = true }
   }, [])
