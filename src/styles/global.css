@@ -41,6 +41,8 @@
 
   --nav-h: 64px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* высота статус-бара + плавающих кнопок TG в fullscreen (ставится из JS) */
+  --tg-top: 0px;
 }
 
 * {
@@ -82,7 +84,7 @@ html, body {
 /* ===== LAYOUT ===== */
 .page {
   flex: 1;
-  padding: 16px 16px calc(var(--nav-h) + 16px + var(--safe-bottom));
+  padding: calc(16px + var(--tg-top)) 16px calc(var(--nav-h) + 16px + var(--safe-bottom));
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
