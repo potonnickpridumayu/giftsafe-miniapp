@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import Market from './pages/Market'
@@ -11,6 +12,19 @@ import Referral from './pages/Referral'
 import Cart from './pages/Cart'
 
 export default function App() {
+  // Прячем сплэш из index.html, когда React смонтировался.
+  // Минимум 600мс показа — чтобы при быстрой загрузке он не мигал.
+  useEffect(() => {
+    const el = document.getElementById('splash')
+    if (!el) return
+    const shownFor = Date.now() - (window.__splashAt || Date.now())
+    const t = setTimeout(() => {
+      el.classList.add('hide')
+      setTimeout(() => el.remove(), 400)
+    }, Math.max(0, 600 - shownFor))
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>
