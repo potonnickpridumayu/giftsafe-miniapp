@@ -714,7 +714,7 @@ export default function Profile() {
                     </div>
                   )
                   return (
-                    <div key={`t${j}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                    <div key={`t${j}`} className="card" style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 45, 85, 0.35)' }}>
                       <div style={{
                         fontSize: 11, marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 4,
                       }}>
@@ -759,7 +759,7 @@ export default function Profile() {
                 return (
                   <div
                     key={j} className="card"
-                    style={{ padding: '10px 16px', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10, cursor: giftLink ? 'pointer' : 'default' }}
+                    style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 45, 85, 0.35)', display: 'flex', alignItems: 'center', gap: 10, cursor: giftLink ? 'pointer' : 'default' }}
                     onClick={giftLink ? () => { haptic('light'); openLink(giftLink) } : undefined}
                   >
                     <div style={{

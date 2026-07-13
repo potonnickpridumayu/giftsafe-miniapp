@@ -215,18 +215,6 @@ export default function ListingDetail() {
         </div>
       )}
 
-      {/* Seller */}
-      <div className="card" style={{ padding: '12px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div className="avatar">👤</div>
-        <div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Продавец</div>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>@{item.seller}</div>
-        </div>
-        <div style={{ marginLeft: 'auto' }}>
-          <span className="badge badge-muted">✓ Проверен</span>
-        </div>
-      </div>
-
       {/* Price breakdown */}
       <div className="card" style={{ padding: '14px 16px', marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>

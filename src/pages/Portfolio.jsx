@@ -38,6 +38,22 @@ const rowBtnStyle = {
 }
 const ellipsisStyle = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 
+// Скролл к раскрывшейся панели. scrollIntoView в Telegram WebView иногда
+// прыгает без анимации: layout ещё не устаканился после mount панели.
+// Ждём отрисовку двойным rAF и скроллим окно вручную к посчитанной точке —
+// с отступом сверху, чтобы панель оказалась в верхней части экрана
+// (и не пряталась под клавиатурой), плюс --tg-top в fullscreen.
+function scrollToPanel(el, offset = 90) {
+  if (!el) return
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const tgTop = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--tg-top')
+    ) || 0
+    const top = el.getBoundingClientRect().top + window.scrollY - tgTop - offset
+    window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' })
+  }))
+}
+
 function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const [panel, setPanel] = useState(null)
   const [address, setAddress] = useState('')
@@ -49,7 +65,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
 
   useEffect(() => {
     if (panel && panelRef.current) {
-      panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      scrollToPanel(panelRef.current)
     }
   }, [panel])
 
@@ -375,7 +391,7 @@ export default function Portfolio() {
 
   useEffect(() => {
     if (tradePicker && tradePickerRef.current) {
-      tradePickerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      scrollToPanel(tradePickerRef.current, 12)
     }
   }, [tradePicker])
 

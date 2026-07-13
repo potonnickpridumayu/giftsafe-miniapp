@@ -12,7 +12,7 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}д назад`
 }
 
-export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart }) {
+export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart, onBuy, buyBusy }) {
   const rarityColor = giftAccentColor(item.gift_id ?? item.id)
 
   return (
@@ -80,6 +80,23 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart 
               {item.owner ? `@${item.owner}` : 'На обмен'}
             </div>}
       </div>
+
+      {onBuy && (
+        <div style={{ padding: '5px 6px 6px' }}>
+          <button
+            className="btn btn-primary"
+            style={{
+              width: '100%', minWidth: 0, fontSize: 12, padding: '7px 6px',
+              borderRadius: 'var(--radius-md)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+            }}
+            disabled={buyBusy}
+            onClick={(e) => { e.stopPropagation(); onBuy(item) }}
+          >
+            {buyBusy ? '⏳' : <>Купить за {fmtGram(item.price)} <GramIcon size={10} /></>}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

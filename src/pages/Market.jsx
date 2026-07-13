@@ -39,7 +39,7 @@ const EMPTY_FILTERS = {
 
 export default function Market() {
   const navigate = useNavigate()
-  const { haptic, user } = useTelegram()
+  const { haptic, user, showConfirm, showAlert } = useTelegram()
   const [search, setSearch] = useState('')
   const [collection, setCollection] = useState('Все')
   const [sort, setSort] = useState('new')
@@ -87,6 +87,30 @@ export default function Market() {
     } finally {
       setOfferBusy(false)
     }
+  }
+
+  // Быстрая покупка прямо с карточки, без захода на страницу лота
+  const [buyingId, setBuyingId] = useState(null)
+  const quickBuy = (item) => {
+    haptic('medium')
+    showConfirm(
+      `Купить «${item.name}» за ${fmtGram(item.price)} Gram?`,
+      async (ok) => {
+        if (!ok) return
+        setBuyingId(item.id)
+        try {
+          await api.buyListing(item.id)
+          haptic('medium')
+          showAlert(`🎉 Куплено! ${item.name} уже в вашем портфеле`)
+          load()
+        } catch (e) {
+          haptic('heavy')
+          showAlert(`⚠️ ${e.message || 'Не удалось совершить покупку'}`)
+        } finally {
+          setBuyingId(null)
+        }
+      }
+    )
   }
 
   const load = useCallback(async () => {
@@ -286,6 +310,8 @@ export default function Market() {
               onOffer={item.seller_id !== user?.id ? openOffer : undefined}
               onCartToggle={item.seller_id !== user?.id ? (it) => { haptic('light'); toggleCart(it.id) } : undefined}
               inCart={cartIds.includes(item.id)}
+              onBuy={item.seller_id !== user?.id ? quickBuy : undefined}
+              buyBusy={buyingId === item.id}
             />
           ))}
         </div>
