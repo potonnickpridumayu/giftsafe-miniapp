@@ -7,7 +7,7 @@ import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
 import BrandLogo from '../components/BrandLogo'
 import { fmtGram } from '../utils/format'
-import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight } from '@tabler/icons-react'
+import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
 
 // Комиссия площадки с доплаты при обмене — та же, что и на Маркете (MARKET_FEE
 // на бэкенде). Здесь только для превью «сколько получит владелец лота»,
@@ -356,86 +356,130 @@ export default function Profile() {
             Вывести
           </button>
         </div>
-        {showDeposit && (
-          <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
-              <HoldStepButton
-              onStep={() => setDepositAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
-            >−</HoldStepButton>
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="0.1"
-              value={depositAmount}
-              onChange={e => setDepositAmount(e.target.value)}
-              style={{
-                width: 80, padding: '10px 12px', borderRadius: 999,
-                border: '1px solid var(--border)', background: 'var(--bg-input)',
-                color: 'var(--text-primary)', fontSize: 14, textAlign: 'center',
-                outline: 'none',
-              }}
-            />
-            <HoldStepButton
-              onStep={() => setDepositAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
-            >+</HoldStepButton>
-            <button
-              onClick={handleDeposit}
-              style={{
-                padding: '10px 16px', borderRadius: 999,
-                background: 'var(--gold-radial)',
-                color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px',
-                border: 'none', cursor: 'pointer', fontSize: 14,
-                boxShadow: 'var(--gold-glow)',
-              }}
-            >
-              OK
-            </button>
-          </div>
-        )}
-        {showWithdraw && (
-          <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
-            <HoldStepButton
-              onStep={() => setWithdrawAmount(a => Math.max(0.1, (parseFloat(String(a).replace(',', '.')) || 0.1) - 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
-            >−</HoldStepButton>
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="0.1"
-              value={withdrawAmount}
-              onChange={e => setWithdrawAmount(e.target.value)}
-              style={{
-                width: 80, padding: '10px 12px', borderRadius: 999,
-                border: '1px solid var(--border)', background: 'var(--bg-input)',
-                color: 'var(--text-primary)', fontSize: 14, textAlign: 'center',
-                outline: 'none',
-              }}
-            />
-            <HoldStepButton
-              onStep={() => setWithdrawAmount(a => ((parseFloat(String(a).replace(',', '.')) || 0) + 0.1).toFixed(1))}
-              style={{ padding: '10px 14px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer', touchAction: 'none' }}
-            >+</HoldStepButton>
-            <button
-              onClick={handleWithdraw}
-              style={{
-                padding: '10px 16px', borderRadius: 999,
-                background: 'var(--gold-radial)',
-                color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px',
-                border: 'none', cursor: 'pointer', fontSize: 14,
-                boxShadow: 'var(--gold-glow)',
-              }}
-            >
-              OK
-            </button>
-          </div>
-        )}
-        {showDeposit && depositStatus && (
+        {/* Статусы после закрытия шторки («Отправлено!…») — внутри шторки свои */}
+        {!showDeposit && depositStatus && (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{depositStatus}</div>
         )}
-        {showWithdraw && withdrawStatus && (
+        {!showWithdraw && withdrawStatus && (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{withdrawStatus}</div>
         )}
+
+        {/* Шторка пополнения/вывода: крупная, с явной идентичностью направления —
+            пополнение золотое (деньги приходят), вывод крэмзовый (уходят) */}
+        {(showDeposit || showWithdraw) && (() => {
+          const isDep = showDeposit
+          const amount = isDep ? depositAmount : withdrawAmount
+          const setAmount = isDep ? setDepositAmount : setWithdrawAmount
+          const status = isDep ? depositStatus : withdrawStatus
+          const accent = isDep ? 'var(--money-1)' : 'var(--gold)'
+          const actionBg = isDep ? 'var(--money-radial)' : 'var(--gold-radial)'
+          const close = () => { setShowDeposit(false); setShowWithdraw(false) }
+          const step = (d) => setAmount(a => Math.max(0.1, ((parseFloat(String(a).replace(',', '.')) || 0.1) + d)).toFixed(1))
+          const stepBtnStyle = {
+            width: 46, height: 46, borderRadius: '50%', fontSize: 22, lineHeight: 1,
+            border: '1px solid var(--border)', background: 'var(--bg-card-hover)',
+            color: accent, fontWeight: 700, cursor: 'pointer', touchAction: 'none', flexShrink: 0,
+          }
+          const shortWallet = walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : null
+          return (
+            <div
+              onClick={close}
+              style={{
+                position: 'fixed', inset: 0, zIndex: 300,
+                background: 'rgba(5,3,4,0.7)',
+                display: 'flex', alignItems: 'flex-end',
+              }}
+            >
+              <div
+                onClick={e => e.stopPropagation()}
+                style={{
+                  width: '100%', background: 'var(--bg-card)', borderRadius: '20px 20px 0 0',
+                  border: '1px solid var(--border)', borderBottom: 'none',
+                  padding: '26px 20px calc(28px + env(safe-area-inset-bottom, 0px))',
+                  maxWidth: 480, margin: '0 auto', textAlign: 'left',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+                  <div style={{
+                    width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
+                    background: actionBg, color: '#fff5f7',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {isDep ? <IconArrowDownLeft size={22} stroke={2.2} /> : <IconArrowUpRight size={22} stroke={2.2} />}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
+                    {isDep ? 'Пополнить баланс' : 'Вывести GRAM'}
+                  </div>
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 18 }}>
+                  {isDep
+                    ? 'TON спишутся с подключённого кошелька и зачислятся на баланс как GRAM.'
+                    : shortWallet
+                      ? <>TON придут на подключённый кошелёк <b style={{ color: 'var(--text-secondary)' }}>{shortWallet}</b>.</>
+                      : 'Кошелёк не подключён — попросим подключить при отправке.'}
+                </div>
+
+                {!isDep && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                      Доступно: <b className="money-text">{fmtGram(balance)}</b> <GramIcon size={11} />
+                    </span>
+                    <button
+                      className="chip"
+                      style={{ padding: '5px 12px', fontSize: 12 }}
+                      onClick={() => { haptic('light'); setAmount(fmtGram(balance)) }}
+                    >
+                      Всё
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                  <HoldStepButton onStep={() => step(-0.1)} style={stepBtnStyle}>−</HoldStepButton>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.1"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value.replace(/[^\d.,]/g, ''))}
+                    style={{
+                      flex: 1, minWidth: 0, padding: '14px 12px', borderRadius: 'var(--radius-md)',
+                      border: `1px solid ${accent}44`, background: 'var(--bg-input, var(--bg))',
+                      color: 'var(--text-primary)', fontSize: 28, fontWeight: 700,
+                      fontFamily: 'var(--font-display)', textAlign: 'center', outline: 'none',
+                    }}
+                  />
+                  <HoldStepButton onStep={() => step(0.1)} style={stepBtnStyle}>+</HoldStepButton>
+                </div>
+
+                {status && (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12, textAlign: 'center' }}>
+                    {status}
+                  </div>
+                )}
+
+                <button
+                  onClick={isDep ? handleDeposit : handleWithdraw}
+                  style={{
+                    width: '100%', padding: '15px', borderRadius: 999,
+                    background: actionBg, boxShadow: isDep ? 'none' : 'var(--gold-glow)',
+                    color: '#fff5f7', fontWeight: 700, fontSize: 16,
+                    border: 'none', cursor: 'pointer',
+                  }}
+                >
+                  {isDep ? `Пополнить на ${amount || '0.1'}` : `Вывести ${amount || '0.1'}`} GRAM
+                </button>
+                <button
+                  onClick={close}
+                  className="btn btn-ghost btn-full"
+                  style={{ marginTop: 8 }}
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          )
+        })()}
         {error && (
           <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 6 }}>{error}</div>
         )}
