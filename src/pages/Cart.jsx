@@ -7,6 +7,13 @@ import { fmtGram } from '../utils/format'
 import { useCartIds, removeFromCart, pruneCart } from '../utils/cart'
 import GramIcon from '../components/GramIcon'
 
+function lotPlural(n) {
+  const mod10 = n % 10, mod100 = n % 100
+  if (mod10 === 1 && mod100 !== 11) return 'лот'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'лота'
+  return 'лотов'
+}
+
 export default function Cart() {
   const navigate = useNavigate()
   const { haptic, showConfirm } = useTelegram()
@@ -23,8 +30,10 @@ export default function Cart() {
     try {
       const data = await api.getListings()
       setListings(data)
-      // лоты, которых больше нет на маркете (проданы/сняты) — выкидываем
-      setStaleCount(pruneCart(data.map(l => l.id)))
+      // лоты, которых больше нет на маркете (проданы/сняты) — выкидываем;
+      // счётчик накапливаем, чтобы повторная загрузка не стёрла надпись
+      const pruned = pruneCart(data.map(l => l.id))
+      if (pruned > 0) setStaleCount(prev => prev + pruned)
     } catch (e) {
       setError(e.message || 'Не удалось загрузить корзину')
       setListings([])
@@ -80,7 +89,9 @@ export default function Cart() {
 
       {staleCount > 0 && (
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
-          {staleCount === 1 ? '1 лот из корзины уже продан или снят — убрали его.' : `${staleCount} лота(ов) из корзины уже проданы или сняты — убрали их.`}
+          {staleCount === 1
+            ? '1 лот из корзины уже продан или снят'
+            : `${staleCount} ${lotPlural(staleCount)} из корзины уже проданы или сняты`}
         </div>
       )}
 
