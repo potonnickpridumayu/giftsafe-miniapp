@@ -100,7 +100,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   }
 
   const sell = async () => {
-    if (!(priceNum > 0)) { setError('Укажите цену в GRAM больше нуля'); return }
+    if (!(priceNum > 0)) { setError('Укажите цену в Gram больше нуля'); return }
     setBusy(true)
     setError('')
     try {
@@ -254,7 +254,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             className="input"
             value={newPrice}
             onChange={e => { setNewPrice(e.target.value.replace(/[^\d.,]/g, '')); setError('') }}
-            placeholder="Новая цена в GRAM"
+            placeholder="Новая цена в Gram"
             inputMode="decimal"
             disabled={busy}
             style={{ fontSize: 13, marginBottom: 8 }}
@@ -285,7 +285,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             className="input"
             value={price}
             onChange={e => { setPrice(e.target.value.replace(/[^\d.,]/g, '')); setError('') }}
-            placeholder="Укажите цену в GRAM"
+            placeholder="Укажите цену в Gram"
             inputMode="decimal"
             disabled={busy}
             style={{ fontSize: 12, marginBottom: 8 }}

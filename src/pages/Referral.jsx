@@ -118,7 +118,7 @@ export default function Referral() {
 
       <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-          💡 Друг заходит по вашей ссылке → продаёт подарки → вам начисляется 1% от суммы каждой его продажи. Начисления приходят на GRAM-баланс автоматически.
+          💡 Друг заходит по вашей ссылке → продаёт подарки → вам начисляется 1% от суммы каждой его продажи. Начисления приходят на Gram-баланс автоматически.
         </div>
       </div>
     </div>

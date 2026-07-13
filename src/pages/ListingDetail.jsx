@@ -82,7 +82,7 @@ export default function ListingDetail() {
   const handleBuy = () => {
     haptic('medium')
     showConfirm(
-      `Купить «${item.name}» за ${fmtGram(item.price)} GRAM?`,
+      `Купить «${item.name}» за ${fmtGram(item.price)} Gram?`,
       async (ok) => {
         if (!ok) return
         setBuying(true)
@@ -285,7 +285,7 @@ export default function ListingDetail() {
 
             {editingPrice ? (
               <div className="card" style={{ padding: '12px 14px', marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>Новая цена (GRAM)</div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>Новая цена (Gram)</div>
                 <input
                   type="number"
                   inputMode="decimal"

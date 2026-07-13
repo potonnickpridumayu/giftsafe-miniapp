@@ -100,13 +100,13 @@ export default function Sell() {
 
   const submitListing = () => {
     if (!(priceNum > 0)) {
-      setError('Укажите цену в GRAM больше нуля')
+      setError('Укажите цену в Gram больше нуля')
       haptic('heavy')
       return
     }
     haptic('medium')
     showConfirm(
-      `Выставить подарок за ${fmtGram(priceNum)} GRAM? Вы получите ${fmtGram(youGet)} GRAM.`,
+      `Выставить подарок за ${fmtGram(priceNum)} Gram? Вы получите ${fmtGram(youGet)} Gram.`,
       async (ok) => {
         if (!ok) return
         setBusy(true)
@@ -140,7 +140,7 @@ export default function Sell() {
           </div>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6 }}>
             {done.gift_name ? `«${done.gift_name}» ` : ''}теперь на маркете
-            При продаже GRAM придёт вам на баланс.
+            При продаже Gram придёт вам на баланс.
           </p>
           <button
             className="btn btn-primary btn-full"
@@ -322,7 +322,7 @@ export default function Sell() {
           </p>
 
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
-            Цена в GRAM <span style={{ color: 'var(--gold)' }}>*</span>
+            Цена в Gram <span style={{ color: 'var(--gold)' }}>*</span>
           </label>
           <input
             className="input"

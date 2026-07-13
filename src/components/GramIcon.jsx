@@ -1,5 +1,5 @@
-// Значок GRAM — синий бриллиант с искрой. Ставится после числовых значений
-// вместо текста "TON"/"GRAM" (в тестнете валюта GRAM, в проде масштабируется).
+// Значок Gram — синий бриллиант с искрой. Ставится после числовых значений
+// вместо текста "TON"/"Gram" (в тестнете валюта Gram, в проде масштабируется).
 export default function GramIcon({ size = 14, style }) {
   return (
     <svg
@@ -7,7 +7,7 @@ export default function GramIcon({ size = 14, style }) {
       height={size}
       viewBox="0 0 24 24"
       style={{ verticalAlign: '-2px', flexShrink: 0, ...style }}
-      aria-label="GRAM"
+      aria-label="Gram"
     >
       <path
         d="M5.6 3.5h12.8c.5 0 1 .23 1.32.62l3 3.7c.5.62.47 1.5-.06 2.09l-9.4 10.4c-.66.73-1.8.73-2.46 0L1.34 9.91c-.53-.59-.56-1.47-.06-2.09l3-3.7c.32-.39.82-.62 1.32-.62z"

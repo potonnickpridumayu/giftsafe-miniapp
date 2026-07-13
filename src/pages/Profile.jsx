@@ -82,7 +82,7 @@ export default function Profile() {
 
   const handleWithdraw = async () => {
   const amount = parseFloat(String(withdrawAmount).replace(',', '.'))
-  if (!amount || amount < 0.1) { setWithdrawStatus('Минимум 0.1 GRAM'); return }
+  if (!amount || amount < 0.1) { setWithdrawStatus('Минимум 0.1 Gram'); return }
   if (amount > balance) { setWithdrawStatus('Недостаточно средств'); return }
   if (!walletAddress) {
     setWithdrawStatus('Сначала подключите кошелёк')
@@ -93,9 +93,8 @@ export default function Profile() {
   try {
     await api.withdrawBalance(walletAddress, amount)
     try { haptic('medium') } catch {}
-    setShowWithdraw(false)
-    setWithdrawAmount('')
-    setWithdrawStatus('Отправлено! GRAM придут в течение 15 секунд')
+    // Шторку не закрываем — статус успеха виден внутри, закроет сам юзер
+    setWithdrawStatus('✅ Отправлено! Gram придут в течение 15 секунд')
     await reloadProfile()
   } catch (e) {
     setWithdrawStatus(e.message || 'Что-то пошло не так, попробуйте ещё раз')
@@ -107,7 +106,7 @@ export default function Profile() {
 
   const handleDeposit = async () => {
     const amount = parseFloat(String(depositAmount).replace(',', '.'))
-    if (!amount || amount < 0.1) { setDepositStatus('Минимум 0.1 GRAM'); return }
+    if (!amount || amount < 0.1) { setDepositStatus('Минимум 0.1 Gram'); return }
     if (!walletAddress) {
       setDepositStatus('Сначала подключите кошелёк')
       tonConnectUI.openModal()
@@ -130,9 +129,8 @@ export default function Profile() {
         }],
       })
       try { haptic('medium') } catch {}
-      setDepositStatus('Отправлено! Ждём подтверждения…')
-      setShowDeposit(false)
-      setDepositAmount('')
+      // Шторку не закрываем — статус успеха виден внутри, закроет сам юзер
+      setDepositStatus('✅ Отправлено! Ждём подтверждения…')
       // опрашиваем профиль каждые 5 сек, пока баланс не вырастет (макс 2 мин)
       const prevBalance = balance
       let tries = 0
@@ -356,14 +354,6 @@ export default function Profile() {
             Вывести
           </button>
         </div>
-        {/* Статусы после закрытия шторки («Отправлено!…») — внутри шторки свои */}
-        {!showDeposit && depositStatus && (
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{depositStatus}</div>
-        )}
-        {!showWithdraw && withdrawStatus && (
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{withdrawStatus}</div>
-        )}
-
         {/* Шторка пополнения/вывода: крупная, с явной идентичностью направления —
             пополнение золотое (деньги приходят), вывод крэмзовый (уходят) */}
         {(showDeposit || showWithdraw) && (() => {
@@ -408,14 +398,14 @@ export default function Profile() {
                     {isDep ? <IconArrowDownLeft size={22} stroke={2.2} /> : <IconArrowUpRight size={22} stroke={2.2} />}
                   </div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
-                    {isDep ? 'Пополнить баланс' : 'Вывести GRAM'}
+                    {isDep ? 'Пополнить баланс' : 'Вывести Gram'}
                   </div>
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 18 }}>
                   {isDep
-                    ? 'TON спишутся с подключённого кошелька и зачислятся на баланс как GRAM.'
+                    ? 'TON спишутся с подключённого кошелька и зачислятся на баланс как Gram.'
                     : shortWallet
-                      ? <>TON придут на подключённый кошелёк <b style={{ color: 'var(--text-secondary)' }}>{shortWallet}</b>.</>
+                      ? <>TON придут на подключённый кошелёк<br /><b style={{ color: 'var(--text-secondary)' }}>{shortWallet}</b></>
                       : 'Кошелёк не подключён — попросим подключить при отправке.'}
                 </div>
 
@@ -467,7 +457,7 @@ export default function Profile() {
                     border: 'none', cursor: 'pointer',
                   }}
                 >
-                  {isDep ? `Пополнить на ${amount || '0.1'}` : `Вывести ${amount || '0.1'}`} GRAM
+                  {isDep ? `Пополнить на ${amount || '0.1'}` : `Вывести ${amount || '0.1'}`} Gram
                 </button>
                 <button
                   onClick={close}

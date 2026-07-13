@@ -49,7 +49,7 @@ export default function Cart() {
     if (items.length === 0) return
     haptic('medium')
     showConfirm(
-      `Купить ${items.length} шт. за ${fmtGram(total)} GRAM?`,
+      `Купить ${items.length} шт. за ${fmtGram(total)} Gram?`,
       async (ok) => {
         if (!ok) return
         setBuying(true)

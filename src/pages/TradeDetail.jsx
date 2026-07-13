@@ -316,7 +316,7 @@ export default function TradeDetail() {
             </div>
           )}
 
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>Доплата (GRAM, необязательно)</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>Доплата (Gram, необязательно)</div>
           <input
             className="input"
             value={topUp}
