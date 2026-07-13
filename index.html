@@ -17,18 +17,29 @@
     <style>
       #splash{position:fixed;inset:0;z-index:9999;background:#18070e;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .35s ease}
       #splash.hide{opacity:0;pointer-events:none}
-      #splash .mark{position:relative;width:150px;height:168px}
-      #splash .r{position:absolute;left:6px;bottom:-34px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:150px;line-height:1;color:#ff2d55;animation:spl-r 3s ease infinite}
-      #splash .gem{position:absolute;right:6px;top:0;width:54px;height:54px;border-radius:16px;background:#ff5c7c;animation:spl-gem 3s cubic-bezier(.34,1.56,.64,1) infinite}
-      #splash .word{margin-top:40px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;letter-spacing:1px;color:#fff;animation:spl-word 3s ease infinite}
-      @keyframes spl-gem{0%{transform:translateY(-90px) rotate(45deg);opacity:0}10%{opacity:1}28%{transform:translateY(0) rotate(45deg)}100%{transform:translateY(0) rotate(45deg);opacity:1}}
-      @keyframes spl-r{0%,20%{transform:translateY(22px);opacity:0}42%{transform:translateY(0);opacity:1}100%{transform:translateY(0);opacity:1}}
-      @keyframes spl-word{0%,52%{transform:translateY(10px);opacity:0}72%{transform:translateY(0);opacity:1}100%{transform:translateY(0);opacity:1}}
+      #splash .mark{position:relative;width:150px;height:170px}
+      #splash .r{position:absolute;left:4px;bottom:-32px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:144px;line-height:1;color:#ff2d55;transform-origin:30% 80%;animation:spl-r 3s ease infinite}
+      #splash .gem{position:absolute;right:4px;top:0;width:56px;height:56px;border-radius:17px;background:#ff5c7c;animation:spl-gem 3s cubic-bezier(.3,1.4,.55,1) infinite}
+      /* рябь: маленькое кольцо вокруг ромбика при приземлении + большое вокруг знака */
+      #splash .ring1{position:absolute;right:-10px;top:-12px;width:82px;height:82px;border-radius:50%;border:1.5px solid rgba(255,92,124,.55);opacity:0;animation:spl-ring1 3s ease-out infinite}
+      #splash .ring2{position:absolute;left:50%;top:54%;width:216px;height:216px;margin:-108px 0 0 -108px;border-radius:50%;border:1.5px solid rgba(255,92,124,.4);opacity:0;animation:spl-ring2 3s ease-out infinite}
+      /* блик: белый скруглённый квадратик прилетает сверху-справа к углу ромбика */
+      #splash .spark{position:absolute;right:-14px;top:-16px;width:13px;height:13px;border-radius:4px;background:#fff;opacity:0;animation:spl-spark 3s ease infinite}
+      #splash .word{margin-top:42px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;color:#ff5c7c;animation:spl-word 3s ease infinite}
+      @keyframes spl-gem{0%,13%{transform:translateY(-150px) rotate(45deg);opacity:0}17%{opacity:1}24%{transform:translateY(0) rotate(45deg)}100%{transform:translateY(0) rotate(45deg);opacity:1}}
+      @keyframes spl-r{0%,22%{transform:scale(.35);opacity:0}40%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:1}}
+      @keyframes spl-ring1{0%,20%{transform:scale(.35);opacity:0}26%{opacity:.6}40%{transform:scale(1.5);opacity:0}100%{opacity:0}}
+      @keyframes spl-ring2{0%,24%{transform:scale(.4);opacity:0}30%{opacity:.45}52%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+      @keyframes spl-word{0%,40%{opacity:0;letter-spacing:.38em;transform:translateY(8px)}58%{opacity:1;letter-spacing:.02em;transform:translateY(0)}100%{opacity:1;letter-spacing:.02em;transform:translateY(0)}}
+      @keyframes spl-spark{0%,50%{transform:translate(26px,-26px) rotate(10deg) scale(.2);opacity:0}55%{opacity:1}58%{transform:translate(6px,-6px) rotate(50deg) scale(1);opacity:1}66%{transform:translate(-2px,2px) rotate(75deg) scale(.15);opacity:0}100%{opacity:0}}
     </style>
     <div id="splash">
       <div class="mark">
         <span class="r">r</span>
         <div class="gem"></div>
+        <div class="ring1"></div>
+        <div class="ring2"></div>
+        <div class="spark"></div>
       </div>
       <div class="word">ruby</div>
     </div>
