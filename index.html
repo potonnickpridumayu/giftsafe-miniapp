@@ -26,16 +26,12 @@
       /* блик: белый скруглённый квадратик прилетает сверху-справа к углу ромбика */
       #splash .spark{position:absolute;right:-14px;top:-16px;width:13px;height:13px;border-radius:4px;background:#fff;opacity:0;animation:spl-spark 3s ease infinite}
       #splash .word{margin-top:42px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;color:#fff;animation:spl-word 3s ease infinite}
-      /* Ромбик кувыркается при падении (наклон меняется), летит чуть по
-         диагонали слева-направо, касается, отскакивает вверх и оседает —
-         тайминги сняты покадрово с Ruby Splash dark.mp4 */
+      /* Ромбик кувыркается при падении (−38°→45°), летит чуть по диагонали.
+         Одна непрерывная кривая без отскока — плавно от старта до покоя. */
       @keyframes spl-gem{
-        0%,12%{transform:translate(-18px,-160px) rotate(-38deg);opacity:0}
-        14%{opacity:1}
-        16%{transform:translate(-10px,-64px) rotate(8deg)}
-        20%{transform:translate(-3px,-10px) rotate(32deg)}
-        24%{transform:translate(0,-24px) rotate(41deg)}
-        30%{transform:translate(0,0) rotate(45deg)}
+        0%,12%{transform:translate(-18px,-170px) rotate(-38deg);opacity:0}
+        15%{opacity:1}
+        27%{transform:translate(0,0) rotate(45deg)}
         100%{transform:translate(0,0) rotate(45deg);opacity:1}
       }
       /* r выскакивает быстро (в видео появляется за 2 кадра) */
