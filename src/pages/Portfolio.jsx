@@ -485,12 +485,13 @@ export default function Portfolio() {
         </button>
 
         {(gifts || []).length > 0 && (
-          <div className="chips-row" style={{ marginTop: 12 }}>
+          <div className="chips-row" style={{ marginTop: 12, flexWrap: 'nowrap', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {STATUS_FILTERS.map(f => (
               <button
                 key={f.value}
                 onClick={() => { haptic('light'); setStatusFilter(f.value) }}
                 className={`chip${statusFilter === f.value ? ' active' : ''}`}
+                style={{ padding: '7px 10px', fontSize: 12, flexShrink: 0 }}
               >
                 {f.label}
               </button>

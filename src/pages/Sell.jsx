@@ -179,7 +179,7 @@ export default function Sell() {
             {[
               { n: 1, t: <>Откройте чат с <b style={{ color: 'var(--gold)' }}>@{BANK_USERNAME}</b></> },
               { n: 2, t: <>Напишите ему <b>прив)</b></> },
-              { n: 3, t: <>Отправьте нужный вам подарок <b style={{ color: 'var(--gold)' }}>@{BANK_USERNAME}</b></> },
+              { n: 3, t: <>Отправьте нужный вам подарок</> },
               { n: 4, t: <>Готово — подарок появится в вашем Портфеле</> },
             ].map((s, i, arr) => (
               <div key={s.n} style={{
