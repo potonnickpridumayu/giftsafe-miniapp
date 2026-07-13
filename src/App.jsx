@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { prefetchAll } from './utils/dataCache'
 import NavBar from './components/NavBar'
 import Market from './pages/Market'
 import ListingDetail from './pages/ListingDetail'
@@ -12,17 +13,23 @@ import Referral from './pages/Referral'
 import Cart from './pages/Cart'
 
 export default function App() {
-  // Прячем сплэш из index.html, когда React смонтировался.
-  // Минимум 600мс показа — чтобы при быстрой загрузке он не мигал.
+  // Прячем сплэш из index.html, когда смонтировался React И предзагрузились
+  // данные вкладок (маркет/обмен/портфель) — вкладки открываются сразу с
+  // контентом. Минимум 600мс показа (не мигает), максимум ждём данные 2.5с
+  // (сплэш никогда не зависает — при медленной сети догрузится уже внутри).
   useEffect(() => {
     const el = document.getElementById('splash')
     if (!el) return
     const shownFor = Date.now() - (window.__splashAt || Date.now())
-    const t = setTimeout(() => {
+    const minShow = new Promise(r => setTimeout(r, Math.max(0, 600 - shownFor)))
+    const data = Promise.race([prefetchAll(), new Promise(r => setTimeout(r, 2500))])
+    let gone = false
+    Promise.all([minShow, data]).then(() => {
+      if (gone) return
       el.classList.add('hide')
       setTimeout(() => el.remove(), 400)
-    }, Math.max(0, 600 - shownFor))
-    return () => clearTimeout(t)
+    })
+    return () => { gone = true }
   }, [])
 
   return (

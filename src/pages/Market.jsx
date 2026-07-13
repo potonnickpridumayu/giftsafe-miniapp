@@ -7,6 +7,7 @@ import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import { fmtGram } from '../utils/format'
 import { useCartIds, toggleCart } from '../utils/cart'
+import { getCached, setCached } from '../utils/dataCache'
 
 function plural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -45,8 +46,10 @@ export default function Market() {
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const [showFilters, setShowFilters] = useState(false)
 
-  const [listings, setListings] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Стартуем из кэша (предзагружен на сплэше) — маркет открывается мгновенно,
+  // свежие данные подтягиваются фоном
+  const [listings, setListings] = useState(() => getCached('listings') || [])
+  const [loading, setLoading] = useState(() => !getCached('listings'))
   const [error, setError] = useState(null)
 
   const cartIds = useCartIds()
@@ -87,13 +90,15 @@ export default function Market() {
   }
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!getCached('listings')) setLoading(true)
     setError(null)
     try {
       const data = await api.getListings()
       setListings(data)
+      setCached('listings', data)
     } catch (e) {
-      setError(e.message || 'Не удалось загрузить маркет')
+      // при живом кэше не роняем экран в ошибку — показываем старые данные
+      if (!getCached('listings')) setError(e.message || 'Не удалось загрузить маркет')
     } finally {
       setLoading(false)
     }

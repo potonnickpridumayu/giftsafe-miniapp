@@ -8,6 +8,7 @@ import TgGiftSticker from '../components/TgGiftSticker'
 import BrandLogo from '../components/BrandLogo'
 import WalletButton from '../components/WalletButton'
 import { fmtGram } from '../utils/format'
+import { getCached, setCached } from '../utils/dataCache'
 
 const API_BASE = 'https://nftmarketbot-production.up.railway.app'
 
@@ -360,7 +361,8 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
 export default function Portfolio() {
   const navigate = useNavigate()
   const { haptic } = useTelegram()
-  const [gifts, setGifts] = useState(null)
+  // null = ещё не грузили (спиннер); из кэша сплэша стартуем сразу с данными
+  const [gifts, setGifts] = useState(() => getCached('portfolio') ?? null)
   const [error, setError] = useState('')
   const [statusFilter, setStatusFilter] = useState('all') // all | sale | trade | free
 
@@ -381,9 +383,13 @@ export default function Portfolio() {
     try {
       const data = await apiCall('/api/portfolio')
       setGifts(data.gifts || [])
+      setCached('portfolio', data.gifts || [])
     } catch (e) {
-      setError(e.message)
-      setGifts([])
+      // при живом кэше не затираем показанные подарки пустотой
+      if (getCached('portfolio') === undefined) {
+        setError(e.message)
+        setGifts([])
+      }
     }
   }, [])
 

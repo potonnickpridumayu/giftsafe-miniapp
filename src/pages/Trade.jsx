@@ -4,23 +4,26 @@ import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
+import { getCached, setCached } from '../utils/dataCache'
 
 export default function Trade() {
   const navigate = useNavigate()
   const { haptic } = useTelegram()
-  const [trades, setTrades] = useState([])
+  // Стартуем из кэша (предзагружен на сплэше) — вкладка открывается мгновенно
+  const [trades, setTrades] = useState(() => getCached('trades') || [])
   const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !getCached('trades'))
   const [error, setError] = useState(null)
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!getCached('trades')) setLoading(true)
     setError(null)
     try {
       const data = await api.getTrades()
       setTrades(data)
+      setCached('trades', data)
     } catch (e) {
-      setError(e.message || 'Не удалось загрузить обмен')
+      if (!getCached('trades')) setError(e.message || 'Не удалось загрузить обмен')
     } finally {
       setLoading(false)
     }
