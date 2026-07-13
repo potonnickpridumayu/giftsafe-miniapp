@@ -10,22 +10,31 @@
   </head>
   <body>
     <!-- Сплэш рисуется до загрузки React — скрывает белый экран и прыжок шрифтов.
-         Анимация — видео (3с, как в исходнике); до его старта просто тёмный фон
-         в цвет видео. Прячет сплэш App.jsx: данные готовы + минимум (__splashMin). -->
+         Анимация повторяет видео-исходник (ромбик падает → появляется r → слово),
+         но собрана в CSS: вектор + шрифт = идеальная чёткость и частота кадров
+         экрана, и она зациклена — крутится, пока App.jsx не скроет сплэш
+         (данные готовы + минимум один полный цикл 3с). -->
     <style>
-      #splash{position:fixed;inset:0;z-index:9999;background:#18070e;transition:opacity .35s ease}
+      #splash{position:fixed;inset:0;z-index:9999;background:#18070e;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .35s ease}
       #splash.hide{opacity:0;pointer-events:none}
-      #splash video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+      #splash .mark{position:relative;width:150px;height:168px}
+      #splash .r{position:absolute;left:6px;bottom:-34px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:150px;line-height:1;color:#ff2d55;animation:spl-r 3s ease infinite}
+      #splash .gem{position:absolute;right:6px;top:0;width:54px;height:54px;border-radius:16px;background:#ff5c7c;animation:spl-gem 3s cubic-bezier(.34,1.56,.64,1) infinite}
+      #splash .word{margin-top:40px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;letter-spacing:1px;color:#fff;animation:spl-word 3s ease infinite}
+      @keyframes spl-gem{0%{transform:translateY(-90px) rotate(45deg);opacity:0}10%{opacity:1}28%{transform:translateY(0) rotate(45deg)}100%{transform:translateY(0) rotate(45deg);opacity:1}}
+      @keyframes spl-r{0%,20%{transform:translateY(22px);opacity:0}42%{transform:translateY(0);opacity:1}100%{transform:translateY(0);opacity:1}}
+      @keyframes spl-word{0%,52%{transform:translateY(10px);opacity:0}72%{transform:translateY(0);opacity:1}100%{transform:translateY(0);opacity:1}}
     </style>
     <div id="splash">
-      <video id="splash-video" src="/splash.mp4" muted playsinline autoplay preload="auto"></video>
+      <div class="mark">
+        <span class="r">r</span>
+        <div class="gem"></div>
+      </div>
+      <div class="word">ruby</div>
     </div>
     <script>
       window.__splashAt = Date.now()
-      window.__splashMin = 600
-      document.getElementById('splash-video').addEventListener('playing', function () {
-        window.__splashMin = 3000 // видео отыгрывает целиком
-      })
+      window.__splashMin = 3000 // минимум один полный цикл анимации
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
