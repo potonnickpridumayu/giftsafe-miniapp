@@ -24,7 +24,7 @@
       #splash .ring1{position:absolute;right:-10px;top:-12px;width:82px;height:82px;border-radius:50%;border:1.5px solid rgba(255,92,124,.55);opacity:0;animation:spl-ring1 3s ease-out infinite}
       #splash .ring2{position:absolute;left:50%;top:54%;width:216px;height:216px;margin:-108px 0 0 -108px;border-radius:50%;border:1.5px solid rgba(255,92,124,.4);opacity:0;animation:spl-ring2 3s ease-out infinite}
       /* блик: белый скруглённый квадратик прилетает сверху-справа к углу ромбика */
-      #splash .spark{position:absolute;right:-14px;top:-16px;width:13px;height:13px;border-radius:4px;background:#fff;opacity:0;animation:spl-spark 3s ease infinite}
+      #splash .spark{position:absolute;right:-14px;top:-16px;width:13px;height:13px;border-radius:4px;background:#fff;opacity:0;animation:spl-spark 3s linear infinite}
       #splash .word{margin-top:42px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;color:#fff;animation:spl-word 3s ease infinite}
       /* Ромбик кувыркается при падении (−38°→45°), летит чуть по диагонали.
          Одна непрерывная кривая без отскока — плавно от старта до покоя. */
@@ -39,8 +39,9 @@
       @keyframes spl-ring1{0%,20%{transform:scale(.35);opacity:0}26%{opacity:.6}40%{transform:scale(1.5);opacity:0}100%{opacity:0}}
       @keyframes spl-ring2{0%,24%{transform:scale(.4);opacity:0}30%{opacity:.45}52%{transform:scale(1.25);opacity:0}100%{opacity:0}}
       @keyframes spl-word{0%,52%{opacity:0;letter-spacing:.38em;transform:translateY(8px)}64%{opacity:1;letter-spacing:.02em;transform:translateY(0)}100%{opacity:1;letter-spacing:.02em;transform:translateY(0)}}
-      /* блик стоит на месте: вырастает и сжимается, прокручиваясь (снято с видео: 1.50-1.83с, центр неподвижен) */
-      @keyframes spl-spark{0%,50%{transform:rotate(0deg) scale(0);opacity:0}52%{opacity:1}55.5%{transform:rotate(65deg) scale(1);opacity:1}61%{transform:rotate(130deg) scale(0);opacity:0}100%{transform:rotate(130deg) scale(0);opacity:0}}
+      /* блик стоит на месте: вырастает и сжимается, медленно и равномерно
+         поворачиваясь −42°→0°(пик, ровный квадрат)→45°(ромбик) — покадрово с видео */
+      @keyframes spl-spark{0%,50%{transform:rotate(-42deg) scale(0);opacity:0}51%{opacity:1}55.5%{transform:rotate(0deg) scale(1);opacity:1}61%{transform:rotate(45deg) scale(0);opacity:0}100%{transform:rotate(45deg) scale(0);opacity:0}}
     </style>
     <div id="splash">
       <div class="mark">
