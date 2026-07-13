@@ -12,6 +12,7 @@ import Profile from './pages/Profile'
 import Sell from './pages/Sell'
 import Referral from './pages/Referral'
 import Cart from './pages/Cart'
+import MarketHistory from './pages/MarketHistory'
 
 export default function App() {
   // Прячем сплэш из index.html, когда смонтировался React И предзагрузились
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/sell" element={<Sell />} />
         <Route path="/referral" element={<Referral />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/history" element={<MarketHistory />} />
       </Routes>
       <NavBar />
       <ConfirmSheet />

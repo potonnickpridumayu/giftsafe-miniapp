@@ -60,6 +60,9 @@ html, body {
   font-size: 15px;
   line-height: 1.5;
   overflow-x: hidden;
+  /* Якорение прокрутки отключено: пикер обмена вставляется выше вьюпорта,
+     сдвиг компенсируем сами (Portfolio) — иначе двойная компенсация = рывок */
+  overflow-anchor: none;
   min-height: 100vh;
   min-height: -webkit-fill-available;
 }

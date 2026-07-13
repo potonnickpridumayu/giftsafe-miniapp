@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useLayoutEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
@@ -38,20 +38,34 @@ const rowBtnStyle = {
 }
 const ellipsisStyle = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 
-// Скролл к раскрывшейся панели. scrollIntoView в Telegram WebView иногда
-// прыгает без анимации: layout ещё не устаканился после mount панели.
-// Ждём отрисовку двойным rAF и скроллим окно вручную к посчитанной точке —
-// с отступом сверху, чтобы панель оказалась в верхней части экрана
-// (и не пряталась под клавиатурой), плюс --tg-top в fullscreen.
+// Скролл к раскрывшейся панели. Нативный scrollTo({behavior:'smooth'}) в
+// Telegram WebView иногда срабатывает мгновенным прыжком — анимируем сами
+// через rAF, это гарантированно плавно на любом клиенте.
+let _scrollRaf = null
+function animateScrollTo(targetY, duration = 450) {
+  if (_scrollRaf) cancelAnimationFrame(_scrollRaf)
+  const startY = window.scrollY
+  const delta = targetY - startY
+  if (Math.abs(delta) < 2) return
+  const t0 = performance.now()
+  const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+  const step = now => {
+    const p = Math.min(1, (now - t0) / duration)
+    window.scrollTo(0, startY + delta * ease(p))
+    _scrollRaf = p < 1 ? requestAnimationFrame(step) : null
+  }
+  _scrollRaf = requestAnimationFrame(step)
+}
+
+// Панель оказывается в верхней части экрана (не прячется под клавиатурой);
+// offset — отступ от верха, плюс --tg-top в fullscreen.
 function scrollToPanel(el, offset = 90) {
   if (!el) return
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    const tgTop = parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue('--tg-top')
-    ) || 0
-    const top = el.getBoundingClientRect().top + window.scrollY - tgTop - offset
-    window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' })
-  }))
+  const tgTop = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--tg-top')
+  ) || 0
+  const top = el.getBoundingClientRect().top + window.scrollY - tgTop - offset
+  animateScrollTo(Math.max(top, 0))
 }
 
 function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
@@ -389,9 +403,17 @@ export default function Portfolio() {
   const [tradeError, setTradeError] = useState('')
   const tradePickerRef = useRef(null)
 
-  useEffect(() => {
+  // Пикер вставляется ВЫШЕ текущей прокрутки и мгновенно сдвигает весь контент
+  // вниз — этот скачок и есть «дёргание». useLayoutEffect срабатывает до
+  // отрисовки кадра: компенсируем сдвиг мгновенным scrollBy (визуально ничего
+  // не меняется), и только потом плавно едем вверх к пикеру.
+  useLayoutEffect(() => {
     if (tradePicker && tradePickerRef.current) {
-      scrollToPanel(tradePickerRef.current, 12)
+      const el = tradePickerRef.current
+      if (el.getBoundingClientRect().bottom < 0) {
+        window.scrollBy(0, el.offsetHeight + 12) // 12 = marginTop пикера
+      }
+      scrollToPanel(el, 12)
     }
   }, [tradePicker])
 

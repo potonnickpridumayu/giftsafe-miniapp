@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconAdjustments, IconShoppingCart } from '@tabler/icons-react'
+import { IconAdjustments, IconShoppingCart, IconHistory } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import { api } from '../api/client'
@@ -200,6 +200,17 @@ export default function Market() {
           <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             {loading ? 'Загрузка…' : `${listings.length} ${plural(listings.length)}`}
           </p>
+          <button
+            onClick={() => { haptic('light'); navigate('/history') }}
+            aria-label="История сделок"
+            style={{
+              background: 'none', border: 'none',
+              color: 'var(--text-primary)', cursor: 'pointer', padding: 4,
+              display: 'flex', alignItems: 'center',
+            }}
+          >
+            <IconHistory size={22} stroke={1.8} />
+          </button>
           <button
             onClick={() => { haptic('light'); navigate('/cart') }}
             aria-label="Корзина"

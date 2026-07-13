@@ -159,6 +159,11 @@ export const api = {
     return normalizeListing(res.listing || res)
   },
   buyListing: (id) => request(`/listings/${id}/buy`, { method: 'POST' }),
+  // Публичная лента последних сделок маркета (продажи + обмены, анонимно)
+  getMarketHistory: async () => {
+    const res = await request('/market/history')
+    return res.history || []
+  },
   changePrice: (id, price) =>
     request(`/listings/${id}/price`, { method: 'POST', body: JSON.stringify({ price }) }),
 
