@@ -38,8 +38,9 @@
       @keyframes spl-r{0%,23%{transform:scale(.55);opacity:0}25%{opacity:.4}31%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:1}}
       @keyframes spl-ring1{0%,20%{transform:scale(.35);opacity:0}26%{opacity:.6}40%{transform:scale(1.5);opacity:0}100%{opacity:0}}
       @keyframes spl-ring2{0%,24%{transform:scale(.4);opacity:0}30%{opacity:.45}52%{transform:scale(1.25);opacity:0}100%{opacity:0}}
-      @keyframes spl-word{0%,40%{opacity:0;letter-spacing:.38em;transform:translateY(8px)}58%{opacity:1;letter-spacing:.02em;transform:translateY(0)}100%{opacity:1;letter-spacing:.02em;transform:translateY(0)}}
-      @keyframes spl-spark{0%,50%{transform:translate(26px,-26px) rotate(10deg) scale(.2);opacity:0}55%{opacity:1}58%{transform:translate(6px,-6px) rotate(50deg) scale(1);opacity:1}66%{transform:translate(-2px,2px) rotate(75deg) scale(.15);opacity:0}100%{opacity:0}}
+      @keyframes spl-word{0%,52%{opacity:0;letter-spacing:.38em;transform:translateY(8px)}64%{opacity:1;letter-spacing:.02em;transform:translateY(0)}100%{opacity:1;letter-spacing:.02em;transform:translateY(0)}}
+      /* блик стоит на месте: вырастает и сжимается, прокручиваясь (снято с видео: 1.50-1.83с, центр неподвижен) */
+      @keyframes spl-spark{0%,50%{transform:rotate(0deg) scale(0);opacity:0}52%{opacity:1}55.5%{transform:rotate(65deg) scale(1);opacity:1}61%{transform:rotate(130deg) scale(0);opacity:0}100%{transform:rotate(130deg) scale(0);opacity:0}}
     </style>
     <div id="splash">
       <div class="mark">
