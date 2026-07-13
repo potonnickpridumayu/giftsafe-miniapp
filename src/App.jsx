@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { prefetchAll } from './utils/dataCache'
 import NavBar from './components/NavBar'
+import ConfirmSheet from './components/ConfirmSheet'
 import Market from './pages/Market'
 import ListingDetail from './pages/ListingDetail'
 import Trade from './pages/Trade'
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
       </Routes>
       <NavBar />
+      <ConfirmSheet />
     </BrowserRouter>
   )
 }

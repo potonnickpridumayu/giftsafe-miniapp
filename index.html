@@ -10,36 +10,22 @@
   </head>
   <body>
     <!-- Сплэш рисуется до загрузки React — скрывает белый экран и прыжок шрифтов.
-         Основная анимация — видео (2× скорость, ~1.5с); пока оно грузится или
-         если не смогло — мгновенный CSS-фолбэк (пульсирующий ромбик).
-         Прячет сплэш App.jsx: данные готовы + минимум показа (__splashMin). -->
+         Анимация — видео (3с, как в исходнике); до его старта просто тёмный фон
+         в цвет видео. Прячет сплэш App.jsx: данные готовы + минимум (__splashMin). -->
     <style>
-      #splash{position:fixed;inset:0;z-index:9999;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .35s ease}
+      #splash{position:fixed;inset:0;z-index:9999;background:#18070e;transition:opacity .35s ease}
       #splash.hide{opacity:0;pointer-events:none}
-      #splash .gem{width:36px;height:36px;border-radius:10px;background:#ff5c7c;animation:splash-pulse 1.1s ease-in-out infinite}
-      #splash .word{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;color:#ff2d55;letter-spacing:.5px}
-      @keyframes splash-pulse{0%,100%{transform:rotate(45deg) scale(1);opacity:1}50%{transform:rotate(45deg) scale(.8);opacity:.65}}
-      #splash video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s ease}
-      #splash.video-on video{opacity:1}
-      #splash.video-on .gem,#splash.video-on .word{visibility:hidden}
+      #splash video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     </style>
     <div id="splash">
       <video id="splash-video" src="/splash.mp4" muted playsinline autoplay preload="auto"></video>
-      <div class="gem"></div>
-      <div class="word">ruby</div>
     </div>
     <script>
       window.__splashAt = Date.now()
       window.__splashMin = 600
-      ;(function () {
-        var v = document.getElementById('splash-video')
-        if (!v) return
-        v.playbackRate = 2 // 3с анимации проигрываются за 1.5с
-        v.addEventListener('playing', function () {
-          document.getElementById('splash').classList.add('video-on')
-          window.__splashMin = 1500 // даём видео отыграть целиком
-        })
-      })()
+      document.getElementById('splash-video').addEventListener('playing', function () {
+        window.__splashMin = 3000 // видео отыгрывает целиком
+      })
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>

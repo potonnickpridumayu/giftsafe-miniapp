@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { requestConfirm } from '../components/ConfirmSheet'
 
 const tg = window.Telegram?.WebApp
 
@@ -51,7 +52,8 @@ export function useTelegram() {
   }, [])
 
   const showAlert = (msg) => tg?.showAlert(msg)
-  const showConfirm = (msg, cb) => tg ? tg.showConfirm(msg, cb) : cb(window.confirm(msg))
+  // Подтверждения — своя шторка снизу (в стиле приложения), не системный попап
+  const showConfirm = (msg, cb) => requestConfirm(msg, cb)
   const haptic = (type = 'light') => tg?.HapticFeedback?.impactOccurred(type)
   const close = () => tg?.close()
   const openLink = (url) => {
