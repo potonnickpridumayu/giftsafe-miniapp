@@ -171,11 +171,7 @@ export default function Sell() {
       {/* ── Шаг 1: интро — отправка TG-подарка на аккаунт-сейф Rubuy ── */}
       {step === 'intro' && (
         <>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
-            Отправьте свой Telegram-подарок — он сам появится в вашем портфеле.
-          </p>
-
-          <div className="card" style={{ padding: 4, marginBottom: 18 }}>
+          <div className="card" style={{ padding: 4, margin: '12px 0 18px' }}>
             {[
               { n: 1, t: <>Откройте чат с <b style={{ color: 'var(--gold)' }}>@{BANK_USERNAME}</b></> },
               { n: 2, t: <>Напишите ему <b>прив)</b></> },

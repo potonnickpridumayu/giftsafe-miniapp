@@ -413,9 +413,9 @@ export default function Portfolio() {
 
   const STATUS_FILTERS = [
     { label: 'Все', value: 'all' },
+    { label: 'Свободные', value: 'free' },
     { label: 'На продаже', value: 'sale' },
     { label: 'В обмене', value: 'trade' },
-    { label: 'Свободные', value: 'free' },
   ]
 
   const openTradePicker = (giftId) => {
@@ -485,7 +485,7 @@ export default function Portfolio() {
         </button>
 
         {(gifts || []).length > 0 && (
-          <div className="chips-row" style={{ marginTop: 12, flexWrap: 'nowrap', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div className="chips-row" style={{ marginTop: 12, flexWrap: 'nowrap', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', justifyContent: 'center' }}>
             {STATUS_FILTERS.map(f => (
               <button
                 key={f.value}
