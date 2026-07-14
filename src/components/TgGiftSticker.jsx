@@ -18,19 +18,53 @@ function cacheTgs(id, data) {
   tgsCache.set(id, data)
 }
 
+// Загрузка tgs с дедупликацией: две карточки с одним стикером (или прогрев
+// со сплэша + маунт карточки) делят один запрос.
+const tgsLoading = new Map() // stickerId -> Promise<animationData>
+function loadTgs(stickerId) {
+  if (tgsCache.has(stickerId)) return Promise.resolve(tgsCache.get(stickerId))
+  if (tgsLoading.has(stickerId)) return tgsLoading.get(stickerId)
+  const p = (async () => {
+    const res = await fetch(`${FILE_BASE}/${stickerId}`)
+    if (!res.ok) throw new Error('tgs fetch failed')
+    const buf = new Uint8Array(await res.arrayBuffer())
+    const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
+    const data = JSON.parse(new TextDecoder().decode(raw))
+    cacheTgs(stickerId, data)
+    return data
+  })().finally(() => tgsLoading.delete(stickerId))
+  tgsLoading.set(stickerId, p)
+  return p
+}
+
 // Тот же приём для картинки узора: после первой загрузки держим её blob'ом
 // в памяти (objectURL живёт всю сессию — узоров столько же, сколько фонов,
 // это единицы), чтобы SVG <image> на ремоунте не ходил даже в дисковый кэш.
 const patternCache = new Map() // file_id -> objectURL
-const patternLoading = new Set()
+const patternLoading = new Map() // file_id -> Promise
 function warmPattern(fileId) {
-  if (!fileId || patternCache.has(fileId) || patternLoading.has(fileId)) return
-  patternLoading.add(fileId)
-  fetch(`${FILE_BASE}/${fileId}`)
+  if (!fileId || patternCache.has(fileId)) return Promise.resolve()
+  if (patternLoading.has(fileId)) return patternLoading.get(fileId)
+  const p = fetch(`${FILE_BASE}/${fileId}`)
     .then(r => (r.ok ? r.blob() : null))
     .then(b => { if (b) patternCache.set(fileId, URL.createObjectURL(b)) })
     .catch(() => { /* узор не критичен, останется сетевой URL */ })
     .finally(() => patternLoading.delete(fileId))
+  patternLoading.set(fileId, p)
+  return p
+}
+
+// Прогрев всей графики подарка (стикер + узор) — зовётся со сплэша
+// (prefetchAll), чтобы маркет открывался уже ПОЛНОСТЬЮ готовым.
+export function warmGiftArt(stickerId, backdrop) {
+  let bd = null
+  if (backdrop) {
+    try { bd = typeof backdrop === 'string' ? JSON.parse(backdrop) : backdrop } catch { /* без фона */ }
+  }
+  const jobs = []
+  if (bd?.pattern) jobs.push(warmPattern(bd.pattern))
+  if (stickerId) jobs.push(loadTgs(stickerId).catch(() => { /* останется JPG */ }))
+  return Promise.all(jobs)
 }
 
 const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
@@ -116,17 +150,7 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
     if (cached) {
       init(cached) // синхронно, без единого кадра фолбэка
     } else {
-      ;(async () => {
-        try {
-          const res = await fetch(`${FILE_BASE}/${stickerId}`)
-          if (!res.ok) throw new Error()
-          const buf = new Uint8Array(await res.arrayBuffer())
-          const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
-          const data = JSON.parse(new TextDecoder().decode(raw))
-          cacheTgs(stickerId, data)
-          init(data)
-        } catch { /* tgs не загрузился — остаёмся на статичном JPG */ }
-      })()
+      loadTgs(stickerId).then(init).catch(() => { /* остаёмся на статичном JPG */ })
     }
     return () => {
       dead = true
