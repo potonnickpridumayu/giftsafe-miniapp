@@ -422,7 +422,7 @@ html, body {
 .poster-price {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 11px;
+  font-size: 16px;
   line-height: 1.2;
   background: linear-gradient(135deg, var(--money-1), var(--money-2));
   -webkit-background-clip: text;

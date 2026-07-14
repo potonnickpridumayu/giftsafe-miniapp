@@ -91,13 +91,13 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
               width: '100%', minWidth: 0, padding: '7px 6px',
               borderRadius: 'var(--radius-md)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14,
+              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17,
               letterSpacing: 0.3,
             }}
             disabled={buyBusy}
             onClick={(e) => { e.stopPropagation(); onBuy(item) }}
           >
-            {buyBusy ? '⏳' : <>{fmtGram(item.price)} <GramIcon size={25} style={{ verticalAlign: '-6px' }} /></>}
+            {buyBusy ? '⏳' : <>{fmtGram(item.price)} <GramIcon size={25} style={{ verticalAlign: '-6px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
           </button>
         </div>
       )}

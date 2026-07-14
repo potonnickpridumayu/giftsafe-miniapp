@@ -348,7 +348,7 @@ export default function Sell() {
             <div className="divider" style={{ margin: '10px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 600 }}>Вы получите</span>
-              <span className="price price-md">{fmtGram(youGet)} <GramIcon size={24} style={{ verticalAlign: '-5px' }} /></span>
+              <span className="price price-md">{fmtGram(youGet)} <GramIcon size={24} style={{ verticalAlign: '-5px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></span>
             </div>
           </div>
 
