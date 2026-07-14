@@ -329,7 +329,7 @@ export default function Profile() {
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700 }}>
           <span className="money-text">{loading ? '…' : fmtGram(balance)}</span>
-          {!loading && <img src="/ruby-gem-256.png" alt="Ruby" style={{ height: 24, marginLeft: 6, verticalAlign: '-3px' }} />}
+          {!loading && <GramIcon size={32} style={{ marginLeft: 6, verticalAlign: '-5px' }} />}
         </div>
         <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 14 }}>
           <button
