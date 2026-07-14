@@ -19,6 +19,16 @@ const EVENT_LABELS = {
   price: ['Цена изменена', '#7f9df5'],
 }
 
+// Чипы фильтра по типу события — только для этой страницы, на Маркет
+// не переносится (там таких сущностей нет)
+const KIND_CHIPS = [
+  ['sale', 'Продажа'],
+  ['list', 'Размещение'],
+  ['price', 'Изменение цены'],
+  ['trade', 'Обмен'],
+  ['delist', 'Снятие'],
+]
+
 function fmtDate(ts) {
   const d = new Date(ts)
   return `${d.toLocaleDateString('ru-RU')} ${d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
@@ -79,6 +89,19 @@ export default function MarketHistory() {
   const [showFilters, setShowFilters] = useState(false)
   // Фильтры общие с Маркетом: выставил там — действуют и здесь
   const filters = useMarketFilters()
+  // …а тип события — ЛОКАЛЬНЫЙ фильтр этой страницы (мультивыбор;
+  // пустой набор = показывать всё). В общий стор не пишем — на Маркете
+  // продаж/размещений как фильтров не существует.
+  const [kinds, setKinds] = useState(() => new Set())
+  const toggleKind = (k) => {
+    haptic('light')
+    setKinds(prev => {
+      const next = new Set(prev)
+      if (next.has(k)) next.delete(k)
+      else next.add(k)
+      return next
+    })
+  }
 
   useEffect(() => {
     api.getMarketHistory()
@@ -101,6 +124,7 @@ export default function MarketHistory() {
 
   const visible = useMemo(() => {
     let list = [...(items || [])]
+    if (kinds.size > 0) list = list.filter(it => kinds.has(it.kind))
     const numQ = filters.number.replace('#', '').trim()
     if (numQ) {
       list = list.filter(it => itemGifts(it).some(
@@ -129,7 +153,7 @@ export default function MarketHistory() {
       })
     }
     return list
-  }, [items, filters])
+  }, [items, filters, kinds])
 
   return (
     <div className="page">
@@ -142,7 +166,7 @@ export default function MarketHistory() {
         </button>
         <button
           onClick={() => { haptic('light'); setShowFilters(true) }}
-          className={`chip${marketFiltersActive(filters) ? ' active' : ''}`}
+          className={`chip${marketFiltersActive(filters) || kinds.size > 0 ? ' active' : ''}`}
           style={{ flexShrink: 0, padding: '0 14px' }}
           aria-label="Фильтры"
         >
@@ -240,7 +264,31 @@ export default function MarketHistory() {
         )
       })}
 
-      <FiltersSheet open={showFilters} onClose={() => setShowFilters(false)} options={attrOptions} haptic={haptic} />
+      <FiltersSheet
+        open={showFilters}
+        onClose={() => setShowFilters(false)}
+        options={attrOptions}
+        haptic={haptic}
+        onReset={() => setKinds(new Set())}
+        extra={(
+          <>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: '16px 0 8px', fontWeight: 600, letterSpacing: 0.5 }}>
+              ТИП СОБЫТИЯ
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {KIND_CHIPS.map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => toggleKind(value)}
+                  className={`chip${kinds.has(value) ? ' active' : ''}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      />
     </div>
   )
 }

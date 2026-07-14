@@ -772,10 +772,9 @@ export default function Profile() {
                           <span style={{ fontWeight: 600, color: '#3ddc84' }}>👥 Реферал</span>
                           {tx.referral_username && <span>: @{tx.referral_username}</span>}
                         </div>
-                        <div style={{
-                          fontSize: 11, marginTop: 2, color: 'var(--text-muted)',
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        }}>
+                        {/* Без nowrap: текст «продал … за …» длинный, пусть
+                            переносится на вторую строку, а не режется «…» */}
+                        <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)', lineHeight: 1.45 }}>
                           продал {tx.gift_name ? `${tx.gift_name}${tx.gift_number ? ` #${tx.gift_number}` : ''}` : 'подарок'}
                           {tx.sale_amount_ton != null && <> за {fmtGram(tx.sale_amount_ton)}</>} — вам 1%
                         </div>

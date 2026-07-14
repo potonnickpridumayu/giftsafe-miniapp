@@ -8,7 +8,11 @@ const SORTS = [
 
 // Общая шторка фильтров Маркета и Истории маркета. Состояние живёт в
 // utils/marketFilters — одно на обе страницы.
-export default function FiltersSheet({ open, onClose, options, haptic }) {
+// extra — JSX-секция, специфичная для страницы (например, тип события в
+// Истории): рендерится в шторке первой, но её состояние живёт у страницы
+// и на другие страницы не переносится. onReset зовётся из «Очистить всё»,
+// чтобы страница сбросила и своё локальное состояние.
+export default function FiltersSheet({ open, onClose, options, haptic, extra, onReset }) {
   const filters = useMarketFilters()
   if (!open) return null
 
@@ -67,6 +71,8 @@ export default function FiltersSheet({ open, onClose, options, haptic }) {
             ✕
           </button>
         </div>
+
+        {extra}
 
         {section('НОМЕР ПОДАРКА')}
         <input
@@ -133,7 +139,7 @@ export default function FiltersSheet({ open, onClose, options, haptic }) {
           <button
             className="btn btn-ghost"
             style={{ flex: 1 }}
-            onClick={() => { haptic('light'); resetMarketFilters() }}
+            onClick={() => { haptic('light'); resetMarketFilters(); onReset?.() }}
           >
             Очистить всё
           </button>
