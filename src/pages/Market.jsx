@@ -1,13 +1,15 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+﻿import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconAdjustments, IconShoppingCart, IconHistory } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
+import FiltersSheet from '../components/FiltersSheet'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import { fmtGram } from '../utils/format'
 import { useCartIds, toggleCart } from '../utils/cart'
 import { getCached, setCached } from '../utils/dataCache'
+import { useMarketFilters, marketFiltersActive } from '../utils/marketFilters'
 
 function plural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -16,34 +18,18 @@ function plural(n) {
   return 'подарков'
 }
 
-const SORTS = [
-  { label: 'Новые', value: 'new' },
-  { label: 'Дешевле', value: 'price_asc' },
-  { label: 'Дороже', value: 'price_desc' },
-]
-
 // Атрибуты подарка (модель/фон/символ) лежат JSON-строкой в tg_backdrop
 function giftAttrs(item) {
   if (!item.tg_backdrop) return {}
   try { return JSON.parse(item.tg_backdrop) } catch { return {} }
 }
 
-const EMPTY_FILTERS = {
-  number: '',
-  priceMin: '',
-  priceMax: '',
-  model: '',
-  backdropName: '',
-  symbolName: '',
-}
-
 export default function Market() {
   const navigate = useNavigate()
   const { haptic, user, showConfirm, showAlert } = useTelegram()
   const [search, setSearch] = useState('')
-  const [collection, setCollection] = useState('Все')
-  const [sort, setSort] = useState('new')
-  const [filters, setFilters] = useState(EMPTY_FILTERS)
+  // Фильтры и сортировка общие с Историей маркета (utils/marketFilters)
+  const filters = useMarketFilters()
   const [showFilters, setShowFilters] = useState(false)
 
   // Стартуем из кэша (предзагружен на сплэше) — маркет открывается мгновенно,
@@ -130,12 +116,7 @@ export default function Market() {
 
   useEffect(() => { load() }, [load])
 
-  // Чипы коллекций и варианты атрибутов собираются из реальных лотов
-  const collections = useMemo(() => {
-    const names = [...new Set(listings.map(l => l.collection || l.name).filter(Boolean))]
-    return ['Все', ...names]
-  }, [listings])
-
+  // Варианты атрибутов для фильтров собираются из реальных лотов
   const attrOptions = useMemo(() => {
     const models = new Set(), backdrops = new Set(), symbols = new Set()
     for (const l of listings) {
@@ -150,7 +131,6 @@ export default function Market() {
   const items = useMemo(() => {
     let list = [...listings]
     if (search) list = list.filter(i => i.name?.toLowerCase().includes(search.toLowerCase()))
-    if (collection !== 'Все') list = list.filter(i => (i.collection || i.name) === collection)
     const numQ = filters.number.replace('#', '').trim()
     if (numQ) list = list.filter(i => String(i.number || '').replace('#', '').includes(numQ))
     const pmin = parseFloat(String(filters.priceMin).replace(',', '.'))
@@ -160,36 +140,13 @@ export default function Market() {
     if (filters.model) list = list.filter(i => giftAttrs(i).model_name === filters.model)
     if (filters.backdropName) list = list.filter(i => giftAttrs(i).backdrop_name === filters.backdropName)
     if (filters.symbolName) list = list.filter(i => giftAttrs(i).symbol_name === filters.symbolName)
-    if (sort === 'price_asc') list.sort((a, b) => a.price - b.price)
-    else if (sort === 'price_desc') list.sort((a, b) => b.price - a.price)
+    if (filters.sort === 'price_asc') list.sort((a, b) => a.price - b.price)
+    else if (filters.sort === 'price_desc') list.sort((a, b) => b.price - a.price)
     else list.sort((a, b) => b.listed_at - a.listed_at)
     return list
-  }, [listings, search, collection, sort, filters])
+  }, [listings, search, filters])
 
-  const filtersActive = sort !== 'new'
-    || Object.entries(filters).some(([, v]) => v !== '')
-
-  const setF = (patch) => setFilters(f => ({ ...f, ...patch }))
-
-  const sheetSection = (title) => (
-    <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: '16px 0 8px', fontWeight: 600, letterSpacing: 0.5 }}>
-      {title}
-    </div>
-  )
-
-  const attrChips = (options, current, key) => (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-      {options.map(o => (
-        <button
-          key={o}
-          onClick={() => { haptic('light'); setF({ [key]: current === o ? '' : o }) }}
-          className={`chip${current === o ? ' active' : ''}`}
-        >
-          {o}
-        </button>
-      ))}
-    </div>
-  )
+  const filtersActive = marketFiltersActive(filters)
 
   return (
     <div className="page">
@@ -254,20 +211,8 @@ export default function Market() {
         </button>
       </div>
 
-      {/* Collection chips */}
-      {collections.length > 2 && (
-        <div className="chips-row">
-          {collections.map(c => (
-            <button
-              key={c}
-              onClick={() => { haptic('light'); setCollection(c) }}
-              className={`chip${collection === c ? ' active' : ''}`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Чипы коллекций убраны (2026-07-14): вернём одной строкой,
+          когда появятся коллекции NFT/модели и т.д. */}
 
       {/* Content */}
       {loading ? (
@@ -415,121 +360,9 @@ export default function Market() {
         </div>
       )}
 
-      {/* Filters bottom sheet */}
-      {showFilters && (
-        <div
-          onClick={() => setShowFilters(false)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 200,
-            background: 'rgba(5,3,4,0.7)',
-            display: 'flex', alignItems: 'flex-end',
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              width: '100%',
-              background: 'var(--bg-card)',
-              borderRadius: '20px 20px 0 0',
-              border: '1px solid var(--border)',
-              borderBottom: 'none',
-              padding: '20px 16px calc(24px + env(safe-area-inset-bottom, 0px))',
-              maxWidth: 480,
-              margin: '0 auto',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>Фильтры</span>
-              <button
-                onClick={() => setShowFilters(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}
-              >
-                ✕
-              </button>
-            </div>
 
-            {sheetSection('НОМЕР ПОДАРКА')}
-            <input
-              className="input"
-              placeholder="# 33824"
-              inputMode="numeric"
-              value={filters.number}
-              onChange={e => setF({ number: e.target.value.replace(/[^\d#]/g, '') })}
-            />
-
-            {sheetSection('СОРТИРОВАТЬ ПО')}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {SORTS.map(s => (
-                <button
-                  key={s.value}
-                  onClick={() => { haptic('light'); setSort(s.value) }}
-                  className={`chip${sort === s.value ? ' active' : ''}`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-
-            {sheetSection('ЦЕНА')}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                className="input"
-                placeholder="От"
-                inputMode="decimal"
-                value={filters.priceMin}
-                onChange={e => setF({ priceMin: e.target.value.replace(/[^\d.,]/g, '') })}
-              />
-              <input
-                className="input"
-                placeholder="До"
-                inputMode="decimal"
-                value={filters.priceMax}
-                onChange={e => setF({ priceMax: e.target.value.replace(/[^\d.,]/g, '') })}
-              />
-            </div>
-
-            {attrOptions.models.length > 0 && (
-              <>
-                {sheetSection('МОДЕЛЬ')}
-                {attrChips(attrOptions.models, filters.model, 'model')}
-              </>
-            )}
-
-            {attrOptions.backdrops.length > 0 && (
-              <>
-                {sheetSection('ФОН')}
-                {attrChips(attrOptions.backdrops, filters.backdropName, 'backdropName')}
-              </>
-            )}
-
-            {attrOptions.symbols.length > 0 && (
-              <>
-                {sheetSection('СИМВОЛ')}
-                {attrChips(attrOptions.symbols, filters.symbolName, 'symbolName')}
-              </>
-            )}
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>
-              <button
-                className="btn btn-ghost"
-                style={{ flex: 1 }}
-                onClick={() => { haptic('light'); setFilters(EMPTY_FILTERS); setSort('new'); setCollection('Все') }}
-              >
-                Очистить всё
-              </button>
-              <button
-                className="btn btn-primary"
-                style={{ flex: 2 }}
-                onClick={() => { haptic('medium'); setShowFilters(false) }}
-              >
-                Показать результаты
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Filters bottom sheet — общий с Историей маркета */}
+      <FiltersSheet open={showFilters} onClose={() => setShowFilters(false)} options={attrOptions} haptic={haptic} />
     </div>
   )
 }

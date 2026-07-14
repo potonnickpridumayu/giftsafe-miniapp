@@ -714,7 +714,7 @@ export default function Profile() {
                     </div>
                   )
                   return (
-                    <div key={`t${j}`} className="card" style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 255, 255, 0.16)' }}>
+                    <div key={`t${j}`} className="card" style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 255, 255, 0.30)' }}>
                       <div style={{
                         fontSize: 11, marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 4,
                       }}>
@@ -746,6 +746,56 @@ export default function Profile() {
                     </div>
                   )
                 }
+                if (tx.kind === 'ref') {
+                  // Реферальное начисление: ваш реферал продал подарок,
+                  // вам капнул 1% от суммы его продажи (из комиссии площадки)
+                  const thumb = fragmentImage(tx.gift_name, tx.gift_number, tx.nft_address)
+                  return (
+                    <div
+                      key={`r${j}`} className="card"
+                      style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 255, 255, 0.30)', display: 'flex', alignItems: 'center', gap: 10 }}
+                    >
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                        flexShrink: 0, background: 'var(--bg-card-hover)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {thumb
+                          ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <span style={{ fontSize: 18 }}>👥</span>}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: 13, fontWeight: 500,
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          <span style={{ fontWeight: 600, color: '#3ddc84' }}>👥 Реферал</span>
+                          {tx.referral_username && <span>: @{tx.referral_username}</span>}
+                        </div>
+                        <div style={{
+                          fontSize: 11, marginTop: 2, color: 'var(--text-muted)',
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          продал {tx.gift_name ? `${tx.gift_name}${tx.gift_number ? ` #${tx.gift_number}` : ''}` : 'подарок'}
+                          {tx.sale_amount_ton != null && <> за {fmtGram(tx.sale_amount_ton)}</>} — вам 1%
+                        </div>
+                        {tx.completed_at && (
+                          <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
+                            {new Date(tx.completed_at).toLocaleDateString('ru-RU')}
+                            {' '}
+                            {new Date(tx.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
+                        color: 'var(--gold)',
+                      }}>
+                        +{fmtGram(tx.amount_ton)} <GramIcon size={11} />
+                      </div>
+                    </div>
+                  )
+                }
                 const isBuy = tx.buyer_id === user?.id
                 const counterpart = isBuy ? tx.seller_username : tx.buyer_username
                 const slug = giftSlug(tx.gift_name, tx.gift_number, tx.nft_address)
@@ -759,7 +809,7 @@ export default function Profile() {
                 return (
                   <div
                     key={j} className="card"
-                    style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 255, 255, 0.16)', display: 'flex', alignItems: 'center', gap: 10, cursor: giftLink ? 'pointer' : 'default' }}
+                    style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 255, 255, 0.30)', display: 'flex', alignItems: 'center', gap: 10, cursor: giftLink ? 'pointer' : 'default' }}
                     onClick={giftLink ? () => { haptic('light'); openLink(giftLink) } : undefined}
                   >
                     <div style={{

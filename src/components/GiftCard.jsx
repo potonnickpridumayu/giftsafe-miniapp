@@ -88,14 +88,16 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
           <button
             className="btn btn-primary"
             style={{
-              width: '100%', minWidth: 0, fontSize: 12, padding: '7px 6px',
+              width: '100%', minWidth: 0, padding: '7px 6px',
               borderRadius: 'var(--radius-md)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14,
+              letterSpacing: 0.3,
             }}
             disabled={buyBusy}
             onClick={(e) => { e.stopPropagation(); onBuy(item) }}
           >
-            {buyBusy ? '⏳' : <>Купить за {fmtGram(item.price)} <GramIcon size={10} /></>}
+            {buyBusy ? '⏳' : <>{fmtGram(item.price)} <GramIcon size={12} /></>}
           </button>
         </div>
       )}

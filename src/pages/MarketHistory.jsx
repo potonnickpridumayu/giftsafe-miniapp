@@ -1,16 +1,45 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { IconAdjustments } from '@tabler/icons-react'
 import { api, giftSlug, fragmentImage } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
+import FiltersSheet from '../components/FiltersSheet'
 import { fmtGram } from '../utils/format'
+import { useMarketFilters, marketFiltersActive } from '../utils/marketFilters'
 
 // Единый стиль рамок ленты — как у истории в Профиле
-const CARD_BORDER = '1px solid rgba(255, 255, 255, 0.16)'
+const CARD_BORDER = '1px solid rgba(255, 255, 255, 0.30)'
+
+// Подписи событий лотов: тип → [текст, цвет]
+const EVENT_LABELS = {
+  sale: ['Продажа', 'var(--gold)'],
+  list: ['Выставлен на продажу', '#3ddc84'],
+  delist: ['Снят с продажи', 'var(--text-secondary)'],
+  price: ['Цена изменена', '#7f9df5'],
+}
 
 function fmtDate(ts) {
   const d = new Date(ts)
   return `${d.toLocaleDateString('ru-RU')} ${d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
+}
+
+function attrsOf(raw) {
+  if (!raw) return {}
+  try { return JSON.parse(raw) } catch { return {} }
+}
+
+// Все подарки записи одним списком (у обмена их несколько с двух сторон)
+function itemGifts(it) {
+  if (it.kind === 'trade') return [...(it.offered_gifts || []), ...(it.target_gifts || [])]
+  return [it]
+}
+
+// Цена записи для фильтра/сортировки (у обмена и снятия цены нет)
+function itemPrice(it) {
+  if (it.kind === 'sale') return it.amount_ton
+  if (it.kind === 'list' || it.kind === 'price') return it.price_ton
+  return null
 }
 
 // Строка подарка с миниатюрой; тап → официальная страница t.me/nft
@@ -47,6 +76,9 @@ export default function MarketHistory() {
   const { haptic, openLink } = useTelegram()
   const [items, setItems] = useState(null) // null = загрузка
   const [error, setError] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  // Фильтры общие с Маркетом: выставил там — действуют и здесь
+  const filters = useMarketFilters()
 
   useEffect(() => {
     api.getMarketHistory()
@@ -54,14 +86,69 @@ export default function MarketHistory() {
       .catch(e => { setError(e.message || 'Не удалось загрузить историю'); setItems([]) })
   }, [])
 
+  const attrOptions = useMemo(() => {
+    const models = new Set(), backdrops = new Set(), symbols = new Set()
+    for (const it of items || []) {
+      for (const g of itemGifts(it)) {
+        const a = attrsOf(g.tg_backdrop)
+        if (a.model_name) models.add(a.model_name)
+        if (a.backdrop_name) backdrops.add(a.backdrop_name)
+        if (a.symbol_name) symbols.add(a.symbol_name)
+      }
+    }
+    return { models: [...models], backdrops: [...backdrops], symbols: [...symbols] }
+  }, [items])
+
+  const visible = useMemo(() => {
+    let list = [...(items || [])]
+    const numQ = filters.number.replace('#', '').trim()
+    if (numQ) {
+      list = list.filter(it => itemGifts(it).some(
+        g => String(g.gift_number || '').replace('#', '').includes(numQ)
+      ))
+    }
+    const pmin = parseFloat(String(filters.priceMin).replace(',', '.'))
+    const pmax = parseFloat(String(filters.priceMax).replace(',', '.'))
+    // Фильтр по цене оставляет только записи, у которых цена вообще есть
+    if (!isNaN(pmin)) list = list.filter(it => itemPrice(it) != null && itemPrice(it) >= pmin)
+    if (!isNaN(pmax)) list = list.filter(it => itemPrice(it) != null && itemPrice(it) <= pmax)
+    const byAttr = (key, val) => (it) =>
+      itemGifts(it).some(g => attrsOf(g.tg_backdrop)[key] === val)
+    if (filters.model) list = list.filter(byAttr('model_name', filters.model))
+    if (filters.backdropName) list = list.filter(byAttr('backdrop_name', filters.backdropName))
+    if (filters.symbolName) list = list.filter(byAttr('symbol_name', filters.symbolName))
+    if (filters.sort === 'price_asc' || filters.sort === 'price_desc') {
+      const sign = filters.sort === 'price_asc' ? 1 : -1
+      // записи без цены — в конец, между собой по дате
+      list.sort((a, b) => {
+        const pa = itemPrice(a), pb = itemPrice(b)
+        if (pa == null && pb == null) return new Date(b.completed_at) - new Date(a.completed_at)
+        if (pa == null) return 1
+        if (pb == null) return -1
+        return sign * (pa - pb)
+      })
+    }
+    return list
+  }, [items, filters])
+
   return (
     <div className="page">
-      <button
-        onClick={() => navigate(-1)}
-        style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 14, cursor: 'pointer', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-body)' }}
-      >
-        ← Назад
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-body)', padding: 0 }}
+        >
+          ← Назад
+        </button>
+        <button
+          onClick={() => { haptic('light'); setShowFilters(true) }}
+          className={`chip${marketFiltersActive(filters) ? ' active' : ''}`}
+          style={{ flexShrink: 0, padding: '0 14px' }}
+          aria-label="Фильтры"
+        >
+          <IconAdjustments size={19} stroke={1.8} />
+        </button>
+      </div>
 
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 14 }}>
         История сделок
@@ -84,7 +171,13 @@ export default function MarketHistory() {
           <div className="empty-title">Сделок пока не было</div>
           <div className="empty-desc">Здесь появятся продажи и обмены маркета</div>
         </div>
-      ) : items.map((it, i) => {
+      ) : visible.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <div className="empty-title">Ничего не найдено</div>
+          <div className="empty-desc">Попробуйте изменить фильтры</div>
+        </div>
+      ) : visible.map((it, i) => {
         if (it.kind === 'trade') {
           const left = it.offered_gifts || []
           const right = it.target_gifts || []
@@ -111,6 +204,7 @@ export default function MarketHistory() {
             </div>
           )
         }
+        const [label, color] = EVENT_LABELS[it.kind] || EVENT_LABELS.sale
         return (
           <div key={i} className="card" style={{
             padding: '10px 16px', marginBottom: 6, border: CARD_BORDER,
@@ -119,19 +213,34 @@ export default function MarketHistory() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <GiftRow gift={it} haptic={haptic} openLink={openLink} size={40} />
               <div style={{ fontSize: 11, marginTop: 4, color: 'var(--text-muted)' }}>
-                <span style={{ fontWeight: 600, color: 'var(--gold)' }}>Продажа</span>
+                <span style={{ fontWeight: 600, color }}>{label}</span>
                 {' · '}{fmtDate(it.completed_at)}
               </div>
             </div>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
-              color: 'var(--money-1, var(--gold))',
-            }}>
-              {fmtGram(it.amount_ton)} <GramIcon size={11} />
-            </div>
+            {it.kind === 'price' ? (
+              <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                {it.old_price_ton != null && (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                    {fmtGram(it.old_price_ton)}
+                  </div>
+                )}
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--money-1, var(--gold))' }}>
+                  {fmtGram(it.price_ton)} <GramIcon size={11} />
+                </div>
+              </div>
+            ) : itemPrice(it) != null ? (
+              <div style={{
+                fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
+                color: 'var(--money-1, var(--gold))',
+              }}>
+                {fmtGram(itemPrice(it))} <GramIcon size={11} />
+              </div>
+            ) : null}
           </div>
         )
       })}
+
+      <FiltersSheet open={showFilters} onClose={() => setShowFilters(false)} options={attrOptions} haptic={haptic} />
     </div>
   )
 }

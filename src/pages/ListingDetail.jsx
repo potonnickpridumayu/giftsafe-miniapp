@@ -282,6 +282,16 @@ export default function ListingDetail() {
                   placeholder={String(item.price)}
                   style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', fontSize: 15, marginBottom: 10 }}
                 />
+                {(() => {
+                  const p = parseFloat(String(newPrice).replace(',', '.')) || 0
+                  const youGet = +(p - p * FEE_RATE).toFixed(4)
+                  return (
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
+                      Комиссия {Math.round(FEE_RATE * 100)}%
+                      {p > 0 ? <> — вы получите <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>{fmtGram(youGet)} <GramIcon size={11} /></span></> : ''}.
+                    </div>
+                  )
+                })()}
                 {priceError && (
                   <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {priceError}</div>
                 )}

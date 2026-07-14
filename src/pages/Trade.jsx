@@ -56,7 +56,7 @@ export default function Trade() {
 
       <button
         className="btn btn-dark-glow btn-full"
-        onClick={() => { haptic('medium'); navigate('/portfolio') }}
+        onClick={() => { haptic('medium'); navigate('/portfolio', { state: { openTradePicker: true } }) }}
         style={{ marginBottom: 16 }}
       >
         + Выставить на обмен
@@ -92,7 +92,7 @@ export default function Trade() {
           <div className="empty-desc">Выставьте свой подарок на обмен в Портфеле — предлагайте и принимайте обмены (возможна доплата в Gram).</div>
           <button
             className="btn btn-primary"
-            onClick={() => { haptic('medium'); navigate('/portfolio') }}
+            onClick={() => { haptic('medium'); navigate('/portfolio', { state: { openTradePicker: true } }) }}
             style={{ marginTop: 14 }}
           >
             Перейти в Портфель

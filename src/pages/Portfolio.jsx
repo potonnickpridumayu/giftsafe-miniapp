@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
 import { IconPencil } from '@tabler/icons-react'
@@ -90,6 +90,8 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
 
   const priceNum = parseFloat(String(price).replace(',', '.')) || 0
   const youGet = round4(priceNum - priceNum * FEE_RATE)
+  const newPriceNum = parseFloat(String(newPrice).replace(',', '.')) || 0
+  const newYouGet = round4(newPriceNum - newPriceNum * FEE_RATE)
 
   const togglePanel = (name) => {
     haptic('light')
@@ -280,6 +282,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
           marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)',
           scrollMarginBottom: 'calc(var(--nav-h) + 20px + var(--safe-bottom))',
         }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+            Комиссия {Math.round(FEE_RATE * 100)}%
+            {newPriceNum > 0 ? <> — вы получите <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>{fmtGram(newYouGet)} <GramIcon size={11} /></span></> : ''}.
+          </div>
           <input
             className="input"
             value={newPrice}
@@ -397,24 +403,23 @@ export default function Portfolio() {
   const [statusFilter, setStatusFilter] = useState('all') // all | sale | trade | free
 
   const [tradePicker, setTradePicker] = useState(false)
+  // Управляет анимацией раскрытия: пикер монтируется СВЁРНУТЫМ (высота 0 —
+  // макет не сдвигается ни на пиксель, поэтому и дёргаться нечему), страница
+  // плавно едет вверх к его месту, и только потом он раскрывается аккордеоном.
+  const [pickerShown, setPickerShown] = useState(false)
   const [tradeSelected, setTradeSelected] = useState(() => new Set())
   const [tradeNote, setTradeNote] = useState('')
   const [tradeBusy, setTradeBusy] = useState(false)
   const [tradeError, setTradeError] = useState('')
   const tradePickerRef = useRef(null)
 
-  // Пикер вставляется ВЫШЕ текущей прокрутки и мгновенно сдвигает весь контент
-  // вниз — этот скачок и есть «дёргание». useLayoutEffect срабатывает до
-  // отрисовки кадра: компенсируем сдвиг мгновенным scrollBy (визуально ничего
-  // не меняется), и только потом плавно едем вверх к пикеру.
   useLayoutEffect(() => {
     if (tradePicker && tradePickerRef.current) {
-      const el = tradePickerRef.current
-      if (el.getBoundingClientRect().bottom < 0) {
-        window.scrollBy(0, el.offsetHeight + 12) // 12 = marginTop пикера
-      }
-      scrollToPanel(el, 12)
+      scrollToPanel(tradePickerRef.current, 12)
+      const t = setTimeout(() => setPickerShown(true), 420) // после подъёма
+      return () => clearTimeout(t)
     }
+    setPickerShown(false)
   }, [tradePicker])
 
   const load = useCallback(async () => {
@@ -467,6 +472,17 @@ export default function Portfolio() {
     setTradeSelected(giftId ? new Set([giftId]) : new Set())
     setTradePicker(true)
   }
+
+  // «+ Выставить на обмен» со вкладки Обмен ведёт сюда с флагом — сразу
+  // открываем пикер, а флаг затираем, чтобы он не срабатывал при возврате.
+  const location = useLocation()
+  useEffect(() => {
+    if (location.state?.openTradePicker) {
+      openTradePicker()
+      navigate('.', { replace: true, state: {} })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const toggleTradeGift = (giftId) => {
     haptic('light')
@@ -544,11 +560,22 @@ export default function Portfolio() {
         )}
 
         {tradePicker && (
-          <div ref={tradePickerRef} className="card" style={{ padding: '14px 16px', marginTop: 12 }}>
+          <div ref={tradePickerRef} style={{
+            overflow: 'hidden',
+            maxHeight: pickerShown ? 640 : 0,
+            opacity: pickerShown ? 1 : 0,
+            marginTop: pickerShown ? 12 : 0,
+            transition: 'max-height .35s ease, opacity .3s ease, margin-top .35s ease',
+          }}>
+          <div className="card" style={{ padding: '14px 16px' }}>
             <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>
               Выберите подарки для обмена {tradeSelected.size > 0 ? `(${tradeSelected.size})` : ''}
             </div>
-            {tradeableGifts.length === 0 ? (
+            {gifts === null ? (
+              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                Загружаем подарки…
+              </div>
+            ) : tradeableGifts.length === 0 ? (
               <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                 Нет свободных подарков (все на продаже/в обмене).
               </div>
@@ -606,6 +633,7 @@ export default function Portfolio() {
                 Отмена
               </button>
             </div>
+          </div>
           </div>
         )}
       </div>
