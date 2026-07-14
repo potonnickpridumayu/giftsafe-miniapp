@@ -208,7 +208,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             {gift.gift_number && <span className="poster-num">#{gift.gift_number}</span>}
           </div>
           {gift.on_sale && gift.price_ton != null && (
-            <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(gift.price_ton)} <GramIcon size={9} /></div>
+            <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(gift.price_ton)} <GramIcon size={15} style={{ verticalAlign: '-3px' }} /></div>
           )}
         </div>
       </div>
