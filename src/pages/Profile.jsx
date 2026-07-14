@@ -707,7 +707,7 @@ export default function Profile() {
                         <div style={{ textAlign: 'right', marginTop: 4 }}>
                           <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{label} </span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
-                            +{fmtGram(amount)} <GramIcon size={10} />
+                            +{fmtGram(amount)} <GramIcon size={13} style={{ verticalAlign: '-2px' }} />
                           </span>
                         </div>
                       )}
@@ -735,7 +735,7 @@ export default function Profile() {
                       <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>
                         ⇅
                         {tx.fee_ton > 0 && (
-                          <span> · комиссия {fmtGram(tx.fee_ton)} <GramIcon size={9} /></span>
+                          <span> · комиссия {fmtGram(tx.fee_ton)} <GramIcon size={12} style={{ verticalAlign: '-2px' }} /></span>
                         )}
                       </div>
                       {giftSide(
@@ -777,7 +777,7 @@ export default function Profile() {
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}>
                           продал {tx.gift_name ? `${tx.gift_name}${tx.gift_number ? ` #${tx.gift_number}` : ''}` : 'подарок'}
-                          {tx.sale_amount_ton != null && <> за {fmtGram(tx.sale_amount_ton)} <GramIcon size={9} /></>}
+                          {tx.sale_amount_ton != null && <> за {fmtGram(tx.sale_amount_ton)} <GramIcon size={12} style={{ verticalAlign: '-2px' }} /></>}
                         </div>
                         {tx.completed_at && (
                           <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
@@ -791,7 +791,7 @@ export default function Profile() {
                         fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                         color: 'var(--gold)',
                       }}>
-                        +{fmtGram(tx.amount_ton)} <GramIcon size={11} />
+                        +{fmtGram(tx.amount_ton)} <GramIcon size={14} style={{ verticalAlign: '-3px' }} />
                       </div>
                     </div>
                   )
@@ -849,7 +849,7 @@ export default function Profile() {
                       fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                       color: isBuy ? 'var(--text-secondary)' : 'var(--gold)',
                     }}>
-                      {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={11} />
+                      {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={14} style={{ verticalAlign: '-3px' }} />
                     </div>
                   </div>
                 )

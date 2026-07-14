@@ -77,7 +77,7 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
         {/* Цена в инфо-строке дублирует кнопку «Купить за N» — прячем, когда
             кнопка есть; на своих лотах (без кнопки) цена остаётся */}
         {item.price != null
-          ? (!onBuy && <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(item.price)} <GramIcon size={15} style={{ verticalAlign: '-3px' }} /></div>)
+          ? (!onBuy && <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(item.price)} <GramIcon size={18} style={{ verticalAlign: '-4px' }} /></div>)
           : <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
               {item.owner ? `@${item.owner}` : 'На обмен'}
             </div>}
@@ -97,7 +97,7 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
             disabled={buyBusy}
             onClick={(e) => { e.stopPropagation(); onBuy(item) }}
           >
-            {buyBusy ? '⏳' : <>{fmtGram(item.price)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></>}
+            {buyBusy ? '⏳' : <>{fmtGram(item.price)} <GramIcon size={19} style={{ verticalAlign: '-4px' }} /></>}
           </button>
         </div>
       )}

@@ -219,16 +219,16 @@ export default function ListingDetail() {
       <div className="card" style={{ padding: '14px 16px', marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Цена</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(item.price)} <GramIcon size={12} /></span>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(item.price)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия ruby ({Math.round(FEE_RATE * 100)}%)</span>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fmtGram(fee)} <GramIcon size={12} /></span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fmtGram(fee)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></span>
         </div>
         <div className="divider" style={{ margin: '10px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontWeight: 600 }}>Итого</span>
-          <span className="price price-md">{fmtGram(total)} <GramIcon size={13} /></span>
+          <span className="price price-md">{fmtGram(total)} <GramIcon size={18} style={{ verticalAlign: '-4px' }} /></span>
         </div>
       </div>
 
@@ -335,7 +335,7 @@ export default function ListingDetail() {
           disabled={buying}
           style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
         >
-          {buying ? '⏳ Обработка...' : <>Купить за {fmtGram(total)} <GramIcon size={14} /></>}
+          {buying ? '⏳ Обработка...' : <>Купить за {fmtGram(total)} <GramIcon size={18} style={{ verticalAlign: '-4px' }} /></>}
         </button>
       )}
     </div>
