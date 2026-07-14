@@ -1,0 +1,97 @@
+.ruby-splash {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruby-splash__canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1080px;
+  height: 1920px;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.ruby-splash__r {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  will-change: transform, opacity, clip-path;
+}
+.ruby-splash__r img { display: block; width: 100%; height: 100%; }
+
+.ruby-splash__gem {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+.ruby-splash__gem-img { display: block; width: 100%; height: 100%; position: relative; z-index: 1; }
+
+.ruby-splash__shine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask-image: url('/ruby-gem-splash.png');
+  mask-image: url('/ruby-gem-splash.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  pointer-events: none;
+  z-index: 2;
+}
+.ruby-splash__shine-bar {
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 60%;
+  height: 220%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(8px);
+}
+
+.ruby-splash__ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 3px solid #ff2d55;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: width, height, opacity;
+}
+
+.ruby-splash__spark {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: #fff;
+  border-radius: 4px;
+  will-change: transform;
+  box-shadow: 0 0 18px 2px rgba(255, 255, 255, 0.7);
+}
+
+.ruby-splash__word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-family: 'Manrope', var(--font-display, sans-serif);
+  font-weight: 800;
+  font-size: 96px;
+  white-space: nowrap;
+  will-change: transform, opacity, letter-spacing;
+}
