@@ -1,8 +1,37 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import lottie from 'lottie-web'
 import { ungzip } from 'pako'
 
 const FILE_BASE = 'https://nftmarketbot-production.up.railway.app/api/tg-file'
+
+// Кэш разобранных tgs-анимаций на всё время сессии. Без него каждый ремоунт
+// карточки (ушёл в подарок → вернулся на маркет) заново качал и парсил
+// стикер, и пока это шло, карточка показывала JPG-фолбэк — фон с узором
+// «перестраивались» на глазах. С кэшем повторный маунт рендерит первый кадр
+// СИНХРОННО, до отрисовки кадра браузером — мигать просто нечему.
+const tgsCache = new Map() // stickerId -> animationData (разобранный JSON)
+const TGS_CACHE_MAX = 150
+function cacheTgs(id, data) {
+  if (tgsCache.size >= TGS_CACHE_MAX) {
+    tgsCache.delete(tgsCache.keys().next().value) // самый старый
+  }
+  tgsCache.set(id, data)
+}
+
+// Тот же приём для картинки узора: после первой загрузки держим её blob'ом
+// в памяти (objectURL живёт всю сессию — узоров столько же, сколько фонов,
+// это единицы), чтобы SVG <image> на ремоунте не ходил даже в дисковый кэш.
+const patternCache = new Map() // file_id -> objectURL
+const patternLoading = new Set()
+function warmPattern(fileId) {
+  if (!fileId || patternCache.has(fileId) || patternLoading.has(fileId)) return
+  patternLoading.add(fileId)
+  fetch(`${FILE_BASE}/${fileId}`)
+    .then(r => (r.ok ? r.blob() : null))
+    .then(b => { if (b) patternCache.set(fileId, URL.createObjectURL(b)) })
+    .catch(() => { /* узор не критичен, останется сетевой URL */ })
+    .finally(() => patternLoading.delete(fileId))
+}
 
 const intHex = (n) => '#' + ((n ?? 0) >>> 0).toString(16).padStart(6, '0')
 
@@ -57,32 +86,48 @@ export default function TgGiftSticker({ stickerId, image = '', backdrop = null, 
   const gradient = bd
     ? `radial-gradient(circle at 50% 42%, ${intHex(bd.center)}, ${intHex(bd.edge)})`
     : 'var(--bg-card-hover)'
-  const patternUrl = bd?.pattern ? `${FILE_BASE}/${bd.pattern}` : ''
+  const patternUrl = bd?.pattern
+    ? (patternCache.get(bd.pattern) || `${FILE_BASE}/${bd.pattern}`)
+    : ''
   const patternColor = bd?.symbol != null ? intHex(bd.symbol) : 'rgba(255,255,255,0.8)'
 
-  useEffect(() => {
+  // useLayoutEffect: при закэшированном стикере первый кадр встаёт ДО того,
+  // как браузер отрисует кадр с фолбэком — ремоунт визуально бесшовный.
+  useLayoutEffect(() => {
+    warmPattern(bd?.pattern)
     if (!stickerId) return undefined
     let dead = false
-    ;(async () => {
-      try {
-        const res = await fetch(`${FILE_BASE}/${stickerId}`)
-        if (!res.ok) throw new Error()
-        const buf = new Uint8Array(await res.arrayBuffer())
-        const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
-        const data = JSON.parse(new TextDecoder().decode(raw))
-        if (dead || !boxRef.current) return
-        const inst = lottie.loadAnimation({
-          container: boxRef.current, renderer: 'svg',
-          loop: false, autoplay: false, animationData: data,
-          rendererSettings: { preserveAspectRatio: 'xMidYMid meet' },
-        })
-        inst.addEventListener('complete', () => inst.goToAndStop(0, true))
-        inst.goToAndStop(0, true)
-        instRef.current = inst
-        setReady(true)
-        if (autoPlay) inst.goToAndPlay(0, true)
-      } catch { /* tgs не загрузился — остаёмся на статичном JPG */ }
-    })()
+
+    const init = (data) => {
+      if (dead || !boxRef.current) return
+      const inst = lottie.loadAnimation({
+        container: boxRef.current, renderer: 'svg',
+        loop: false, autoplay: false, animationData: data,
+        rendererSettings: { preserveAspectRatio: 'xMidYMid meet' },
+      })
+      inst.addEventListener('complete', () => inst.goToAndStop(0, true))
+      inst.goToAndStop(0, true)
+      instRef.current = inst
+      setReady(true)
+      if (autoPlay) inst.goToAndPlay(0, true)
+    }
+
+    const cached = tgsCache.get(stickerId)
+    if (cached) {
+      init(cached) // синхронно, без единого кадра фолбэка
+    } else {
+      ;(async () => {
+        try {
+          const res = await fetch(`${FILE_BASE}/${stickerId}`)
+          if (!res.ok) throw new Error()
+          const buf = new Uint8Array(await res.arrayBuffer())
+          const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
+          const data = JSON.parse(new TextDecoder().decode(raw))
+          cacheTgs(stickerId, data)
+          init(data)
+        } catch { /* tgs не загрузился — остаёмся на статичном JPG */ }
+      })()
+    }
     return () => {
       dead = true
       if (instRef.current) { instRef.current.destroy(); instRef.current = null }
