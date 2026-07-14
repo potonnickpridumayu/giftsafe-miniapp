@@ -4,9 +4,8 @@ export default function GramIcon({ size = 14, style }) {
   return (
     <img
       src="/ruby-gem-256.png"
-      width={size}
       height={size}
-      style={{ verticalAlign: 'middle', flexShrink: 0, marginLeft: -4, ...style }}
+      style={{ verticalAlign: 'middle', flexShrink: 0, marginLeft: -4, width: 'auto', ...style }}
       alt="Gram"
     />
   )

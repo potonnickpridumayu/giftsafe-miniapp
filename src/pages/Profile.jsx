@@ -329,7 +329,7 @@ export default function Profile() {
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700 }}>
           <span className="money-text">{loading ? '…' : fmtGram(balance)}</span>
-          {!loading && <GramIcon size={26} style={{ marginLeft: -1 }} />}
+          {!loading && <GramIcon size={26} style={{ marginLeft: -1, verticalAlign: '-1px' }} />}
         </div>
         <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 14 }}>
           <button
