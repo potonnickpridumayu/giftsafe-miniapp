@@ -82,7 +82,7 @@ export default function Referral() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'Приглашено', value: stats === null ? '…' : String(stats.invited ?? 0) },
-          { label: 'Заработано', value: stats === null ? '…' : <><span className="money-text">{fmtGram(stats.earned_ton)}</span> <GramIcon size={20} style={{ verticalAlign: '-4px' }} /></> },
+          { label: 'Заработано', value: stats === null ? '…' : <><span className="money-text">{fmtGram(stats.earned_ton)}</span> <GramIcon size={20} /></> },
         ].map(s => (
           <div key={s.label} style={{
             background: 'var(--bg-card)',

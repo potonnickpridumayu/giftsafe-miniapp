@@ -149,7 +149,7 @@ export default function Cart() {
                     {item.name}{item.number ? ` ${String(item.number).startsWith('#') ? item.number : `#${item.number}`}` : ''}
                   </div>
                   <div className="money-text" style={{ fontSize: 13, fontWeight: 700, marginTop: 2 }}>
-                    {fmtGram(item.price)} <GramIcon size={20} style={{ verticalAlign: '-4px' }} />
+                    {fmtGram(item.price)} <GramIcon size={20} />
                   </div>
                 </div>
                 <button
@@ -171,7 +171,7 @@ export default function Cart() {
           <div className="card" style={{ padding: '14px 16px', marginBottom: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 600 }}>Итого</span>
-              <span className="price price-md">{fmtGram(total)} <GramIcon size={24} style={{ marginLeft: -1, verticalAlign: '-7px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></span>
+              <span className="price price-md">{fmtGram(total)} <GramIcon size={24} style={{ marginLeft: -1, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></span>
             </div>
           </div>
 
@@ -181,7 +181,7 @@ export default function Cart() {
             onClick={buyAll}
             style={{ fontSize: 15, padding: '14px', boxShadow: buying ? 'none' : 'var(--gold-glow)', opacity: buying ? 0.5 : 1, gap: 1 }}
           >
-            {buying ? '⏳ Покупаем…' : <>Купить всё за {fmtGram(total)} <GramIcon size={24} style={{ verticalAlign: '-5px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
+            {buying ? '⏳ Покупаем…' : <>Купить всё за {fmtGram(total)} <GramIcon size={24} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
           </button>
         </>
       )}

@@ -208,7 +208,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             {gift.gift_number && <span className="poster-num">#{gift.gift_number}</span>}
           </div>
           {gift.on_sale && gift.price_ton != null && (
-            <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(gift.price_ton)} <GramIcon size={24} style={{ verticalAlign: '-5px' }} /></div>
+            <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(gift.price_ton)} <GramIcon size={24} /></div>
           )}
         </div>
       </div>
@@ -284,7 +284,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
         }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Комиссия {Math.round(FEE_RATE * 100)}%
-            {newPriceNum > 0 ? <> — вы получите <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>{fmtGram(newYouGet)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></span></> : ''}.
+            {newPriceNum > 0 ? <> — вы получите <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>{fmtGram(newYouGet)} <GramIcon size={16} /></span></> : ''}.
           </div>
           <input
             className="input"
@@ -315,7 +315,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
         }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             Лот появится на маркете. Комиссия {Math.round(FEE_RATE * 100)}%
-            {priceNum > 0 ? <> — вы получите {fmtGram(youGet)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></> : ''}.
+            {priceNum > 0 ? <> — вы получите {fmtGram(youGet)} <GramIcon size={16} /></> : ''}.
           </div>
           <input
             className="input"
@@ -347,7 +347,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
             twentop автоматически отправит подарок на ваш Telegram аккаунт.
             <br />
-            Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.25 <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></span>
+            Комиссия за передачу — <span style={{ color: 'var(--money-1)', fontWeight: 700 }}>0.25 <GramIcon size={16} /></span>
           </div>
           {error && (
             <div style={{ fontSize: 12, color: 'var(--red)', marginBottom: 8 }}>{error}</div>

@@ -231,7 +231,7 @@ export default function MarketHistory() {
               <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>
                 ⇅
                 {it.top_up_ton > 0 && (
-                  <span> · доплата {fmtGram(it.top_up_ton)} <GramIcon size={13} style={{ verticalAlign: '-2px' }} /></span>
+                  <span> · доплата {fmtGram(it.top_up_ton)} <GramIcon size={13} /></span>
                 )}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -261,7 +261,7 @@ export default function MarketHistory() {
                   </div>
                 )}
                 <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--money-1, var(--gold))' }}>
-                  {fmtGram(it.price_ton)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} />
+                  {fmtGram(it.price_ton)} <GramIcon size={16} />
                 </div>
               </div>
             ) : itemPrice(it) != null ? (
@@ -269,7 +269,7 @@ export default function MarketHistory() {
                 fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                 color: 'var(--money-1, var(--gold))',
               }}>
-                {fmtGram(itemPrice(it))} <GramIcon size={16} style={{ verticalAlign: '-3px' }} />
+                {fmtGram(itemPrice(it))} <GramIcon size={16} />
               </div>
             ) : null}
           </div>
