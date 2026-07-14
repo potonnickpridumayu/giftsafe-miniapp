@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconAdjustments } from '@tabler/icons-react'
+import { IconAdjustments, IconX } from '@tabler/icons-react'
 import { api, giftSlug, fragmentImage } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
 import FiltersSheet from '../components/FiltersSheet'
 import { fmtGram } from '../utils/format'
-import { useMarketFilters, marketFiltersActive } from '../utils/marketFilters'
+import { useMarketFilters, marketFiltersActive, resetMarketFilters } from '../utils/marketFilters'
 
 // Единый стиль рамок ленты — как у истории в Профиле
 const CARD_BORDER = '1px solid rgba(255, 255, 255, 0.30)'
@@ -45,10 +45,10 @@ function itemGifts(it) {
   return [it]
 }
 
-// Цена записи для фильтра/сортировки (у обмена и снятия цены нет)
+// Цена записи для фильтра/сортировки (у обмена цены нет)
 function itemPrice(it) {
   if (it.kind === 'sale') return it.amount_ton
-  if (it.kind === 'list' || it.kind === 'price') return it.price_ton
+  if (it.kind === 'list' || it.kind === 'price' || it.kind === 'delist') return it.price_ton
   return null
 }
 
@@ -164,18 +164,30 @@ export default function MarketHistory() {
         >
           ← Назад
         </button>
-        <button
-          onClick={() => { haptic('light'); setShowFilters(true) }}
-          className={`chip${marketFiltersActive(filters) || kinds.size > 0 ? ' active' : ''}`}
-          style={{ flexShrink: 0, padding: '0 14px' }}
-          aria-label="Фильтры"
-        >
-          <IconAdjustments size={19} stroke={1.8} />
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => { haptic('light'); setShowFilters(true) }}
+            className={`chip${marketFiltersActive(filters) || kinds.size > 0 ? ' active' : ''}`}
+            style={{ flexShrink: 0, padding: '0 14px' }}
+            aria-label="Фильтры"
+          >
+            <IconAdjustments size={19} stroke={1.8} />
+          </button>
+          {(marketFiltersActive(filters) || kinds.size > 0) && (
+            <button
+              onClick={() => { haptic('light'); resetMarketFilters(); setKinds(new Set()) }}
+              className="chip"
+              style={{ flexShrink: 0, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 4 }}
+              aria-label="Очистить фильтры"
+            >
+              <IconX size={16} stroke={2} />
+            </button>
+          )}
+        </div>
       </div>
 
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 14 }}>
-        История сделок
+        Активность маркета
       </h2>
 
       {items === null ? (

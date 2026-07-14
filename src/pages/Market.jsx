@@ -1,6 +1,6 @@
 ﻿import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconAdjustments, IconShoppingCart, IconHistory } from '@tabler/icons-react'
+import { IconAdjustments, IconShoppingCart, IconHistory, IconX } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import FiltersSheet from '../components/FiltersSheet'
@@ -9,7 +9,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import { fmtGram } from '../utils/format'
 import { useCartIds, toggleCart } from '../utils/cart'
 import { getCached, setCached } from '../utils/dataCache'
-import { useMarketFilters, marketFiltersActive } from '../utils/marketFilters'
+import { useMarketFilters, marketFiltersActive, resetMarketFilters } from '../utils/marketFilters'
 
 function plural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -159,7 +159,7 @@ export default function Market() {
           </p>
           <button
             onClick={() => { haptic('light'); navigate('/history') }}
-            aria-label="История сделок"
+            aria-label="Активность маркета"
             style={{
               background: 'none', border: 'none',
               color: 'var(--text-primary)', cursor: 'pointer', padding: 4,
@@ -209,6 +209,16 @@ export default function Market() {
         >
           <IconAdjustments size={19} stroke={1.8} />
         </button>
+        {filtersActive && (
+          <button
+            onClick={() => { haptic('light'); resetMarketFilters() }}
+            className="chip"
+            style={{ flexShrink: 0, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 4 }}
+            aria-label="Очистить фильтры"
+          >
+            <IconX size={16} stroke={2} />
+          </button>
+        )}
       </div>
 
       {/* Чипы коллекций убраны (2026-07-14): вернём одной строкой,
