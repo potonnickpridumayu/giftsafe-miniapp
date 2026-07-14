@@ -337,18 +337,18 @@ export default function Sell() {
           <div className="card" style={{ padding: '14px 16px', marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Цена покупателя</span>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(priceNum)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(priceNum)} <GramIcon size={21} style={{ verticalAlign: '-4px' }} /></span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 Комиссия ruby ({Math.round(FEE_RATE * 100)}%)
               </span>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fmtGram(fee)} <GramIcon size={16} style={{ verticalAlign: '-3px' }} /></span>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fmtGram(fee)} <GramIcon size={21} style={{ verticalAlign: '-4px' }} /></span>
             </div>
             <div className="divider" style={{ margin: '10px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 600 }}>Вы получите</span>
-              <span className="price price-md">{fmtGram(youGet)} <GramIcon size={18} style={{ verticalAlign: '-4px' }} /></span>
+              <span className="price price-md">{fmtGram(youGet)} <GramIcon size={24} style={{ verticalAlign: '-5px' }} /></span>
             </div>
           </div>
 

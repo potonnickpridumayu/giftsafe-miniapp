@@ -327,8 +327,8 @@ export default function TradeDetail() {
           />
           {topUpNum > 0 && (
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
-              Комиссия площадки {Math.round(FEE_RATE * 100)}% ({fmtGram(topUpFee)} <GramIcon size={10} />) с доплаты —
-              владелец лота получит {fmtGram(topUpNum - topUpFee)} <GramIcon size={10} />
+              Комиссия площадки {Math.round(FEE_RATE * 100)}% ({fmtGram(topUpFee)} <GramIcon size={15} style={{ verticalAlign: '-3px' }} />) с доплаты —
+              владелец лота получит {fmtGram(topUpNum - topUpFee)} <GramIcon size={15} style={{ verticalAlign: '-3px' }} />
             </div>
           )}
 

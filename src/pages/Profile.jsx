@@ -248,10 +248,10 @@ export default function Profile() {
         <div style={{ textAlign: 'right', marginTop: 4 }}>
           <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>доплата </span>
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
-            +{fmtGram(paidTopUp)} <GramIcon size={10} />
+            +{fmtGram(paidTopUp)} <GramIcon size={14} style={{ verticalAlign: '-3px' }} />
           </span>
           <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
-            комиссия при принятии {fmtGram(paidTopUp * TRADE_FEE_RATE)} <GramIcon size={8} />
+            комиссия при принятии {fmtGram(paidTopUp * TRADE_FEE_RATE)} <GramIcon size={12} style={{ verticalAlign: '-2px' }} />
           </div>
         </div>
       )}
@@ -329,7 +329,7 @@ export default function Profile() {
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700 }}>
           <span className="money-text">{loading ? '…' : fmtGram(balance)}</span>
-          {!loading && <GramIcon size={32} style={{ marginLeft: 6, verticalAlign: '-5px' }} />}
+          {!loading && <GramIcon size={42} style={{ marginLeft: 6, verticalAlign: '-7px' }} />}
         </div>
         <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 14 }}>
           <button
@@ -412,7 +412,7 @@ export default function Profile() {
                 {!isDep && (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                      Доступно: <b className="money-text">{fmtGram(balance)}</b> <GramIcon size={11} />
+                      Доступно: <b className="money-text">{fmtGram(balance)}</b> <GramIcon size={16} style={{ verticalAlign: '-3px' }} />
                     </span>
                     <button
                       className="chip"
@@ -569,7 +569,7 @@ export default function Profile() {
                                 💬 {title}
                               </div>
                               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                                Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} />
+                                Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={14} style={{ verticalAlign: '-3px' }} />
                               </div>
                               <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>От: @{o.from_username}</div>
                             </div>
@@ -623,7 +623,7 @@ export default function Profile() {
                                 💬 {title}
                               </div>
                               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                                Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={10} />
+                                Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={14} style={{ verticalAlign: '-3px' }} />
                               </div>
                               <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>Кому: @{o.to_username}</div>
                             </div>
@@ -707,7 +707,7 @@ export default function Profile() {
                         <div style={{ textAlign: 'right', marginTop: 4 }}>
                           <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{label} </span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
-                            +{fmtGram(amount)} <GramIcon size={13} style={{ verticalAlign: '-2px' }} />
+                            +{fmtGram(amount)} <GramIcon size={18} style={{ verticalAlign: '-4px' }} />
                           </span>
                         </div>
                       )}
@@ -735,7 +735,7 @@ export default function Profile() {
                       <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>
                         ⇅
                         {tx.fee_ton > 0 && (
-                          <span> · комиссия {fmtGram(tx.fee_ton)} <GramIcon size={12} style={{ verticalAlign: '-2px' }} /></span>
+                          <span> · комиссия {fmtGram(tx.fee_ton)} <GramIcon size={17} style={{ verticalAlign: '-3px' }} /></span>
                         )}
                       </div>
                       {giftSide(
@@ -777,7 +777,7 @@ export default function Profile() {
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}>
                           продал {tx.gift_name ? `${tx.gift_name}${tx.gift_number ? ` #${tx.gift_number}` : ''}` : 'подарок'}
-                          {tx.sale_amount_ton != null && <> за {fmtGram(tx.sale_amount_ton)} <GramIcon size={12} style={{ verticalAlign: '-2px' }} /></>}
+                          {tx.sale_amount_ton != null && <> за {fmtGram(tx.sale_amount_ton)} <GramIcon size={17} style={{ verticalAlign: '-3px' }} /></>}
                         </div>
                         {tx.completed_at && (
                           <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
@@ -791,7 +791,7 @@ export default function Profile() {
                         fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                         color: 'var(--gold)',
                       }}>
-                        +{fmtGram(tx.amount_ton)} <GramIcon size={14} style={{ verticalAlign: '-3px' }} />
+                        +{fmtGram(tx.amount_ton)} <GramIcon size={19} style={{ verticalAlign: '-4px' }} />
                       </div>
                     </div>
                   )
@@ -849,7 +849,7 @@ export default function Profile() {
                       fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                       color: isBuy ? 'var(--text-secondary)' : 'var(--gold)',
                     }}>
-                      {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={14} style={{ verticalAlign: '-3px' }} />
+                      {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={19} style={{ verticalAlign: '-4px' }} />
                     </div>
                   </div>
                 )
