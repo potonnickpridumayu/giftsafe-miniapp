@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
@@ -402,25 +402,29 @@ export default function Portfolio() {
   const [error, setError] = useState('')
   const [statusFilter, setStatusFilter] = useState('all') // all | sale | trade | free
 
+  // Раньше пикер раскрывался аккордеоном в потоке страницы + скролл к нему
+  // отдельной JS rAF-анимацией — два аниматора одновременно дёргали layout
+  // (max-height реflow + scrollTo каждый кадр) и на реальном устройстве это
+  // читалось как лаги/дёрганье. Теперь это шторка снизу (как ConfirmSheet/
+  // FiltersSheet) — фиксированный оверлей поверх страницы, скроллить страницу
+  // не нужно вообще, анимируется только transform (GPU, без reflow).
   const [tradePicker, setTradePicker] = useState(false)
-  // Управляет анимацией раскрытия: пикер монтируется СВЁРНУТЫМ (высота 0 —
-  // макет не сдвигается ни на пиксель, поэтому и дёргаться нечему), страница
-  // плавно едет вверх к его месту, и только потом он раскрывается аккордеоном.
-  const [pickerShown, setPickerShown] = useState(false)
+  const [pickerVisible, setPickerVisible] = useState(false)
   const [tradeSelected, setTradeSelected] = useState(() => new Set())
   const [tradeNote, setTradeNote] = useState('')
   const [tradeBusy, setTradeBusy] = useState(false)
   const [tradeError, setTradeError] = useState('')
-  const tradePickerRef = useRef(null)
 
-  useLayoutEffect(() => {
-    if (tradePicker && tradePickerRef.current) {
-      scrollToPanel(tradePickerRef.current, 12)
-      const t = setTimeout(() => setPickerShown(true), 420) // после подъёма
-      return () => clearTimeout(t)
-    }
-    setPickerShown(false)
+  useEffect(() => {
+    if (!tradePicker) return
+    const id = requestAnimationFrame(() => setPickerVisible(true))
+    return () => cancelAnimationFrame(id)
   }, [tradePicker])
+
+  const closeTradePicker = () => {
+    setPickerVisible(false)
+    setTimeout(() => setTradePicker(false), 250)
+  }
 
   const load = useCallback(async () => {
     try {
@@ -501,7 +505,7 @@ export default function Portfolio() {
     try {
       await api.createTrade(Array.from(tradeSelected), tradeNote)
       haptic('medium')
-      setTradePicker(false)
+      closeTradePicker()
       setTradeSelected(new Set())
       setTradeNote('')
       load()
@@ -559,15 +563,65 @@ export default function Portfolio() {
           </div>
         )}
 
-        {tradePicker && (
-          <div ref={tradePickerRef} style={{
-            overflow: 'hidden',
-            maxHeight: pickerShown ? 640 : 0,
-            opacity: pickerShown ? 1 : 0,
-            marginTop: pickerShown ? 12 : 0,
-            transition: 'max-height .35s ease, opacity .3s ease, margin-top .35s ease',
-          }}>
-          <div className="card" style={{ padding: '14px 16px' }}>
+      </div>
+
+      {gifts === null ? (
+        <div className="empty-state">
+          <div className="empty-icon">⏳</div>
+          <div className="empty-title">Загружаем портфель…</div>
+        </div>
+      ) : gifts.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">💼</div>
+          <div className="empty-title">Портфель пуст</div>
+          <div className="empty-desc">
+            {error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
+          </div>
+        </div>
+      ) : visibleGifts.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <div className="empty-title">Таких подарков нет</div>
+          <div className="empty-desc">Попробуйте другой фильтр</div>
+        </div>
+      ) : (
+        <div style={{ columnCount: 2, columnGap: 9 }}>
+          {visibleGifts.map(gift => (
+            <div key={gift.gift_id} style={{ breakInside: 'avoid', marginBottom: 9 }}>
+              <GiftCard gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tradePicker && (
+        <div
+          onClick={closeTradePicker}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(5,3,4,0.7)',
+            opacity: pickerVisible ? 1 : 0,
+            transition: 'opacity .25s ease',
+            display: 'flex', alignItems: 'flex-end',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%',
+              background: 'var(--bg-card)',
+              borderRadius: '20px 20px 0 0',
+              border: '1px solid var(--border)',
+              borderBottom: 'none',
+              padding: '20px 16px calc(24px + env(safe-area-inset-bottom, 0px))',
+              maxWidth: 480,
+              margin: '0 auto',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              transform: pickerVisible ? 'translateY(0)' : 'translateY(100%)',
+              transition: 'transform .3s ease',
+            }}
+          >
             <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>
               Выберите подарки для обмена {tradeSelected.size > 0 ? `(${tradeSelected.size})` : ''}
             </div>
@@ -628,42 +682,12 @@ export default function Portfolio() {
               <button
                 className="btn btn-ghost" style={{ flex: 1 }}
                 disabled={tradeBusy}
-                onClick={() => setTradePicker(false)}
+                onClick={closeTradePicker}
               >
                 Отмена
               </button>
             </div>
           </div>
-          </div>
-        )}
-      </div>
-
-      {gifts === null ? (
-        <div className="empty-state">
-          <div className="empty-icon">⏳</div>
-          <div className="empty-title">Загружаем портфель…</div>
-        </div>
-      ) : gifts.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">💼</div>
-          <div className="empty-title">Портфель пуст</div>
-          <div className="empty-desc">
-            {error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
-          </div>
-        </div>
-      ) : visibleGifts.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">Таких подарков нет</div>
-          <div className="empty-desc">Попробуйте другой фильтр</div>
-        </div>
-      ) : (
-        <div style={{ columnCount: 2, columnGap: 9 }}>
-          {visibleGifts.map(gift => (
-            <div key={gift.gift_id} style={{ breakInside: 'avoid', marginBottom: 9 }}>
-              <GiftCard gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
-            </div>
-          ))}
         </div>
       )}
     </div>
