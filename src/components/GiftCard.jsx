@@ -77,7 +77,7 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
         {/* Цена в инфо-строке дублирует кнопку «Купить за N» — прячем, когда
             кнопка есть; на своих лотах (без кнопки) цена остаётся */}
         {item.price != null
-          ? (!onBuy && <div className="poster-price" style={{ flexShrink: 0 }}>{fmtGram(item.price)} <GramIcon size={24} /></div>)
+          ? (!onBuy && <div className="poster-price">{fmtGram(item.price)} <GramIcon size={17} /></div>)
           : <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
               {item.owner ? `@${item.owner}` : 'На обмен'}
             </div>}
