@@ -233,7 +233,7 @@ html, body {
   padding: 5px 12px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 1px;
   box-shadow: var(--money-glow);
   position: relative;
   overflow: hidden;

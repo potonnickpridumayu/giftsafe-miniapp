@@ -179,7 +179,7 @@ export default function Cart() {
             className="btn btn-primary btn-full"
             disabled={buying}
             onClick={buyAll}
-            style={{ fontSize: 15, padding: '14px', boxShadow: buying ? 'none' : 'var(--gold-glow)', opacity: buying ? 0.5 : 1 }}
+            style={{ fontSize: 15, padding: '14px', boxShadow: buying ? 'none' : 'var(--gold-glow)', opacity: buying ? 0.5 : 1, gap: 1 }}
           >
             {buying ? '⏳ Покупаем…' : <>Купить всё за {fmtGram(total)} <GramIcon size={24} style={{ verticalAlign: '-5px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
           </button>

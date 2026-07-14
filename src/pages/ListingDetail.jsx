@@ -333,7 +333,7 @@ export default function ListingDetail() {
           className="btn btn-primary btn-full"
           onClick={handleBuy}
           disabled={buying}
-          style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
+          style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)', gap: 1 }}
         >
           {buying ? '⏳ Обработка...' : <>Купить за {fmtGram(total)} <GramIcon size={24} style={{ verticalAlign: '-5px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
         </button>

@@ -90,7 +90,7 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
             style={{
               width: '100%', minWidth: 0, padding: '7px 6px',
               borderRadius: 'var(--radius-md)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
               fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17,
               letterSpacing: 0.3,
             }}
