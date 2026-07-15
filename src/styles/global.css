@@ -430,6 +430,26 @@ html, body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+/* Плашка своего лота. Занимает тот же слот, что и кнопка «Купить» на чужих
+   лотах: без неё карточка своего лота ниже соседней, и в ряду сетки под ней
+   зияет тёмный провал. Геометрия должна совпадать с кнопкой до пикселя —
+   поэтому та же база .btn и рамка через inset-тень, а не border (border
+   добавил бы 2px высоты, .btn его снимает). Не кнопка: тап проваливается на
+   карточку и открывает лот, где цену и меняют. */
+.poster-own-plate {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.poster-own-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+
 .poster-ribbon {
   position: absolute;
   top: 10px;

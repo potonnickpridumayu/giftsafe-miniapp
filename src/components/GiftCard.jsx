@@ -12,8 +12,20 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}д назад`
 }
 
+// Геометрия нижнего слота карточки. Кнопка «Купить» и плашка своего лота
+// делят её один в один — иначе карточки в ряду сетки разной высоты.
+const PLATE_STYLE = {
+  width: '100%', minWidth: 0, padding: '7px 6px',
+  borderRadius: 'var(--radius-md)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
+  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17,
+  letterSpacing: 0.3,
+}
+
 export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart, onBuy, buyBusy }) {
   const rarityColor = giftAccentColor(item.gift_id ?? item.id)
+  // Свой лот на маркете: цена есть, а кнопки «Купить» нет.
+  const isOwnListing = item.price != null && !onBuy
 
   return (
     <div className="poster-card" onClick={onClick}>
@@ -74,31 +86,36 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
               : timeAgo(item.listed_at)}
           </span>
         </div>
-        {/* Цена в инфо-строке дублирует кнопку «Купить за N» — прячем, когда
-            кнопка есть; на своих лотах (без кнопки) цена остаётся */}
-        {item.price != null
-          ? (!onBuy && <div className="poster-price">{fmtGram(item.price)} <GramIcon size={17} /></div>)
-          : <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
-              {item.owner ? `@${item.owner}` : 'На обмен'}
-            </div>}
+        {/* Цена живёт в нижнем слоте — кнопкой на чужих лотах, плашкой на своих.
+            В инфо-строке она была бы дублем, поэтому здесь только имя и номер. */}
+        {item.price == null && (
+          <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
+            {item.owner ? `@${item.owner}` : 'На обмен'}
+          </div>
+        )}
       </div>
 
       {onBuy && (
         <div style={{ padding: '5px 6px 6px' }}>
           <button
             className="btn btn-primary"
-            style={{
-              width: '100%', minWidth: 0, padding: '7px 6px',
-              borderRadius: 'var(--radius-md)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
-              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17,
-              letterSpacing: 0.3,
-            }}
+            style={PLATE_STYLE}
             disabled={buyBusy}
             onClick={(e) => { e.stopPropagation(); onBuy(item) }}
           >
             {buyBusy ? '⏳' : <>{fmtGram(item.price)} <GramIcon size={25} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
           </button>
+        </div>
+      )}
+
+      {isOwnListing && (
+        <div style={{ padding: '5px 6px 6px' }}>
+          <div className="btn poster-own-plate" style={{ ...PLATE_STYLE, gap: 5 }}>
+            <span className="poster-own-label">Ваш лот</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+              {fmtGram(item.price)} <GramIcon size={25} />
+            </span>
+          </div>
         </div>
       )}
     </div>
