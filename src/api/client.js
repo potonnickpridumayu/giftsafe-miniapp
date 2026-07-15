@@ -210,6 +210,10 @@ export const api = {
   createListing: (data) => request('/listings', { method: 'POST', body: JSON.stringify(data) }),
 
   // Escrow deposit
+  // Адрес сейфа берём с бэкенда перед каждым пополнением и НИКОГДА не зашиваем
+  // в код: раньше он был константой в Profile.jsx, бэкенд переехал на mainnet,
+  // а фронт продолжил слать деньги на старый адрес.
+  getEscrowAddress: () => request('/escrow/address'),
   createDepositIntent: () => request('/escrow/deposit-intent', { method: 'POST' }),
   getDepositStatus: () => request('/escrow/deposit-intent'),
   withdrawListing: (id) => request(`/escrow/withdraw/${id}`, { method: 'POST' }),

@@ -69,8 +69,6 @@ export default function Profile() {
 
   const SUPPORT_USERNAME = 'giftruby_support'
 
-  const SAFE_ADDRESS = '0QA2-P0sWJofS2PuPFrDln3nyBNJhw2wddDwUhxSU1b0tmqS'
-
   // Единая перезагрузка профиля; best-effort — ошибку глотаем,
   // чтобы не перетереть статус вывода/пополнения.
   const reloadProfile = async () => {
@@ -113,6 +111,21 @@ export default function Profile() {
       return
     }
     try {
+      // Адрес сейфа спрашиваем у бэкенда перед каждой отправкой. Зашивать его
+      // в код нельзя: он менялся при переезде на mainnet, и старая константа
+      // увела бы деньги на давно заброшенный адрес. Не ответил — не отправляем.
+      let safeAddress
+      try {
+        const res = await api.getEscrowAddress()
+        safeAddress = res?.address
+      } catch {
+        safeAddress = null
+      }
+      if (!safeAddress) {
+        setDepositStatus('Не удалось получить адрес пополнения — попробуйте ещё раз')
+        return
+      }
+
       const boc = beginCell()
         .storeUint(0, 32)
         .storeStringTail(`GS-DEP-${user?.id}`)
@@ -123,7 +136,7 @@ export default function Profile() {
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 300,
         messages: [{
-          address: SAFE_ADDRESS,
+          address: safeAddress,
           amount: String(Math.round(amount * 1e9)), // nanotons
           payload,
         }],
