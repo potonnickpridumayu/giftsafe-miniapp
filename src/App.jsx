@@ -45,23 +45,32 @@ export default function App() {
     return () => { alive = false }
   }, [])
 
+  // Контент НЕ монтируем под сплэшем: карточки маркета поднимают lottie-рендер
+  // стикеров, и он отъедает тот же главный поток, на котором рисуется анимация
+  // (получались рывки). Монтируем в момент начала затухания — оно сделано
+  // CSS-transition'ом по opacity, живёт на композиторе и не страдает от того,
+  // что главный поток занят маунтом. Данные к этому моменту уже в кэше.
   return (
     <BrowserRouter>
       {splash !== 'gone' && <RubyMarketSplash background="#1A0910" fading={splash === 'fading'} />}
-      <Routes>
-        <Route path="/" element={<Market />} />
-        <Route path="/listing/:id" element={<ListingDetail />} />
-        <Route path="/trade" element={<Trade />} />
-        <Route path="/trade/:id" element={<TradeDetail />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/sell" element={<Sell />} />
-        <Route path="/referral" element={<Referral />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/history" element={<MarketHistory />} />
-      </Routes>
-      <NavBar />
-      <ConfirmSheet />
+      {splash !== 'visible' && (
+        <>
+          <Routes>
+            <Route path="/" element={<Market />} />
+            <Route path="/listing/:id" element={<ListingDetail />} />
+            <Route path="/trade" element={<Trade />} />
+            <Route path="/trade/:id" element={<TradeDetail />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/sell" element={<Sell />} />
+            <Route path="/referral" element={<Referral />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/history" element={<MarketHistory />} />
+          </Routes>
+          <NavBar />
+          <ConfirmSheet />
+        </>
+      )}
     </BrowserRouter>
   )
 }

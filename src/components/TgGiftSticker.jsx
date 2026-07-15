@@ -21,15 +21,29 @@ function cacheTgs(id, data) {
 // Загрузка tgs с дедупликацией: две карточки с одним стикером (или прогрев
 // со сплэша + маунт карточки) делят один запрос.
 const tgsLoading = new Map() // stickerId -> Promise<animationData>
+
+// Распаковка tgs (gzip'нутый lottie-JSON). Через нативный DecompressionStream:
+// он разжимает во внутренних потоках браузера, а не в JS на главном потоке, и
+// Response.json() парсит нативно, без промежуточной JS-строки. Это важно не
+// ради скорости самой по себе: прогрев зовётся со сплэша, и pako.ungzip на
+// главном потоке блокировал его на десятки мс × число стикеров — анимация
+// логотипа теряла кадры. pako остаётся фолбэком для старых webview.
+async function decodeTgs(buf) {
+  const gz = buf[0] === 0x1f && buf[1] === 0x8b
+  if (gz && typeof DecompressionStream !== 'undefined') {
+    const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))
+    return new Response(stream).json()
+  }
+  return JSON.parse(new TextDecoder().decode(gz ? ungzip(buf) : buf))
+}
+
 function loadTgs(stickerId) {
   if (tgsCache.has(stickerId)) return Promise.resolve(tgsCache.get(stickerId))
   if (tgsLoading.has(stickerId)) return tgsLoading.get(stickerId)
   const p = (async () => {
     const res = await fetch(`${FILE_BASE}/${stickerId}`)
     if (!res.ok) throw new Error('tgs fetch failed')
-    const buf = new Uint8Array(await res.arrayBuffer())
-    const raw = (buf[0] === 0x1f && buf[1] === 0x8b) ? ungzip(buf) : buf
-    const data = JSON.parse(new TextDecoder().decode(raw))
+    const data = await decodeTgs(new Uint8Array(await res.arrayBuffer()))
     cacheTgs(stickerId, data)
     return data
   })().finally(() => tgsLoading.delete(stickerId))

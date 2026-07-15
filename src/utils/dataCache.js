@@ -14,6 +14,22 @@ export const setCached = (key, value) => { store.set(key, value) }
 // минуту на гигантском маркете; сверху его и так страхует потолок 10с).
 const WARM_ART_LIMIT = 24
 
+// Прогреваем не залпом, а батчами, уступая поток между ними. Залп из 24 штук
+// забивал главный поток распаковкой/разбором стикеров, и анимация сплэша,
+// которая рисуется на том же потоке, теряла кадры. Батч держит сеть
+// параллельной, а пауза между батчами отдаёт браузеру кадр на отрисовку.
+const WARM_BATCH = 4
+const yieldToFrame = () => new Promise(r => setTimeout(r, 0))
+
+async function warmInBatches(listings) {
+  for (let i = 0; i < listings.length; i += WARM_BATCH) {
+    await Promise.allSettled(
+      listings.slice(i, i + WARM_BATCH).map(l => warmGiftArt(l.tg_sticker, l.tg_backdrop))
+    )
+    await yieldToFrame()
+  }
+}
+
 let prefetchPromise = null
 export function prefetchAll() {
   if (!prefetchPromise) {
@@ -23,9 +39,7 @@ export function prefetchAll() {
       // достраиваются у пользователя на глазах.
       api.getListings().then(async d => {
         setCached('listings', d)
-        await Promise.allSettled(
-          d.slice(0, WARM_ART_LIMIT).map(l => warmGiftArt(l.tg_sticker, l.tg_backdrop))
-        )
+        await warmInBatches(d.slice(0, WARM_ART_LIMIT))
       }),
       api.getTrades().then(d => setCached('trades', d)),
       // вне Telegram (нет initData) портфель вернёт 401 — allSettled это глотает
