@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftSlug } from '../api/client'
-import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react'
+import { useTonConnectUI, useTonAddress, useTonWallet, CHAIN } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
 import BrandLogo from '../components/BrandLogo'
@@ -55,6 +55,10 @@ export default function Profile() {
   const [error, setError] = useState(null)
   const [tonConnectUI] = useTonConnectUI()
   const walletAddress = useTonAddress()
+  // Нужен ради account.chain: адрес сам по себе сеть не выдаёт надёжно, а
+  // кошелёк в тестовом режиме увёл бы деньги на адрес, которым в основной сети
+  // владелец не распоряжается (у W5 адреса в сетях разные).
+  const wallet = useTonWallet()
   const [depositAmount, setDepositAmount] = useState('')
   const [showDeposit, setShowDeposit] = useState(false)
   const [depositStatus, setDepositStatus] = useState(null)
@@ -114,15 +118,24 @@ export default function Profile() {
       // Адрес сейфа спрашиваем у бэкенда перед каждой отправкой. Зашивать его
       // в код нельзя: он менялся при переезде на mainnet, и старая константа
       // увела бы деньги на давно заброшенный адрес. Не ответил — не отправляем.
-      let safeAddress
+      let safeAddress, safeNetwork
       try {
         const res = await api.getEscrowAddress()
         safeAddress = res?.address
+        safeNetwork = res?.network
       } catch {
         safeAddress = null
       }
       if (!safeAddress) {
         setDepositStatus('Не удалось получить адрес пополнения — попробуйте ещё раз')
+        return
+      }
+      // Сеть кошелька должна совпадать с сетью сервиса, иначе перевод уйдёт
+      // в другую сеть и не зачислится.
+      const expectedChain = safeNetwork === 'testnet' ? CHAIN.TESTNET : CHAIN.MAINNET
+      const walletChain = wallet?.account?.chain
+      if (walletChain && walletChain !== expectedChain) {
+        setDepositStatus('Кошелёк подключён к другой сети — переключите его и подключите заново')
         return
       }
 
