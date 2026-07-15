@@ -24,7 +24,9 @@ const yieldToFrame = () => new Promise(r => setTimeout(r, 0))
 async function warmInBatches(listings) {
   for (let i = 0; i < listings.length; i += WARM_BATCH) {
     await Promise.allSettled(
-      listings.slice(i, i + WARM_BATCH).map(l => warmGiftArt(l.tg_sticker, l.tg_backdrop))
+      listings.slice(i, i + WARM_BATCH).map(l =>
+        warmGiftArt(l.tg_sticker, l.tg_backdrop, l.image_full || l.image_url)
+      )
     )
     await yieldToFrame()
   }
@@ -39,7 +41,13 @@ export function prefetchAll() {
       // достраиваются у пользователя на глазах.
       api.getListings().then(async d => {
         setCached('listings', d)
-        await warmInBatches(d.slice(0, WARM_ART_LIMIT))
+        // Прогреваем В ТОМ ЖЕ ПОРЯДКЕ, в каком лоты покажет Маркет (сортировка
+        // по умолчанию — новые сверху, см. Market.jsx). Раньше брали первые 24
+        // как их отдал бэкенд: набор не совпадал с видимым, и карточки первого
+        // экрана оставались непрогретыми — на медленной сети открывались с
+        // недогруженной графикой, хотя сплэш считал, что всё готово.
+        const byDisplayOrder = [...d].sort((a, b) => b.listed_at - a.listed_at)
+        await warmInBatches(byDisplayOrder.slice(0, WARM_ART_LIMIT))
       }),
       api.getTrades().then(d => setCached('trades', d)),
       // вне Telegram (нет initData) портфель вернёт 401 — allSettled это глотает

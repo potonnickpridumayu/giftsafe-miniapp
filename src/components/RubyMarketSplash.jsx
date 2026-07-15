@@ -209,7 +209,12 @@ export default function RubyMarketSplash({ background = '#1A0910', showWordmark 
       fontReady,
     ]).then(() => {
       if (!alive) return
+      // Сначала кадр t=0, и только потом показываем холст. Иначе камень видно
+      // статично: <img> лежит в DOM с первого рендера без трансформа, и как
+      // только его байты приезжают, браузер рисует его в позиции покоя —
+      // получался «красный ромб висит» до старта анимации.
       draw()
+      canvasRef.current.style.visibility = 'visible'
       raf = requestAnimationFrame(step)
       onReadyRef.current?.()
     })
@@ -247,7 +252,9 @@ export default function RubyMarketSplash({ background = '#1A0910', showWordmark 
         pointerEvents: fading ? 'none' : 'auto',
       }}
     >
-      <div ref={canvasRef} style={{ width: W, height: H, flex: '0 0 auto', position: 'relative', transformOrigin: 'center center' }}>
+      {/* visibility: hidden до первого кадра — см. draw() в эффекте: пока он не
+          проставил t=0, камень нарисовался бы в позиции покоя */}
+      <div ref={canvasRef} style={{ width: W, height: H, flex: '0 0 auto', position: 'relative', transformOrigin: 'center center', visibility: 'hidden' }}>
         <div ref={rippleRef} style={{
           position: 'absolute', borderRadius: '50%',
           border: '3px solid #FF2D55', opacity: 0,

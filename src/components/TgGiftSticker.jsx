@@ -68,16 +68,31 @@ function warmPattern(fileId) {
   return p
 }
 
+// Кладём картинку в кэш браузера, чтобы <img> в карточке взял её оттуда.
+const warmImage = (url) => new Promise(res => {
+  const im = new Image()
+  im.onload = im.onerror = () => res()
+  im.src = url
+})
+
 // Прогрев всей графики подарка (стикер + узор) — зовётся со сплэша
 // (prefetchAll), чтобы маркет открывался уже ПОЛНОСТЬЮ готовым.
-export function warmGiftArt(stickerId, backdrop) {
+export function warmGiftArt(stickerId, backdrop, image) {
   let bd = null
   if (backdrop) {
     try { bd = typeof backdrop === 'string' ? JSON.parse(backdrop) : backdrop } catch { /* без фона */ }
   }
   const jobs = []
   if (bd?.pattern) jobs.push(warmPattern(bd.pattern))
-  if (stickerId) jobs.push(loadTgs(stickerId).catch(() => { /* останется JPG */ }))
+  if (stickerId) {
+    jobs.push(loadTgs(stickerId).catch(() => { /* останется JPG */ }))
+  } else if (image) {
+    // Стикера нет — карточка так и останется на JPG, значит греем его. Когда
+    // стикер есть, JPG не греем сознательно: он рисуется только пока стикер
+    // не готов, а из кэша тот встаёт сразу — качать оба вдвое дороже, и как
+    // раз на медленной сети это било бы больнее всего.
+    jobs.push(warmImage(image))
+  }
   return Promise.all(jobs)
 }
 
