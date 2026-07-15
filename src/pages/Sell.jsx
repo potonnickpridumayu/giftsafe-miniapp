@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
 import { fmtGram } from '../utils/format'
+import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
 // Должна совпадать с FEE_RATE в ListingDetail.jsx, "Комиссия 3%" в Market.jsx
 // и MARKET_FEE на бэкенде. Весь маркет работает в TON, не в Stars.
@@ -101,6 +102,11 @@ export default function Sell() {
   const submitListing = () => {
     if (!(priceNum > 0)) {
       setError('Укажите цену в Gram больше нуля')
+      haptic('heavy')
+      return
+    }
+    if (overMaxPrice(priceNum)) {
+      setError(MAX_PRICE_ERROR)
       haptic('heavy')
       return
     }

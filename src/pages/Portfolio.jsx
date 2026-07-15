@@ -8,6 +8,7 @@ import TgGiftSticker from '../components/TgGiftSticker'
 import BrandLogo from '../components/BrandLogo'
 import WalletButton from '../components/WalletButton'
 import { fmtGram } from '../utils/format'
+import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 import { getCached, setCached } from '../utils/dataCache'
 
 const API_BASE = 'https://nftmarketbot-production.up.railway.app'
@@ -133,6 +134,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
 
   const sell = async () => {
     if (!(priceNum > 0)) { setError('Укажите цену в Gram больше нуля'); return }
+    if (overMaxPrice(priceNum)) { setError(MAX_PRICE_ERROR); return }
     setBusy(true)
     setError('')
     try {
@@ -165,6 +167,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const savePrice = async () => {
     const p = parseFloat(String(newPrice).replace(',', '.'))
     if (!p || p <= 0) { setError('Введите цену больше нуля'); return }
+    if (overMaxPrice(p)) { setError(MAX_PRICE_ERROR); return }
     setBusy(true)
     setError('')
     try {

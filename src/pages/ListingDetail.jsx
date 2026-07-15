@@ -5,6 +5,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
 import { fmtGram, fmtPercent } from '../utils/format'
+import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
 // Должна совпадать с MARKET_FEE на бэкенде и цифрой в Market.jsx.
 // Итоговая комиссия всё равно приходит в ответе покупки — это лишь предпросмотр.
@@ -75,6 +76,7 @@ export default function ListingDetail() {
     try { attrs = JSON.parse(item.tg_backdrop) } catch { /* без атрибутов */ }
   }
   const fee = +(item.price * FEE_RATE).toFixed(4)
+  const sellerGets = +(item.price - fee).toFixed(4)
   const total = item.price
   const soldOut = item.status && item.status !== 'active'
   const isOwnListing = user?.id === item.seller_id
@@ -126,6 +128,11 @@ export default function ListingDetail() {
     const p = parseFloat(String(newPrice).replace(',', '.'))
     if (!p || p <= 0) {
       setPriceError('Введите цену больше нуля')
+      return
+    }
+    if (overMaxPrice(p)) {
+      setPriceError(MAX_PRICE_ERROR)
+      haptic('heavy')
       return
     }
     haptic('light')
@@ -224,6 +231,12 @@ export default function ListingDetail() {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Комиссия ruby ({Math.round(FEE_RATE * 100)}%)</span>
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{fmtGram(fee)} <GramIcon size={21} /></span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            {isOwnListing ? 'Вы получите' : 'Продавец получит'}
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>{fmtGram(sellerGets)} <GramIcon size={21} /></span>
         </div>
         <div className="divider" style={{ margin: '10px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
