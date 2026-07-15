@@ -82,7 +82,19 @@ function hexIsDark(hex) {
   } catch { return false }
 }
 
-export default function RubyMarketSplash({ background = '#1A0910', showWordmark = true, fading = false }) {
+// Ждём именно ДЕКОДИРОВАННУЮ картинку: onload значит «байты приехали», но
+// первый кадр с ней всё равно может не успеть отрисоваться. Ошибку глотаем —
+// сплэш не должен застрять из-за неприехавшей картинки.
+function preloadImage(src) {
+  return new Promise(res => {
+    const im = new Image()
+    im.onload = () => (im.decode ? im.decode().then(res, res) : res())
+    im.onerror = res
+    im.src = src
+  })
+}
+
+export default function RubyMarketSplash({ background = '#1A0910', showWordmark = true, fading = false, onReady }) {
   const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const rippleRef = useRef(null)
@@ -93,6 +105,10 @@ export default function RubyMarketSplash({ background = '#1A0910', showWordmark 
   const glintBarRef = useRef(null)
   const sparkRef = useRef(null)
   const wordRef = useRef(null)
+  // onReady зовётся из эффекта с пустыми deps — держим в ref, чтобы новая
+  // функция на каждом рендере родителя не перезапускала анимацию.
+  const onReadyRef = useRef(onReady)
+  onReadyRef.current = onReady
 
   // rAF-таймлайн: секунды, зациклен по DUR (как Stage loop в исходном DC).
   // Пока данные грузятся дольше интро, анимация просто идёт по кругу; на стыке
@@ -100,8 +116,14 @@ export default function RubyMarketSplash({ background = '#1A0910', showWordmark 
   // повторный прогон видно только на долгой загрузке, и это осознанно.
   // Обрывает цикл App.jsx: как только данные готовы, он гасит сплэш прямо
   // посреди кадра — первый прогон при этом всегда доигрывает до конца.
+  //
+  // Стартуем не раньше, чем приедут и декодируются камень, «r» и шрифт слова:
+  // иначе на медленной сети (или у любого, кто зашёл впервые с пустым кэшем)
+  // первые прогоны идут вхолостую — рисовать ещё нечем. Пока ждём, на экране
+  // просто фон, и это ровно то же, что кадр t=0. О реальном старте сообщаем
+  // наверх через onReady — от него App.jsx отсчитывает полный первый прогон.
   useEffect(() => {
-    let raf, last = null, t = 0
+    let raf, last = null, t = 0, alive = true
 
     const draw = () => {
       // камень: падение → приземление → отскок → лёгкое «дыхание»
@@ -177,9 +199,22 @@ export default function RubyMarketSplash({ background = '#1A0910', showWordmark 
       draw()
       raf = requestAnimationFrame(step)
     }
-    draw()
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
+    const fontReady = document.fonts?.load
+      ? document.fonts.load('800 96px Manrope', 'ruby').catch(() => {})
+      : Promise.resolve()
+
+    Promise.all([
+      preloadImage('/splash-gem.png'),
+      preloadImage('/splash-r.png'),
+      fontReady,
+    ]).then(() => {
+      if (!alive) return
+      draw()
+      raf = requestAnimationFrame(step)
+      onReadyRef.current?.()
+    })
+
+    return () => { alive = false; if (raf) cancelAnimationFrame(raf) }
   }, [])
 
   // contain-fit холста 1080×1920 в контейнер

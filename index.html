@@ -7,6 +7,11 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet" />
+    <!-- Картинки сплэша качаем с первого кадра, параллельно с бандлом: иначе
+         они стартуют только после маунта React, и на медленной сети первые
+         прогоны анимации идут с пустым камнем (рисовать ещё нечего). -->
+    <link rel="preload" as="image" href="/splash-gem.png" />
+    <link rel="preload" as="image" href="/splash-r.png" />
   </head>
   <body>
     <!-- Тёмная подложка под первый кадр (до загрузки/монтирования React) —
