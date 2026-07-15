@@ -9,53 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <!-- Сплэш рисуется до загрузки React — скрывает белый экран и прыжок шрифтов.
-         Анимация повторяет видео-исходник (ромбик падает → появляется r → слово),
-         но собрана в CSS: вектор + шрифт = идеальная чёткость и частота кадров
-         экрана, и она зациклена — крутится, пока App.jsx не скроет сплэш
-         (данные готовы + минимум один полный цикл 3с). -->
+    <!-- Тёмная подложка под первый кадр (до загрузки/монтирования React) —
+         прячет белый экран. Точь-в-точь фон React-сплэша RubyMarketSplash,
+         который монтируется поверх, запускает анимацию логотипа и сам удаляет
+         эту подложку. Без CSS-анимации, чтобы не конфликтовать с React-версией. -->
     <style>
-      #splash{position:fixed;inset:0;z-index:9999;background:#18070e;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .35s ease}
-      #splash.hide{opacity:0;pointer-events:none}
-      #splash .mark{position:relative;width:150px;height:170px}
-      #splash .r{position:absolute;left:4px;bottom:-32px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:144px;line-height:1;color:#ff2d55;transform-origin:30% 80%;animation:spl-r 3s ease infinite}
-      #splash .gem{position:absolute;right:4px;top:0;width:56px;height:56px;border-radius:17px;background:#ff5c7c;animation:spl-gem 3s ease infinite}
-      /* рябь: маленькое кольцо вокруг ромбика при приземлении + большое вокруг знака */
-      #splash .ring1{position:absolute;right:-10px;top:-12px;width:82px;height:82px;border-radius:50%;border:1.5px solid rgba(255,92,124,.55);opacity:0;animation:spl-ring1 3s ease-out infinite}
-      #splash .ring2{position:absolute;left:50%;top:54%;width:216px;height:216px;margin:-108px 0 0 -108px;border-radius:50%;border:1.5px solid rgba(255,92,124,.4);opacity:0;animation:spl-ring2 3s ease-out infinite}
-      /* блик: белый скруглённый квадратик прилетает сверху-справа к углу ромбика */
-      #splash .spark{position:absolute;right:-14px;top:-16px;width:13px;height:13px;border-radius:4px;background:#fff;opacity:0;animation:spl-spark 3s linear infinite}
-      #splash .word{margin-top:42px;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;color:#fff;animation:spl-word 3s ease infinite}
-      /* Ромбик кувыркается при падении (−38°→45°), летит чуть по диагонали.
-         Одна непрерывная кривая без отскока — плавно от старта до покоя. */
-      @keyframes spl-gem{
-        0%,12%{transform:translate(-18px,-170px) rotate(-38deg);opacity:0}
-        15%{opacity:1}
-        27%{transform:translate(0,0) rotate(45deg)}
-        100%{transform:translate(0,0) rotate(45deg);opacity:1}
-      }
-      /* r выскакивает быстро (в видео появляется за 2 кадра) */
-      @keyframes spl-r{0%,23%{transform:scale(.55);opacity:0}25%{opacity:.4}31%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:1}}
-      @keyframes spl-ring1{0%,20%{transform:scale(.35);opacity:0}26%{opacity:.6}40%{transform:scale(1.5);opacity:0}100%{opacity:0}}
-      @keyframes spl-ring2{0%,24%{transform:scale(.4);opacity:0}30%{opacity:.45}52%{transform:scale(1.25);opacity:0}100%{opacity:0}}
-      @keyframes spl-word{0%,52%{opacity:0;letter-spacing:.38em;transform:translateY(8px)}64%{opacity:1;letter-spacing:.02em;transform:translateY(0)}100%{opacity:1;letter-spacing:.02em;transform:translateY(0)}}
-      /* блик стоит на месте: вырастает и сжимается, медленно и равномерно
-         поворачиваясь −42°→0°(пик, ровный квадрат)→45°(ромбик) — покадрово с видео */
-      @keyframes spl-spark{0%,47%{transform:rotate(-42deg) scale(0);opacity:0}48.5%{opacity:1}57.5%{transform:rotate(0deg) scale(1);opacity:1}70%{transform:rotate(45deg) scale(0);opacity:0}100%{transform:rotate(45deg) scale(0);opacity:0}}
+      #splash{position:fixed;inset:0;z-index:9998;background:#1A0910}
     </style>
-    <div id="splash">
-      <div class="mark">
-        <span class="r">r</span>
-        <div class="gem"></div>
-        <div class="ring1"></div>
-        <div class="ring2"></div>
-        <div class="spark"></div>
-      </div>
-      <div class="word">ruby</div>
-    </div>
+    <div id="splash"></div>
     <script>
-      window.__splashAt = Date.now()
-      window.__splashMin = 3000 // минимум один полный цикл анимации
+      window.__splashAt = Date.now() // якорь тайминга: минимум 3с показа сплэша
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
