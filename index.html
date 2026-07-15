@@ -7,21 +7,24 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet" />
-    <!-- Картинки сплэша качаем с первого кадра, параллельно с бандлом: иначе
-         они стартуют только после маунта React, и на медленной сети первые
-         прогоны анимации идут с пустым камнем (рисовать ещё нечего). -->
+    <!-- Картинки сплэша качаем с первого кадра, параллельно со скриптами:
+         иначе анимация ждёт их и на медленной сети стартует с пустым камнем. -->
     <link rel="preload" as="image" href="/splash-gem.png" />
     <link rel="preload" as="image" href="/splash-r.png" />
   </head>
   <body>
-    <!-- Тёмная подложка под первый кадр (до загрузки/монтирования React) —
-         прячет белый экран. Точь-в-точь фон React-сплэша RubyMarketSplash,
-         который монтируется поверх, запускает анимацию логотипа и сам удаляет
-         эту подложку. Без CSS-анимации, чтобы не конфликтовать с React-версией. -->
+    <!-- Экран сплэша: тёмная подложка рисуется с первого кадра (прячет белый
+         экран), внутрь splash-boot.js строит сцену и запускает анимацию, он же
+         сам удаляет узел по finish() из App.jsx. -->
     <style>
       #splash{position:fixed;inset:0;z-index:9998;background:#1A0910}
     </style>
     <div id="splash"></div>
+    <!-- Обычный (не module) скрипт сразу после #splash: выполняется ДО бандла,
+         поэтому анимация идёт, пока основной бандл (~600КБ gzip) ещё едет. Лежит
+         в public/, а не в src/: модуль из src/ Vite схлопнул бы в тот же бандл,
+         и на 3G до анимации был бы длинный тёмный экран. -->
+    <script src="/splash.js"></script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

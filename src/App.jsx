@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { prefetchAll } from './utils/dataCache'
 import NavBar from './components/NavBar'
 import ConfirmSheet from './components/ConfirmSheet'
-import RubyMarketSplash from './components/RubyMarketSplash'
 import Market from './pages/Market'
 import ListingDetail from './pages/ListingDetail'
 import Trade from './pages/Trade'
@@ -24,60 +23,42 @@ const SPLASH_MIN_MS = 3000
 const SPLASH_CAP_MS = 30000
 
 export default function App() {
-  // Сплэш открытия маркета: React-анимация логотипа ruby (RubyMarketSplash)
-  // поверх приложения. Держим, пока предзагружаются данные вкладок
-  // (маркет/обмен/портфель), но не меньше одного полного прогона: если данные
-  // готовы раньше — ждём его конца, если позже — анимация идёт по кругу и мы
-  // обрываем её сразу по готовности, посреди любого кадра.
-  // 'visible' → 'fading' (плавное затухание 0.45с) → 'gone' (размонтирован).
-  const [splash, setSplash] = useState('visible')
-  // Момент, когда анимация РЕАЛЬНО пошла (ассеты сплэша готовы), а не когда
-  // смонтировался компонент: от него отсчитываем полный первый прогон.
-  const [animStart, setAnimStart] = useState(null)
-  const dataRef = useRef(null)
+  // Сплэшем рулит splash-boot.js (window.rubySplash): он стартует до этого
+  // бандла и сам рисует анимацию. Здесь только решаем, КОГДА его погасить —
+  // когда предзагрузились данные вкладок (маркет/обмен/портфель), но не раньше
+  // конца первого полного прогона. Если данные подъехали позже, анимация всё
+  // это время идёт по кругу и мы обрываем её посреди любого кадра.
+  // Пока сплэш виден, контент НЕ монтируем: карточки поднимают lottie-рендер
+  // стикеров, а он отъедает тот же главный поток, на котором идёт анимация
+  // (получались рывки). Монтируем в момент начала затухания — оно CSS-ное, по
+  // opacity, живёт на композиторе и от занятого потока не страдает. Данные к
+  // этому моменту уже в кэше.
+  const [showContent, setShowContent] = useState(() => !window.rubySplash)
 
   useEffect(() => {
-    // Тёмная подложка первого кадра из index.html больше не нужна — её
-    // накрывает React-сплэш; убираем сразу, чтобы не мигала под затуханием.
-    const el = document.getElementById('splash')
-    if (el) el.remove()
-    // Загрузку начинаем сразу, не дожидаясь старта анимации.
-    dataRef.current = Promise.race([
+    const splash = window.rubySplash
+    const data = Promise.race([
       prefetchAll(),
       new Promise(r => setTimeout(r, SPLASH_CAP_MS)),
     ])
-  }, [])
+    if (!splash) return undefined // сплэш не поднялся — просто показываем app
 
-  useEffect(() => {
-    if (animStart == null) return undefined
     let alive = true
-    dataRef.current.then(() => {
+    Promise.all([splash.ready, data]).then(() => {
       if (!alive) return
-      const left = Math.max(0, SPLASH_MIN_MS - (Date.now() - animStart))
+      const left = Math.max(0, SPLASH_MIN_MS - (Date.now() - splash.startedAt))
       setTimeout(() => {
         if (!alive) return
-        setSplash('fading')
-        setTimeout(() => { if (alive) setSplash('gone') }, 450)
+        splash.finish()      // запускает затухание, потом сам удалит узел
+        setShowContent(true) // контент встаёт под затухающим сплэшем
       }, left)
     })
     return () => { alive = false }
-  }, [animStart])
+  }, [])
 
-  // Контент НЕ монтируем под сплэшем: карточки маркета поднимают lottie-рендер
-  // стикеров, и он отъедает тот же главный поток, на котором рисуется анимация
-  // (получались рывки). Монтируем в момент начала затухания — оно сделано
-  // CSS-transition'ом по opacity, живёт на композиторе и не страдает от того,
-  // что главный поток занят маунтом. Данные к этому моменту уже в кэше.
   return (
     <BrowserRouter>
-      {splash !== 'gone' && (
-        <RubyMarketSplash
-          background="#1A0910"
-          fading={splash === 'fading'}
-          onReady={() => setAnimStart(Date.now())}
-        />
-      )}
-      {splash !== 'visible' && (
+      {showContent && (
         <>
           <Routes>
             <Route path="/" element={<Market />} />
