@@ -104,7 +104,9 @@ export default function Market() {
     setError(null)
     try {
       const data = await api.getListings()
-      setListings(data)
+      // не трогаем стейт, если данные не изменились — иначе автоопрос
+      // перерисовывал бы сетку каждые 15 с впустую
+      setListings(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data)
       setCached('listings', data)
     } catch (e) {
       // при живом кэше не роняем экран в ошибку — показываем старые данные
@@ -115,6 +117,14 @@ export default function Market() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  // Автообновление: тихий рефетч раз в 15 с, чтобы проданные/снятые лоты
+  // пропадали у всех открывших маркет, а не только после ручного перехода.
+  // Пока приложение свёрнуто (document.hidden) — не опрашиваем.
+  useEffect(() => {
+    const id = setInterval(() => { if (!document.hidden) load() }, 15000)
+    return () => clearInterval(id)
+  }, [load])
 
   // Варианты атрибутов для фильтров собираются из реальных лотов
   const attrOptions = useMemo(() => {
