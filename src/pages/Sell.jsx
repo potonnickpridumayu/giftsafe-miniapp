@@ -112,7 +112,7 @@ export default function Sell() {
     }
     haptic('medium')
     showConfirm(
-      `Выставить подарок за ${fmtGram(priceNum)} Gram? Вы получите ${fmtGram(youGet)} Gram.`,
+      `Выставить подарок за ${fmtGram(priceNum)} Gram? Вы получите ${fmtGram(youGet)} Gram`,
       async (ok) => {
         if (!ok) return
         setBusy(true)

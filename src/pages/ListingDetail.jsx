@@ -106,7 +106,7 @@ export default function ListingDetail() {
   const handleWithdraw = () => {
     haptic('medium')
     showConfirm(
-      `Снять «${item.name}» с продажи? Подарок останется в вашем портфеле.`,
+      `Снять «${item.name}» с продажи? Подарок останется в вашем портфеле`,
       async (ok) => {
         if (!ok) return
         setWithdrawing(true)

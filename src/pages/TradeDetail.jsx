@@ -94,7 +94,7 @@ export default function TradeDetail() {
   const handleCancel = () => {
     haptic('medium')
     showConfirm(
-      `Снять «${item.name}» с обмена? Подарок останется в вашем портфеле.`,
+      `Снять «${item.name}» с обмена? Подарок останется в вашем портфеле`,
       async (ok) => {
         if (!ok) return
         setCancelling(true)

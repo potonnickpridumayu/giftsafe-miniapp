@@ -89,7 +89,7 @@ export default function Trade() {
         <div className="empty-state">
           <div className="empty-icon">🔄</div>
           <div className="empty-title">Пока нет подарков на обмен</div>
-          <div className="empty-desc">Выставьте свой подарок на обмен в Портфеле — предлагайте и принимайте обмены (возможна доплата в Gram).</div>
+          <div className="empty-desc">Выставьте свой подарок на обмен в Портфеле — предлагайте и принимайте обмены (возможна доплата в Gram)</div>
           <button
             className="btn btn-primary"
             onClick={() => { haptic('medium'); navigate('/portfolio', { state: { openTradePicker: true } }) }}

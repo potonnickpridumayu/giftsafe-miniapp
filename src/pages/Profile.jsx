@@ -155,9 +155,9 @@ export default function Profile() {
         }],
       })
       try { haptic('medium') } catch {}
-      // Шторку не закрываем — статус успеха виден внутри, закроет сам юзер
       setDepositStatus('✅ Отправлено! Ждём подтверждения…')
-      // опрашиваем профиль каждые 5 сек, пока баланс не вырастет (макс 2 мин)
+      // опрашиваем профиль каждые 5 сек, пока баланс не вырастет (макс 2 мин);
+      // как только Gram зачислены — шторка закрывается сама, новый баланс уже на экране
       const prevBalance = balance
       let tries = 0
       const poll = setInterval(async () => {
@@ -167,6 +167,8 @@ export default function Profile() {
           setProfile(res)
           if ((res?.user?.balance_ton ?? 0) > prevBalance) {
             setDepositStatus(null)
+            setShowDeposit(false)
+            try { haptic('medium') } catch {}
             clearInterval(poll)
           }
         } catch {}
@@ -429,10 +431,10 @@ export default function Profile() {
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 18 }}>
                   {isDep
-                    ? 'TON спишутся с подключённого кошелька и зачислятся на баланс как Gram.'
+                    ? 'TON спишутся с подключённого кошелька и зачислятся на ваш баланс'
                     : shortWallet
                       ? <>TON придут на подключённый кошелёк<br /><b style={{ color: 'var(--text-secondary)' }}>{shortWallet}</b></>
-                      : 'Кошелёк не подключён — попросим подключить при отправке.'}
+                      : 'Кошелёк не подключён — попросим подключить при отправке'}
                 </div>
 
                 {!isDep && (
