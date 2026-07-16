@@ -431,9 +431,9 @@ export default function Profile() {
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 18 }}>
                   {isDep
-                    ? 'TON спишутся с подключённого кошелька и зачислятся на ваш баланс'
+                    ? 'Gram спишутся с подключённого кошелька и зачислятся на ваш баланс'
                     : shortWallet
-                      ? <>TON придут на подключённый кошелёк<br /><b style={{ color: 'var(--text-secondary)' }}>{shortWallet}</b></>
+                      ? <>Gram придут на подключённый кошелёк<br /><b style={{ color: 'var(--text-secondary)' }}>{shortWallet}</b></>
                       : 'Кошелёк не подключён — попросим подключить при отправке'}
                 </div>
 
