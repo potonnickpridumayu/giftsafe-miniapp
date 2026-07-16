@@ -774,6 +774,56 @@ export default function Profile() {
                     </div>
                   )
                 }
+                if (tx.kind === 'deposit' || tx.kind === 'withdrawal') {
+                  // Движение средств: пополнение баланса TON или вывод на кошелёк
+                  const isDep = tx.kind === 'deposit'
+                  const wdStatus = isDep ? null : ({
+                    pending: ['в обработке', 'var(--text-muted)'],
+                    sent: ['в обработке', 'var(--text-muted)'],
+                    confirmed: ['выполнен', '#3ddc84'],
+                    refunded: ['возвращён на баланс', '#e8a13c'],
+                  }[tx.status] || [tx.status, 'var(--text-muted)'])
+                  return (
+                    <div
+                      key={`m${j}`} className="card"
+                      style={{ padding: '10px 16px', marginBottom: 6, border: '1px solid rgba(255, 255, 255, 0.30)', display: 'flex', alignItems: 'center', gap: 10 }}
+                    >
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 'var(--radius-md)',
+                        flexShrink: 0, background: 'var(--bg-card-hover)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <span style={{ fontSize: 18 }}>{isDep ? '💰' : '📤'}</span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: 13,
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          <span style={{ fontWeight: 600, color: isDep ? '#3ddc84' : 'var(--text-secondary)' }}>
+                            {isDep ? 'Пополнение' : 'Вывод средств'}
+                          </span>
+                          {wdStatus && (
+                            <span style={{ fontSize: 11, marginLeft: 6, color: wdStatus[1] }}>{wdStatus[0]}</span>
+                          )}
+                        </div>
+                        {tx.completed_at && (
+                          <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
+                            {new Date(tx.completed_at).toLocaleDateString('ru-RU')}
+                            {' '}
+                            {new Date(tx.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
+                        color: isDep ? 'var(--gold)' : 'var(--text-secondary)',
+                      }}>
+                        {isDep ? '+' : '−'}{fmtGram(tx.amount_ton)} <GramIcon size={19} />
+                      </div>
+                    </div>
+                  )
+                }
                 if (tx.kind === 'ref') {
                   // Реферальное начисление: ваш реферал продал подарок,
                   // вам капнул 1% от суммы его продажи (из комиссии площадки)
