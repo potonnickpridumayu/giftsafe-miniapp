@@ -277,7 +277,7 @@ export function OfferCard({
       </div>
       {/* от кого / кому */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <OwnerAvatar username={username} size={26} fallback="letter" />
+        <OwnerAvatar username={username} size={26} />
         <span style={{ fontSize: 12, color: '#8f868c' }}>{incoming ? 'От' : 'Кому'}</span>
         <span style={{ fontSize: 13, fontWeight: 700, color: '#F5F2F4' }}>@{username}</span>
       </div>

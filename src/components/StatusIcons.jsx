@@ -184,38 +184,54 @@ export function CheckBadge({ size = 30 }) {
   )
 }
 
-// ── Аватар владельца: реальная Telegram-аватарка в градиентном кольце.
-// fallback='gem' (по умолчанию, «Владелец» на странице обмена) или
-// fallback='letter' — первая буква ника (карточка входящего оффера) ──
-export function OwnerAvatar({ username, photoUrl, size = 52, fallback = 'gem' }) {
+// Палитра дефолтных аватарок Telegram (7 градиентов). Цвет выбираем по хэшу
+// ника — как сам клиент, чтобы у юзера был стабильный «свой» цвет.
+const TG_AVATAR_GRADIENTS = [
+  ['#ff885e', '#ff516a'], // красный
+  ['#ffcd6a', '#ffa85c'], // оранжевый
+  ['#e0a2f3', '#d669ed'], // фиолетовый
+  ['#a0de7e', '#54cb68'], // зелёный
+  ['#53edd6', '#28c9b7'], // бирюзовый
+  ['#72d5fd', '#2a9ef1'], // синий
+  ['#ffa3b6', '#ff5c8a'], // розовый
+]
+function tgAvatarGradient(key) {
+  let h = 0
+  for (let i = 0; i < key.length; i++) h += key.charCodeAt(i)
+  return TG_AVATAR_GRADIENTS[h % TG_AVATAR_GRADIENTS.length]
+}
+
+// ── Аватар пользователя как в Telegram: реальное фото, если приватность
+// позволяет (публичное t.me/i/userpic по нику), иначе — дефолтная аватарка
+// Telegram: первая буква ника на фирменном цветном кружке. Проп photoUrl
+// (напр. текущий юзер из initData) приоритетнее ника. ──
+export function OwnerAvatar({ username, photoUrl, size = 52 }) {
   const [failed, setFailed] = useState(false)
   const clean = (username || '').replace(/^@/, '').trim()
-  // Явный photoUrl (напр. текущего юзера из initData) приоритетнее. Для чужих
-  // юзеров пробуем публичную аватарку t.me по нику — но она часто отдаёт
-  // пустой 1×1 пиксель (приватность), который «грузится успешно»: ловим это
-  // в onLoad по naturalWidth и откатываемся на fallback.
+  // t.me отдаёт пустой 1×1 пиксель, когда фото скрыто приватностью — он
+  // «грузится успешно», поэтому ловим его в onLoad по naturalWidth.
   const url = photoUrl || (clean ? `https://t.me/i/userpic/320/${clean}.jpg` : null)
+
+  if (url && !failed) {
+    return (
+      <img
+        src={url} alt=""
+        onError={() => setFailed(true)}
+        onLoad={e => { if (e.target.naturalWidth <= 1) setFailed(true) }}
+        style={{ width: size, height: size, flexShrink: 0, borderRadius: '999px', objectFit: 'cover', background: '#1a1420' }}
+      />
+    )
+  }
+
+  const grad = tgAvatarGradient(clean || 'x')
   return (
     <div style={{
-      position: 'relative', width: size, height: size, flexShrink: 0, borderRadius: '999px',
-      padding: 2.5, boxSizing: 'border-box',
-      background: `conic-gradient(from 200deg, ${ACC}, #ff8ba0, ${ACC}44, ${ACC})`,
+      width: size, height: size, flexShrink: 0, borderRadius: '999px',
+      background: `linear-gradient(160deg, ${grad[0]}, ${grad[1]})`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: '#fff', fontWeight: 600, fontSize: Math.round(size * 0.42), lineHeight: 1,
     }}>
-      <div style={{
-        width: '100%', height: '100%', borderRadius: '999px', background: '#1a1420', overflow: 'hidden',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {url && !failed
-          ? <img
-              src={url} alt=""
-              onError={() => setFailed(true)}
-              onLoad={e => { if (e.target.naturalWidth <= 1) setFailed(true) }}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '999px' }}
-            />
-          : fallback === 'letter'
-            ? <span style={{ fontSize: size * 0.42, fontWeight: 700, color: '#F5F2F4' }}>{(clean || '?')[0].toUpperCase()}</span>
-            : <img src={gem} alt="" style={{ width: size * 0.46, height: size * 0.46 }} />}
-      </div>
+      {(clean || '?')[0].toUpperCase()}
     </div>
   )
 }
