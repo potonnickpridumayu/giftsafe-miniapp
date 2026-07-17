@@ -350,6 +350,16 @@ html, body {
 @keyframes stPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 @keyframes stShimmer { 0%{transform:translateX(-120%)} 100%{transform:translateX(220%)} }
 
+/* Анимации состояний маркета (дизайн-хендофф market-states, 1:1) — все на
+   transform/opacity, GPU-лёгкие */
+@keyframes msFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes msGlow { 0%,100%{opacity:.4} 50%{opacity:.85} }
+@keyframes msSpin { to{transform:rotate(360deg)} }
+@keyframes msSpinR { to{transform:rotate(-360deg)} }
+@keyframes msPop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
+@keyframes msDash { to{stroke-dashoffset:-140} }
+@keyframes msScan { 0%,100%{transform:translate(0,0)} 50%{transform:translate(10px,8px)} }
+
 /* Анимации empty-state иллюстраций (дизайн-хендофф, 1:1) — все на
    transform/opacity, GPU-лёгкие */
 @keyframes rbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }

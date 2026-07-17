@@ -7,6 +7,7 @@ import { fmtGram } from '../utils/format'
 import { useCartIds, removeFromCart, pruneCart } from '../utils/cart'
 import GramIcon from '../components/GramIcon'
 import { LoadingScreen, MiniSpin, BtnShimmer, CheckBadge } from '../components/StatusIcons'
+import StateCard, { IlloError } from '../components/MarketStates'
 
 function lotPlural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -123,14 +124,13 @@ export default function Cart() {
       {listings === null ? (
         <LoadingScreen text="Загружаем…" />
       ) : error ? (
-        <div className="empty-state">
-          <div className="empty-icon">⚠️</div>
-          <div className="empty-title">Ошибка загрузки</div>
-          <div className="empty-desc">{error}</div>
-          <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => { haptic('medium'); load() }}>
-            Повторить
-          </button>
-        </div>
+        <StateCard
+          illo={<IlloError />}
+          title="Ошибка загрузки"
+          sub={error}
+          cta="Повторить"
+          onCta={() => { haptic('medium'); load() }}
+        />
       ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon"><IconShoppingCart size={44} stroke={1.5} /></div>

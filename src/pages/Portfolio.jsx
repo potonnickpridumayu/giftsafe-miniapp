@@ -9,6 +9,7 @@ import BrandLogo from '../components/BrandLogo'
 import WalletButton from '../components/WalletButton'
 import EmptyState, { IlloCase } from '../components/EmptyState'
 import { LoadingScreen, MiniSpinAccent } from '../components/StatusIcons'
+import StateCard, { IlloSearch } from '../components/MarketStates'
 import { fmtGram } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 import { getCached, setCached } from '../utils/dataCache'
@@ -587,11 +588,11 @@ export default function Portfolio() {
           sub={error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
         />
       ) : visibleGifts.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">Таких подарков нет</div>
-          <div className="empty-desc">Попробуйте другой фильтр</div>
-        </div>
+        <StateCard
+          illo={<IlloSearch />}
+          title="Таких подарков нет"
+          sub="Попробуйте другой фильтр"
+        />
       ) : (
         <div style={{ columnCount: 2, columnGap: 9 }}>
           {visibleGifts.map(gift => (

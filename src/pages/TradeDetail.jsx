@@ -5,6 +5,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
 import { LoadingScreen, IconSuccess, IconReturn, IconSwap, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar, Chip } from '../components/StatusIcons'
+import StateCard, { IlloError, IlloMissing } from '../components/MarketStates'
 import { fmtGram, fmtPercent } from '../utils/format'
 
 // Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
@@ -119,16 +120,26 @@ export default function TradeDetail() {
     </div>
   )
 
+  // Бэкенд шлёт 404 "Объявление об обмене не найдено" тем же текстом, что и
+  // настоящую ошибку сети (request() бросает Error с detail из ответа) —
+  // разводим их по тексту, иначе «объявление снято» показывалось бы как
+  // «Ошибка загрузки».
+  if (loadError && loadError !== 'Объявление об обмене не найдено') return (
+    <div className="page">
+      <StateCard illo={<IlloError />} title="Ошибка загрузки" sub={loadError} cta="Повторить" onCta={load} />
+    </div>
+  )
+
   if (loadError || !item) return (
     <div className="page">
-      <div className="empty-state">
-        <div className="empty-icon">❓</div>
-        <div className="empty-title">{loadError ? 'Ошибка' : 'Лот не найден'}</div>
-        {loadError && <div className="empty-desc">{loadError}</div>}
-        <button className="btn btn-ghost" onClick={() => navigate('/trade')} style={{ marginTop: 12 }}>
-          ← Назад
-        </button>
-      </div>
+      <StateCard
+        illo={<IlloMissing />}
+        title="Обмен не найден"
+        sub="Похоже, объявление снято или уже обменяно."
+        cta="← Назад"
+        ctaVariant="ghost"
+        onCta={() => navigate('/trade')}
+      />
     </div>
   )
 

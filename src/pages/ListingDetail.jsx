@@ -5,6 +5,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
 import { LoadingScreen, IconPurchase, IconReturn, MiniSpin, MiniSpinAccent, BtnShimmer } from '../components/StatusIcons'
+import StateCard, { IlloError, IlloMissing, InsufficientFundsBanner } from '../components/MarketStates'
 import { fmtGram, fmtPercent } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
@@ -55,16 +56,25 @@ export default function ListingDetail() {
     </div>
   )
 
+  // Бэкенд шлёт 404 "Лот не найден" тем же текстом, что и настоящую ошибку
+  // сети (request() бросает Error с detail из ответа) — разводим их по
+  // тексту, иначе «лот удалён» показывался бы как «Ошибка загрузки».
+  if (loadError && loadError !== 'Лот не найден') return (
+    <div className="page">
+      <StateCard illo={<IlloError />} title="Ошибка загрузки" sub={loadError} cta="Повторить" onCta={load} />
+    </div>
+  )
+
   if (loadError || !item) return (
     <div className="page">
-      <div className="empty-state">
-        <div className="empty-icon">❓</div>
-        <div className="empty-title">{loadError ? 'Ошибка' : 'Лот не найден'}</div>
-        {loadError && <div className="empty-desc">{loadError}</div>}
-        <button className="btn btn-ghost" onClick={() => navigate('/')} style={{ marginTop: 12 }}>
-          ← Назад
-        </button>
-      </div>
+      <StateCard
+        illo={<IlloMissing />}
+        title="Лот не найден"
+        sub="Похоже, лот удалён или уже продан."
+        cta="← Назад"
+        ctaVariant="ghost"
+        onCta={() => navigate('/')}
+      />
     </div>
   )
 
@@ -243,12 +253,15 @@ export default function ListingDetail() {
         </div>
       </div>
 
-      {/* Buy error */}
-      {buyError && (
+      {/* Buy error — недостаточно средств получает фирменный баннер
+          из хендоффа market-states, остальные ошибки покупки — как раньше */}
+      {buyError && (buyError.startsWith('Недостаточно средств') ? (
+        <InsufficientFundsBanner onDeposit={() => { haptic('light'); navigate('/profile') }} />
+      ) : (
         <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
           ⚠️ {buyError}
         </div>
-      )}
+      ))}
 
       {/* Buy button */}
       {bought ? (

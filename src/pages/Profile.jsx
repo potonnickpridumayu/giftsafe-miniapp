@@ -8,6 +8,7 @@ import GramIcon from '../components/GramIcon'
 import BrandLogo from '../components/BrandLogo'
 import TxRow from '../components/TxRow'
 import { IconSwap, MiniSpin, MiniSpinAccent } from '../components/StatusIcons'
+import { OfferCard } from '../components/MarketStates'
 import { fmtGram } from '../utils/format'
 import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
 
@@ -598,34 +599,18 @@ export default function Profile() {
                     const isListing = o.kind === 'listing'
                     const busy = offerBusyId === o.offer_id
                     if (isListing) {
-                      const thumb = fragmentImage(o.gift_name, o.gift_number, o.nft_address)
                       const title = `${o.gift_name}${o.gift_number ? ` #${o.gift_number}` : ''}`
                       return (
-                        <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                            <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
-                              {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 18 }}>🎁</span>}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                💬 {title}
-                              </div>
-                              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                                Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={14} />
-                              </div>
-                              <div style={{ fontSize: 11, color: 'var(--text-primary)', marginTop: 2 }}>От: @{o.from_username}</div>
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
-                              disabled={busy} onClick={() => handleOfferAction(o, 'accept')}>
-                              {busy ? <MiniSpin size={14} /> : 'Принять'}
-                            </button>
-                            <button className="btn btn-ghost" style={{ flex: 1, fontSize: 12, padding: '8px' }}
-                              disabled={busy} onClick={() => handleOfferAction(o, 'decline')}>
-                              {busy ? <MiniSpinAccent size={14} /> : 'Отклонить'}
-                            </button>
-                          </div>
+                        <div key={`${o.kind}-${o.offer_id}`} style={{ marginBottom: 10 }}>
+                          <OfferCard
+                            giftTitle={title}
+                            priceTon={fmtGram(o.price_ton)}
+                            offeredTon={fmtGram(o.amount_ton)}
+                            fromUsername={o.from_username}
+                            busy={busy}
+                            onAccept={() => handleOfferAction(o, 'accept')}
+                            onDecline={() => handleOfferAction(o, 'decline')}
+                          />
                         </div>
                       )
                     }
@@ -664,7 +649,7 @@ export default function Profile() {
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                💬 {title}
+                                {title}
                               </div>
                               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                                 Цена лота {fmtGram(o.price_ton)} → предложено <b style={{ color: 'var(--gold)' }}>{fmtGram(o.amount_ton)}</b> <GramIcon size={14} />

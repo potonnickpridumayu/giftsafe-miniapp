@@ -184,9 +184,10 @@ export function CheckBadge({ size = 30 }) {
   )
 }
 
-// ── Аватар владельца: реальная Telegram-аватарка в градиентном кольце,
-// гем — только fallback, когда фото недоступно (нет username / фото скрыто) ──
-export function OwnerAvatar({ username, size = 52 }) {
+// ── Аватар владельца: реальная Telegram-аватарка в градиентном кольце.
+// fallback='gem' (по умолчанию, «Владелец» на странице обмена) или
+// fallback='letter' — первая буква ника (карточка входящего оффера) ──
+export function OwnerAvatar({ username, size = 52, fallback = 'gem' }) {
   const [failed, setFailed] = useState(false)
   const url = username ? `https://t.me/i/userpic/320/${username}.jpg` : null
   return (
@@ -201,7 +202,9 @@ export function OwnerAvatar({ username, size = 52 }) {
       }}>
         {url && !failed
           ? <img src={url} alt="" onError={() => setFailed(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '999px' }} />
-          : <img src={gem} alt="" style={{ width: 24, height: 24 }} />}
+          : fallback === 'letter'
+            ? <span style={{ fontSize: size * 0.42, fontWeight: 700, color: '#F5F2F4' }}>{(username || '?')[0].toUpperCase()}</span>
+            : <img src={gem} alt="" style={{ width: size * 0.46, height: size * 0.46 }} />}
       </div>
     </div>
   )

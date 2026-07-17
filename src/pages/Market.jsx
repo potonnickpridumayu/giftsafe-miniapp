@@ -4,6 +4,7 @@ import { IconAdjustments, IconShoppingCart, IconHistory, IconX } from '@tabler/i
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import EmptyState, { IlloListing } from '../components/EmptyState'
+import StateCard, { IlloError, IlloSearch } from '../components/MarketStates'
 import { LoadingScreen, IconSuccess, MiniSpin, BtnShimmer } from '../components/StatusIcons'
 import FiltersSheet from '../components/FiltersSheet'
 import { api } from '../api/client'
@@ -240,18 +241,13 @@ export default function Market() {
       {loading ? (
         <LoadingScreen text="Загружаем маркет…" />
       ) : error ? (
-        <div className="empty-state">
-          <div className="empty-icon">⚠️</div>
-          <div className="empty-title">Ошибка загрузки</div>
-          <div className="empty-desc">{error}</div>
-          <button
-            className="btn btn-primary"
-            onClick={() => { haptic('medium'); load() }}
-            style={{ marginTop: 12 }}
-          >
-            Повторить
-          </button>
-        </div>
+        <StateCard
+          illo={<IlloError />}
+          title="Ошибка загрузки"
+          sub={error}
+          cta="Повторить"
+          onCta={() => { haptic('medium'); load() }}
+        />
       ) : listings.length === 0 ? (
         <EmptyState
           illo={<IlloListing />}
@@ -261,11 +257,11 @@ export default function Market() {
           onCta={() => { haptic('medium'); navigate('/sell') }}
         />
       ) : items.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">Ничего не найдено</div>
-          <div className="empty-desc">Попробуйте изменить фильтры</div>
-        </div>
+        <StateCard
+          illo={<IlloSearch />}
+          title="Ничего не найдено"
+          sub="Попробуйте изменить фильтры или поисковый запрос."
+        />
       ) : (
         <div style={{
           display: 'grid',

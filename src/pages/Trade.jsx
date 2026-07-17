@@ -4,6 +4,7 @@ import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import EmptyState, { IlloSwap } from '../components/EmptyState'
 import { LoadingScreen } from '../components/StatusIcons'
+import StateCard, { IlloError, IlloSearch } from '../components/MarketStates'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import { getCached, setCached } from '../utils/dataCache'
@@ -84,14 +85,13 @@ export default function Trade() {
       {loading ? (
         <LoadingScreen text="Загружаем обмен…" />
       ) : error ? (
-        <div className="empty-state">
-          <div className="empty-icon">⚠️</div>
-          <div className="empty-title">Ошибка загрузки</div>
-          <div className="empty-desc">{error}</div>
-          <button className="btn btn-primary" onClick={() => { haptic('medium'); load() }} style={{ marginTop: 12 }}>
-            Повторить
-          </button>
-        </div>
+        <StateCard
+          illo={<IlloError />}
+          title="Ошибка загрузки"
+          sub={error}
+          cta="Повторить"
+          onCta={() => { haptic('medium'); load() }}
+        />
       ) : trades.length === 0 ? (
         <EmptyState
           illo={<IlloSwap />}
@@ -101,10 +101,11 @@ export default function Trade() {
           onCta={() => { haptic('medium'); navigate('/portfolio', { state: { openTradePicker: true } }) }}
         />
       ) : items.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">Ничего не найдено</div>
-        </div>
+        <StateCard
+          illo={<IlloSearch />}
+          title="Ничего не найдено"
+          sub="Попробуйте изменить фильтры или поисковый запрос."
+        />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
           {items.map(item => (

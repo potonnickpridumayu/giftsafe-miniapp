@@ -6,6 +6,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
 import FiltersSheet from '../components/FiltersSheet'
 import { LoadingScreen, IconSwap } from '../components/StatusIcons'
+import StateCard, { IlloError, IlloDeals, IlloSearch } from '../components/MarketStates'
 import { fmtGram } from '../utils/format'
 import { useMarketFilters, marketFiltersActive, resetMarketFilters } from '../utils/marketFilters'
 
@@ -194,23 +195,19 @@ export default function MarketHistory() {
       {items === null ? (
         <LoadingScreen text="Загружаем историю…" />
       ) : error ? (
-        <div className="empty-state">
-          <div className="empty-icon">⚠️</div>
-          <div className="empty-title">Ошибка загрузки</div>
-          <div className="empty-desc">{error}</div>
-        </div>
+        <StateCard illo={<IlloError />} title="Ошибка загрузки" sub={error} />
       ) : items.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">📭</div>
-          <div className="empty-title">Сделок пока не было</div>
-          <div className="empty-desc">Здесь появятся продажи и обмены маркета</div>
-        </div>
+        <StateCard
+          illo={<IlloDeals />}
+          title="Сделок пока не было"
+          sub="Здесь появятся продажи и обмены маркета."
+        />
       ) : visible.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">Ничего не найдено</div>
-          <div className="empty-desc">Попробуйте изменить фильтры</div>
-        </div>
+        <StateCard
+          illo={<IlloSearch />}
+          title="Ничего не найдено"
+          sub="Попробуйте изменить фильтры или поисковый запрос."
+        />
       ) : visible.map((it, i) => {
         if (it.kind === 'trade') {
           const left = it.offered_gifts || []
