@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
+import { IconSuccess, MiniSpin, MiniSpinAccent, BtnShimmer, CheckBadge } from '../components/StatusIcons'
 import { fmtGram } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
@@ -140,7 +141,7 @@ export default function Sell() {
     return (
       <div className="page">
         <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-          <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconSuccess /></div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
             Подарок выставлен!
           </div>
@@ -284,8 +285,8 @@ export default function Sell() {
             ⚠️ Без кода в комментарии мы не сможем привязать NFT к вам. Проверьте код перед отправкой.
           </div>
 
-          <div className="card" style={{ padding: '14px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
-            ⏳ Ждём ваш NFT… Проверяем каждые 10 секунд, страницу можно не обновлять.
+          <div className="card" style={{ padding: '14px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            <MiniSpinAccent size={16} /> Ждём ваш NFT… Проверяем каждые 10 секунд, страницу можно не обновлять.
           </div>
         </>
       )}
@@ -294,7 +295,7 @@ export default function Sell() {
       {step === 'deposited' && gift && (
         <>
           <div style={{ textAlign: 'center', padding: '24px 0 8px' }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconSuccess /></div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>
               NFT получен!
             </div>
@@ -323,8 +324,8 @@ export default function Sell() {
       {/* ── Шаг 3: цена ── */}
       {step === 'price' && gift && (
         <>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>
-            ✅ Подарок получен и хранится в ruby. Назначьте цену.
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CheckBadge size={18} /> Подарок получен и хранится в ruby. Назначьте цену.
           </p>
 
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
@@ -368,9 +369,9 @@ export default function Sell() {
             className="btn btn-primary btn-full"
             onClick={submitListing}
             disabled={busy || !(priceNum > 0)}
-            style={{ fontSize: 15, padding: '14px', boxShadow: (busy || !(priceNum > 0)) ? 'none' : 'var(--gold-glow)', opacity: (busy || !(priceNum > 0)) ? 0.5 : 1 }}
+            style={{ fontSize: 15, padding: '14px', boxShadow: (busy || !(priceNum > 0)) ? 'none' : 'var(--gold-glow)', opacity: (!busy && !(priceNum > 0)) ? 0.5 : 1, position: 'relative', overflow: 'hidden', gap: 8 }}
           >
-            {busy ? '⏳ Выставляем…' : 'Выставить на продажу'}
+            {busy ? <><BtnShimmer /><MiniSpin size={16} /> Выставляем…</> : 'Выставить на продажу'}
           </button>
         </>
       )}

@@ -4,6 +4,7 @@ import { api, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
+import { LoadingScreen, IconPurchase, IconReturn, MiniSpin, MiniSpinAccent, BtnShimmer } from '../components/StatusIcons'
 import { fmtGram, fmtPercent } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
@@ -50,10 +51,7 @@ export default function ListingDetail() {
 
   if (loading) return (
     <div className="page">
-      <div className="empty-state">
-        <div className="empty-icon">⏳</div>
-        <div className="empty-title">Загрузка…</div>
-      </div>
+      <LoadingScreen text="Загрузка…" />
     </div>
   )
 
@@ -255,7 +253,7 @@ export default function ListingDetail() {
       {/* Buy button */}
       {bought ? (
         <div style={{ textAlign: 'center', padding: 20 }}>
-          <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconPurchase /></div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Куплено!</div>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
             {result?.gift_name || item.name} добавлен в ваш портфель
@@ -267,7 +265,7 @@ export default function ListingDetail() {
       ) : isOwnListing ? (
         withdrawn ? (
           <div style={{ textAlign: 'center', padding: 20 }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>📤</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconReturn /></div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Лот снят</div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
               Подарок снова в вашем портфеле
@@ -309,8 +307,8 @@ export default function ListingDetail() {
                   <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {priceError}</div>
                 )}
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSavePrice} disabled={savingPrice}>
-                    {savingPrice ? '⏳ Сохраняем...' : 'Сохранить'}
+                  <button className="btn btn-primary" style={{ flex: 1, position: 'relative', overflow: 'hidden', gap: 8 }} onClick={handleSavePrice} disabled={savingPrice}>
+                    {savingPrice ? <><BtnShimmer /><MiniSpin size={16} /> Сохраняем…</> : 'Сохранить'}
                   </button>
                   <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => { setEditingPrice(false); setPriceError(null) }} disabled={savingPrice}>
                     Отмена
@@ -333,7 +331,7 @@ export default function ListingDetail() {
               onClick={handleWithdraw}
               disabled={withdrawing || soldOut}
             >
-              {withdrawing ? '⏳ Снимаем...' : soldOut ? 'Лот неактивен' : 'Снять с продажи'}
+              {withdrawing ? <><MiniSpinAccent size={16} /> Снимаем…</> : soldOut ? 'Лот неактивен' : 'Снять с продажи'}
             </button>
           </>
         )
@@ -346,9 +344,9 @@ export default function ListingDetail() {
           className="btn btn-primary btn-full"
           onClick={handleBuy}
           disabled={buying}
-          style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)', gap: 1 }}
+          style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)', gap: 1, position: 'relative', overflow: 'hidden' }}
         >
-          {buying ? '⏳ Обработка...' : <>Купить за {fmtGram(total)} <GramIcon size={24} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
+          {buying ? <><BtnShimmer /><MiniSpin /> <span style={{ marginLeft: 8 }}>Покупаем…</span></> : <>Купить за {fmtGram(total)} <GramIcon size={24} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
         </button>
       )}
     </div>

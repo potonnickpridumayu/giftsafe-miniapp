@@ -4,6 +4,7 @@ import { IconAdjustments, IconShoppingCart, IconHistory, IconX } from '@tabler/i
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import EmptyState, { IlloListing } from '../components/EmptyState'
+import { LoadingScreen, IconSuccess, MiniSpin, BtnShimmer } from '../components/StatusIcons'
 import FiltersSheet from '../components/FiltersSheet'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
@@ -88,7 +89,7 @@ export default function Market() {
         try {
           await api.buyListing(item.id)
           haptic('medium')
-          showAlert(`🎉 Куплено! ${item.name} уже в вашем портфеле`)
+          showAlert(`Куплено! ${item.name} уже в вашем портфеле`)
           load()
         } catch (e) {
           haptic('heavy')
@@ -237,10 +238,7 @@ export default function Market() {
 
       {/* Content */}
       {loading ? (
-        <div className="empty-state">
-          <div className="empty-icon">⏳</div>
-          <div className="empty-title">Загружаем маркет…</div>
-        </div>
+        <LoadingScreen text="Загружаем маркет…" />
       ) : error ? (
         <div className="empty-state">
           <div className="empty-icon">⚠️</div>
@@ -310,7 +308,7 @@ export default function Market() {
           >
             {offerSent ? (
               <div style={{ textAlign: 'center', padding: 12 }}>
-                <div style={{ fontSize: 40, marginBottom: 8 }}>✅</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><IconSuccess size={90} /></div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>Предложение отправлено!</div>
                 <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
                   Продавец увидит его в Профиле → Офферы
@@ -343,8 +341,8 @@ export default function Market() {
                   <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {offerError}</div>
                 )}
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button className="btn btn-primary" style={{ flex: 1 }} onClick={submitOffer} disabled={offerBusy}>
-                    {offerBusy ? '⏳ Отправляем...' : 'Отправить'}
+                  <button className="btn btn-primary" style={{ flex: 1, position: 'relative', overflow: 'hidden', gap: 8 }} onClick={submitOffer} disabled={offerBusy}>
+                    {offerBusy ? <><BtnShimmer /><MiniSpin size={16} /> Отправляем…</> : 'Отправить'}
                   </button>
                   <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setOfferTarget(null)} disabled={offerBusy}>
                     Отмена

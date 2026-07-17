@@ -8,6 +8,7 @@ import TgGiftSticker from '../components/TgGiftSticker'
 import BrandLogo from '../components/BrandLogo'
 import WalletButton from '../components/WalletButton'
 import EmptyState, { IlloCase } from '../components/EmptyState'
+import { LoadingScreen, MiniSpinAccent } from '../components/StatusIcons'
 import { fmtGram } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 import { getCached, setCached } from '../utils/dataCache'
@@ -235,7 +236,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
                   disabled={busy}
                   onClick={delist}
                 >
-                  <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с продажи'}</span>
+                  <span style={ellipsisStyle}>{busy ? <MiniSpinAccent size={15} /> : 'Снять с продажи'}</span>
                 </button>
               </>
             ) : gift.on_trade ? (
@@ -245,7 +246,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
                 disabled={busy}
                 onClick={cancelTrade}
               >
-                <span style={ellipsisStyle}>{busy ? '⏳' : 'Снять с обмена'}</span>
+                <span style={ellipsisStyle}>{busy ? <MiniSpinAccent size={15} /> : 'Снять с обмена'}</span>
               </button>
             ) : (
               <>
@@ -570,10 +571,7 @@ export default function Portfolio() {
       </div>
 
       {gifts === null ? (
-        <div className="empty-state">
-          <div className="empty-icon">⏳</div>
-          <div className="empty-title">Загружаем портфель…</div>
-        </div>
+        <LoadingScreen text="Загружаем портфель…" />
       ) : gifts.length === 0 ? (
         <EmptyState
           illo={<IlloCase />}

@@ -7,6 +7,7 @@ import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
 import BrandLogo from '../components/BrandLogo'
 import TxRow from '../components/TxRow'
+import { IconSwap, MiniSpin, MiniSpinAccent } from '../components/StatusIcons'
 import { fmtGram } from '../utils/format'
 import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
 
@@ -97,7 +98,7 @@ export default function Profile() {
     await api.withdrawBalance(walletAddress, amount)
     try { haptic('medium') } catch {}
     // Шторку не закрываем — статус успеха виден внутри, закроет сам юзер
-    setWithdrawStatus('✅ Отправлено! Gram придут в течение 15 секунд')
+    setWithdrawStatus('Отправлено! Gram придут в течение 15 секунд')
     await reloadProfile()
   } catch (e) {
     setWithdrawStatus(e.message || 'Что-то пошло не так, попробуйте ещё раз')
@@ -156,7 +157,7 @@ export default function Profile() {
         }],
       })
       try { haptic('medium') } catch {}
-      setDepositStatus('✅ Отправлено! Ждём подтверждения…')
+      setDepositStatus('Отправлено! Ждём подтверждения…')
       // опрашиваем профиль каждые 5 сек, пока баланс не вырастет (макс 2 мин);
       // как только Gram зачислены — шторка закрывается сама, новый баланс уже на экране
       const prevBalance = balance
@@ -606,11 +607,11 @@ export default function Profile() {
                           <div style={{ display: 'flex', gap: 8 }}>
                             <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
                               disabled={busy} onClick={() => handleOfferAction(o, 'accept')}>
-                              {busy ? '⏳' : 'Принять'}
+                              {busy ? <MiniSpin size={14} /> : 'Принять'}
                             </button>
                             <button className="btn btn-ghost" style={{ flex: 1, fontSize: 12, padding: '8px' }}
                               disabled={busy} onClick={() => handleOfferAction(o, 'decline')}>
-                              {busy ? '⏳' : 'Отклонить'}
+                              {busy ? <MiniSpinAccent size={14} /> : 'Отклонить'}
                             </button>
                           </div>
                         </div>
@@ -618,18 +619,20 @@ export default function Profile() {
                     }
                     return (
                       <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
-                        <div style={{ fontSize: 11, marginBottom: 6, fontWeight: 600, color: '#8a7fd6' }}>🔄 Предлагают обмен</div>
+                        <div style={{ fontSize: 11, marginBottom: 6, fontWeight: 600, color: '#8a7fd6', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <IconSwap size={12} color="#8a7fd6" /> Предлагают обмен
+                        </div>
                         {tradeOfferGiftSide(o.from_username, o.offered_gifts, o.top_up_ton)}
                         <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
                         {tradeOfferGiftSide(user?.username || 'вы', o.target_gifts, 0)}
                         <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                           <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
                             disabled={busy} onClick={() => handleOfferAction(o, 'accept')}>
-                            {busy ? '⏳' : 'Принять'}
+                            {busy ? <MiniSpin size={14} /> : 'Принять'}
                           </button>
                           <button className="btn btn-ghost" style={{ flex: 1, fontSize: 12, padding: '8px' }}
                             disabled={busy} onClick={() => handleOfferAction(o, 'decline')}>
-                            {busy ? '⏳' : 'Отклонить'}
+                            {busy ? <MiniSpinAccent size={14} /> : 'Отклонить'}
                           </button>
                         </div>
                       </div>
@@ -659,20 +662,22 @@ export default function Profile() {
                           </div>
                           <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px' }}
                             disabled={busy} onClick={() => handleOfferAction(o, 'cancel')}>
-                            {busy ? '⏳' : 'Отменить предложение'}
+                            {busy ? <MiniSpinAccent size={14} /> : 'Отменить предложение'}
                           </button>
                         </div>
                       )
                     }
                     return (
                       <div key={`${o.kind}-${o.offer_id}`} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
-                        <div style={{ fontSize: 11, marginBottom: 6, fontWeight: 600, color: '#8a7fd6' }}>🔄 Ваше предложение</div>
+                        <div style={{ fontSize: 11, marginBottom: 6, fontWeight: 600, color: '#8a7fd6', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <IconSwap size={12} color="#8a7fd6" /> Ваше предложение
+                        </div>
                         {tradeOfferGiftSide(user?.username || 'вы', o.offered_gifts, o.top_up_ton)}
                         <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
                         {tradeOfferGiftSide(o.to_username, o.target_gifts, 0)}
                         <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px', marginTop: 10 }}
                           disabled={busy} onClick={() => handleOfferAction(o, 'cancel')}>
-                          {busy ? '⏳' : 'Отменить предложение'}
+                          {busy ? <MiniSpinAccent size={14} /> : 'Отменить предложение'}
                         </button>
                       </div>
                     )
@@ -747,7 +752,9 @@ export default function Profile() {
                       <div style={{
                         fontSize: 11, marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 4,
                       }}>
-                        <span style={{ fontWeight: 600, color: '#8a7fd6' }}>🔄 Обмен</span>
+                        <span style={{ fontWeight: 600, color: '#8a7fd6', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <IconSwap size={12} color="#8a7fd6" /> Обмен
+                        </span>
                         {tx.completed_at && (
                           <span style={{ color: 'var(--text-muted)', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
                             {new Date(tx.completed_at).toLocaleDateString('ru-RU')}

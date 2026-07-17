@@ -5,6 +5,7 @@ import { api, giftSlug, fragmentImage } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
 import FiltersSheet from '../components/FiltersSheet'
+import { LoadingScreen, IconSwap } from '../components/StatusIcons'
 import { fmtGram } from '../utils/format'
 import { useMarketFilters, marketFiltersActive, resetMarketFilters } from '../utils/marketFilters'
 
@@ -191,10 +192,7 @@ export default function MarketHistory() {
       </h2>
 
       {items === null ? (
-        <div className="empty-state">
-          <div className="empty-icon">⏳</div>
-          <div className="empty-title">Загружаем историю…</div>
-        </div>
+        <LoadingScreen text="Загружаем историю…" />
       ) : error ? (
         <div className="empty-state">
           <div className="empty-icon">⚠️</div>
@@ -220,7 +218,9 @@ export default function MarketHistory() {
           return (
             <div key={`t${i}`} className="card" style={{ padding: '10px 16px', marginBottom: 6, border: CARD_BORDER }}>
               <div style={{ fontSize: 11, marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontWeight: 600, color: '#8a7fd6' }}>🔄 Обмен</span>
+                <span style={{ fontWeight: 600, color: '#8a7fd6', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <IconSwap size={13} color="#8a7fd6" /> Обмен
+                </span>
                 <span style={{ color: 'var(--text-muted)', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
                   {fmtDate(it.completed_at)}
                 </span>

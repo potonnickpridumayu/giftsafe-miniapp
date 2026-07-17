@@ -336,6 +336,20 @@ html, body {
 .empty-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text-secondary); }
 .empty-desc { font-size: 13px; color: var(--text-muted); }
 
+/* Анимации статусов/лоадеров (дизайн-хендофф status_icons, 1:1) — все на
+   transform/opacity, GPU-лёгкие */
+@keyframes stSpin { to{transform:rotate(360deg)} }
+@keyframes stFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes stGlow { 0%,100%{opacity:.4} 50%{opacity:.9} }
+@keyframes stPop { 0%{transform:scale(.4);opacity:0} 60%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
+@keyframes stDraw { to{stroke-dashoffset:0} }
+@keyframes stRingIn { 0%{transform:scale(.5);opacity:0} 40%{opacity:.8} 100%{transform:scale(1.25);opacity:0} }
+@keyframes stConf { 0%{transform:translate(0,0) rotate(0) scale(1);opacity:1} 100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rr)) scale(.5);opacity:0} }
+@keyframes stArrowIn { 0%,100%{transform:translateY(-6px);opacity:.9} 55%{transform:translateY(4px);opacity:1} 70%{transform:translateY(2px)} }
+@keyframes stSwapOrbit { to{transform:rotate(360deg)} }
+@keyframes stPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+@keyframes stShimmer { 0%{transform:translateX(-120%)} 100%{transform:translateX(220%)} }
+
 /* Анимации empty-state иллюстраций (дизайн-хендофф, 1:1) — все на
    transform/opacity, GPU-лёгкие */
 @keyframes rbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }

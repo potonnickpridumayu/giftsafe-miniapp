@@ -4,6 +4,7 @@ import { api, fragmentImage, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
+import { LoadingScreen, IconSuccess, IconReturn, IconSwap, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar, Chip } from '../components/StatusIcons'
 import { fmtGram, fmtPercent } from '../utils/format'
 
 // Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
@@ -114,10 +115,7 @@ export default function TradeDetail() {
 
   if (loading) return (
     <div className="page">
-      <div className="empty-state">
-        <div className="empty-icon">⏳</div>
-        <div className="empty-title">Загрузка…</div>
-      </div>
+      <LoadingScreen text="Загрузка…" />
     </div>
   )
 
@@ -222,15 +220,18 @@ export default function TradeDetail() {
         </div>
       )}
 
-      <div className="card" style={{ padding: '12px 14px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div className="avatar">👤</div>
-        <div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Владелец</div>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>@{item.owner}</div>
+      {/* OwnerRow из хендоффа: реальная TG-аватарка (t.me/i/userpic по username,
+          гем — fallback) в градиентном кольце + чип «На обмен» */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 14, width: '100%', marginBottom: 20,
+        padding: '14px 18px', borderRadius: 20, background: '#100d14', border: '1px solid #1e1826',
+      }}>
+        <OwnerAvatar username={item.owner} />
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3, textAlign: 'left' }}>
+          <span style={{ fontSize: 13, color: '#655c6b', fontWeight: 500 }}>Владелец</span>
+          <span style={{ fontSize: 17, fontWeight: 700, color: '#F5F2F4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{item.owner}</span>
         </div>
-        <div style={{ marginLeft: 'auto' }}>
-          <span className="badge badge-muted">🔄 На обмен</span>
-        </div>
+        <Chip icon={<IconSwap size={15} />} label="На обмен" filled />
       </div>
 
       {item.note && (
@@ -241,7 +242,7 @@ export default function TradeDetail() {
 
       {proposed ? (
         <div style={{ textAlign: 'center', padding: 20 }}>
-          <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconSuccess /></div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Предложение отправлено!</div>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
             Владелец увидит его в Профиле → Офферы
@@ -253,7 +254,7 @@ export default function TradeDetail() {
       ) : isOwnTrade ? (
         cancelled ? (
           <div style={{ textAlign: 'center', padding: 20 }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>📤</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconReturn /></div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Лот снят с обмена</div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
               Подарок остался в вашем портфеле
@@ -269,8 +270,8 @@ export default function TradeDetail() {
                 ⚠️ {cancelError}
               </div>
             )}
-            <button className="btn btn-ghost btn-full" onClick={handleCancel} disabled={cancelling || soldOut}>
-              {cancelling ? '⏳ Снимаем...' : soldOut ? 'Лот неактивен' : 'Снять с обмена'}
+            <button className="btn btn-ghost btn-full" style={{ gap: 8 }} onClick={handleCancel} disabled={cancelling || soldOut}>
+              {cancelling ? <><MiniSpinAccent size={16} /> Снимаем…</> : soldOut ? 'Лот неактивен' : 'Снять с обмена'}
             </button>
           </>
         )
@@ -342,8 +343,8 @@ export default function TradeDetail() {
           )}
 
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-primary" style={{ flex: 1 }} onClick={handlePropose} disabled={proposing || selectedGiftIds.size === 0}>
-              {proposing ? '⏳ Отправляем...' : `Предложить${selectedGiftIds.size > 0 ? ` (${selectedGiftIds.size})` : ''}`}
+            <button className="btn btn-primary" style={{ flex: 1, position: 'relative', overflow: 'hidden', gap: 8 }} onClick={handlePropose} disabled={proposing || selectedGiftIds.size === 0}>
+              {proposing ? <><BtnShimmer /><MiniSpin size={16} /> Отправляем…</> : `Предложить${selectedGiftIds.size > 0 ? ` (${selectedGiftIds.size})` : ''}`}
             </button>
             <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setPicking(false)} disabled={proposing}>
               Отмена
@@ -356,7 +357,7 @@ export default function TradeDetail() {
           onClick={openPicker}
           style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
         >
-          🔄 Предложить обмен
+          <IconSwap size={17} /> Предложить обмен
         </button>
       )}
     </div>

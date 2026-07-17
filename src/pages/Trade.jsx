@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
 import EmptyState, { IlloSwap } from '../components/EmptyState'
+import { LoadingScreen } from '../components/StatusIcons'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import { getCached, setCached } from '../utils/dataCache'
@@ -73,10 +74,7 @@ export default function Trade() {
       </div>
 
       {loading ? (
-        <div className="empty-state">
-          <div className="empty-icon">⏳</div>
-          <div className="empty-title">Загружаем обмен…</div>
-        </div>
+        <LoadingScreen text="Загружаем обмен…" />
       ) : error ? (
         <div className="empty-state">
           <div className="empty-icon">⚠️</div>

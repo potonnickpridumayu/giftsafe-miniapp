@@ -6,6 +6,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import { fmtGram } from '../utils/format'
 import { useCartIds, removeFromCart, pruneCart } from '../utils/cart'
 import GramIcon from '../components/GramIcon'
+import { LoadingScreen, MiniSpin, BtnShimmer, CheckBadge } from '../components/StatusIcons'
 
 function lotPlural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -96,21 +97,31 @@ export default function Cart() {
       )}
 
       {buyReport && (
-        <div className="card" style={{ padding: '12px 14px', marginBottom: 14, fontSize: 13, lineHeight: 1.6 }}>
+        <div style={{ marginBottom: 14 }}>
+          {/* Тост «Куплено: …» из дизайн-хендоффа status_icons */}
           {buyReport.ok.length > 0 && (
-            <div style={{ color: 'var(--money-1)' }}>✅ Куплено: {buyReport.ok.join(', ')}</div>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+              padding: '14px 18px', borderRadius: 18, background: '#100d14',
+              border: '1px solid #3DDC8444', boxShadow: '0 12px 30px -12px #3DDC8455',
+              marginBottom: buyReport.fail.length > 0 ? 8 : 0,
+            }}>
+              <CheckBadge size={30} />
+              <span style={{ fontSize: 15.5, fontWeight: 600, color: '#F5F2F4' }}>
+                Куплено: <span style={{ color: '#ffb84d' }}>{buyReport.ok.join(', ')}</span>
+              </span>
+            </div>
           )}
           {buyReport.fail.map(f => (
-            <div key={f.name} style={{ color: '#ff6b6b' }}>⚠️ {f.name}: {f.reason}</div>
+            <div key={f.name} className="card" style={{ padding: '10px 14px', fontSize: 13, lineHeight: 1.6, color: '#ff6b6b', marginBottom: 4 }}>
+              ⚠️ {f.name}: {f.reason}
+            </div>
           ))}
         </div>
       )}
 
       {listings === null ? (
-        <div className="empty-state">
-          <div className="empty-icon">⏳</div>
-          <div className="empty-title">Загружаем…</div>
-        </div>
+        <LoadingScreen text="Загружаем…" />
       ) : error ? (
         <div className="empty-state">
           <div className="empty-icon">⚠️</div>
@@ -179,9 +190,9 @@ export default function Cart() {
             className="btn btn-primary btn-full"
             disabled={buying}
             onClick={buyAll}
-            style={{ fontSize: 15, padding: '14px', boxShadow: buying ? 'none' : 'var(--gold-glow)', opacity: buying ? 0.5 : 1, gap: 1 }}
+            style={{ fontSize: 15, padding: '14px', boxShadow: buying ? 'none' : 'var(--gold-glow)', gap: 1, position: 'relative', overflow: 'hidden' }}
           >
-            {buying ? '⏳ Покупаем…' : <>Купить всё за {fmtGram(total)} <GramIcon size={24} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
+            {buying ? <><BtnShimmer /><MiniSpin /> <span style={{ marginLeft: 8 }}>Покупаем…</span></> : <>Купить всё за {fmtGram(total)} <GramIcon size={24} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
           </button>
         </>
       )}
