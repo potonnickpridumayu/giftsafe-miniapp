@@ -888,7 +888,7 @@ export default function Profile() {
                         fontSize: 11, marginTop: 2,
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
-                        <span style={{ fontWeight: 600, color: isBuy ? 'var(--text-secondary)' : 'var(--gold)' }}>
+                        <span style={{ fontWeight: 600, color: isBuy ? '#FA4A66' : '#3DDC84' }}>
                           {isBuy ? 'Покупка' : 'Продажа'}
                         </span>
                         {counterpart && <span style={{ color: 'var(--text-primary)' }}>: @{counterpart}</span>}
