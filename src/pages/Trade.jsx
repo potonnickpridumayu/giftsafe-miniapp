@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
+import EmptyState, { IlloSwap } from '../components/EmptyState'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import { getCached, setCached } from '../utils/dataCache'
@@ -86,18 +87,13 @@ export default function Trade() {
           </button>
         </div>
       ) : trades.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔄</div>
-          <div className="empty-title">Пока нет подарков на обмен</div>
-          <div className="empty-desc">Выставьте свой подарок на обмен в Портфеле — предлагайте и принимайте обмены (возможна доплата в Gram)</div>
-          <button
-            className="btn btn-primary"
-            onClick={() => { haptic('medium'); navigate('/portfolio', { state: { openTradePicker: true } }) }}
-            style={{ marginTop: 14 }}
-          >
-            Перейти в Портфель
-          </button>
-        </div>
+        <EmptyState
+          illo={<IlloSwap />}
+          title="Пока нет подарков на обмен"
+          sub="Выставьте свой подарок на обмен в Портфеле — предлагайте и принимайте обмены (возможна доплата в Gram)"
+          cta="Перейти в Портфель"
+          onCta={() => { haptic('medium'); navigate('/portfolio', { state: { openTradePicker: true } }) }}
+        />
       ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>

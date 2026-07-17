@@ -7,6 +7,7 @@ import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
 import BrandLogo from '../components/BrandLogo'
 import WalletButton from '../components/WalletButton'
+import EmptyState, { IlloCase } from '../components/EmptyState'
 import { fmtGram } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 import { getCached, setCached } from '../utils/dataCache'
@@ -574,13 +575,11 @@ export default function Portfolio() {
           <div className="empty-title">Загружаем портфель…</div>
         </div>
       ) : gifts.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">💼</div>
-          <div className="empty-title">Портфель пуст</div>
-          <div className="empty-desc">
-            {error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
-          </div>
-        </div>
+        <EmptyState
+          illo={<IlloCase />}
+          title="Портфель пуст"
+          sub={error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
+        />
       ) : visibleGifts.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>

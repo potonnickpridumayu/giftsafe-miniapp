@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { IconAdjustments, IconShoppingCart, IconHistory, IconX } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
 import BrandLogo from '../components/BrandLogo'
+import EmptyState, { IlloListing } from '../components/EmptyState'
 import FiltersSheet from '../components/FiltersSheet'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
@@ -254,18 +255,13 @@ export default function Market() {
           </button>
         </div>
       ) : listings.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">📭</div>
-          <div className="empty-title">Пока нет объявлений</div>
-          <div className="empty-desc">Будьте первым — выставьте свой подарок!</div>
-          <button
-            className="btn btn-primary"
-            onClick={() => { haptic('medium'); navigate('/sell') }}
-            style={{ marginTop: 14 }}
-          >
-            + Выставить подарок
-          </button>
-        </div>
+        <EmptyState
+          illo={<IlloListing />}
+          title="Пока нет объявлений"
+          sub="Будьте первым — выставьте свой подарок!"
+          cta="+ Выставить подарок"
+          onCta={() => { haptic('medium'); navigate('/sell') }}
+        />
       ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
