@@ -350,6 +350,13 @@ html, body {
 @keyframes stPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 @keyframes stShimmer { 0%{transform:translateX(-120%)} 100%{transform:translateX(220%)} }
 
+/* Нижняя шторка результата (ResultSheet) — вход/выход на CSS, а не на rAF:
+   CSS-анимации играют даже когда вкладка throttled, rAF — нет. */
+@keyframes rsFadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes rsFadeOut { from { opacity: 1 } to { opacity: 0 } }
+@keyframes rsSlideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+@keyframes rsSlideDown { from { transform: translateY(0) } to { transform: translateY(100%) } }
+
 /* Анимации состояний маркета (дизайн-хендофф market-states, 1:1) — все на
    transform/opacity, GPU-лёгкие */
 @keyframes msFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }

@@ -6,6 +6,7 @@ import BrandLogo from '../components/BrandLogo'
 import EmptyState, { IlloListing } from '../components/EmptyState'
 import StateCard, { IlloError, IlloSearch } from '../components/MarketStates'
 import { LoadingScreen, IconSuccess, MiniSpin, BtnShimmer } from '../components/StatusIcons'
+import { showResult } from '../components/ResultSheet'
 import FiltersSheet from '../components/FiltersSheet'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
@@ -29,7 +30,7 @@ function giftAttrs(item) {
 
 export default function Market() {
   const navigate = useNavigate()
-  const { haptic, user, showConfirm, showAlert } = useTelegram()
+  const { haptic, user, showConfirm } = useTelegram()
   const [search, setSearch] = useState('')
   // Фильтры и сортировка общие с Историей маркета (utils/marketFilters)
   const filters = useMarketFilters()
@@ -64,6 +65,12 @@ export default function Market() {
       setOfferError(`Минимум ${fmtGram(min)} Gram (50% цены)`)
       return
     }
+    // Оффер — это предложение цены НИЖЕ текущей: платить больше цены лота
+    // бессмысленно (можно просто купить). Не даём отправить такой оффер.
+    if (amount >= offerTarget.price) {
+      setOfferError(`Меньше цены лота — ${fmtGram(offerTarget.price)} Gram`)
+      return
+    }
     haptic('medium')
     setOfferBusy(true)
     setOfferError(null)
@@ -90,11 +97,11 @@ export default function Market() {
         try {
           await api.buyListing(item.id)
           haptic('medium')
-          showAlert(`Куплено! ${item.name} уже в вашем портфеле`)
+          showResult({ icon: 'purchase', title: 'Куплено!', sub: `${item.name} уже в вашем портфеле` })
           load()
         } catch (e) {
           haptic('heavy')
-          showAlert(`⚠️ ${e.message || 'Не удалось совершить покупку'}`)
+          showResult({ icon: 'error', title: 'Не удалось купить', sub: e.message || 'Попробуйте ещё раз' })
         } finally {
           setBuyingId(null)
         }
@@ -331,7 +338,7 @@ export default function Market() {
                   style={{ fontSize: 13, marginBottom: 8 }}
                 />
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
-                  Минимум 50% цены лота — {fmtGram(offerTarget.price * 0.5)} Gram
+                  От {fmtGram(offerTarget.price * 0.5)} Gram (50%) и строго ниже цены лота {fmtGram(offerTarget.price)} Gram
                 </div>
                 {offerError && (
                   <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {offerError}</div>

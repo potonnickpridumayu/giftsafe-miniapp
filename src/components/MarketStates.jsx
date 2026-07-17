@@ -196,45 +196,52 @@ export function InsufficientFundsBanner({ onDeposit }) {
   )
 }
 
-// ── Карточка входящего денежного оффера — заголовок дословно из хендоффа
-// («Новое предложение об обмене» — общая формулировка для входящего
-// предложения площадки, используется и для денежных офферов на лот) ──
-export function OfferCard({ giftTitle, priceTon, offeredTon, fromUsername, onAccept, onDecline, busy }) {
+// ── Карточка денежного оффера на лот. Компактная (по размерам истории
+// сделок). variant: 'incoming' (мне предложили — Принять/Отклонить) или
+// 'outgoing' (я предложил — Отменить). Пропсы busy рисуют спиннер внутри. ──
+export function OfferCard({
+  variant = 'incoming', giftTitle, priceTon, offeredTon, username,
+  onAccept, onDecline, onCancel, busy,
+}) {
+  const incoming = variant === 'incoming'
   const discount = priceTon > 0 ? Math.round((1 - offeredTon / priceTon) * 100) : 0
-  const btn = (label, variant, onClick) => (
-    <div
+  const btn = (label, kind, onClick) => (
+    <button
+      className="btn"
       onClick={!busy ? onClick : undefined}
+      disabled={busy}
       style={{
-        flex: 1, padding: '14px 0', borderRadius: 999, textAlign: 'center', fontSize: 16, fontWeight: 700,
-        cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
-        ...(variant === 'accept'
-          ? { background: `linear-gradient(180deg, ${ACC}, #e02547)`, color: '#fff', boxShadow: `0 10px 26px -10px ${ACC}aa` }
+        flex: 1, padding: '10px 0', borderRadius: 999, fontSize: 13, fontWeight: 600,
+        ...(kind === 'accept'
+          ? { background: `linear-gradient(180deg, ${ACC}, #e02547)`, color: '#fff', boxShadow: `0 8px 20px -10px ${ACC}aa` }
           : { background: '#181320', color: '#a99fa8', border: '1px solid #2a2230' }),
       }}
     >
       {label}
-    </div>
+    </button>
   )
 
   return (
     <div style={{
-      width: '100%', borderRadius: 22, padding: 22, boxSizing: 'border-box',
+      width: '100%', borderRadius: 16, padding: '12px 14px', boxSizing: 'border-box',
       background: 'radial-gradient(130% 120% at 20% 0%, #17121e 0%, #0c0a10 75%)', border: `1px solid ${ACC}33`,
-      boxShadow: `0 24px 60px -30px ${ACC}88`, display: 'flex', flexDirection: 'column', gap: 18,
+      display: 'flex', flexDirection: 'column', gap: 12,
     }}>
       {/* шапка */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{
-          width: 48, height: 48, flexShrink: 0, borderRadius: 14,
-          background: `linear-gradient(160deg, ${ACC}, #e02547)`, boxShadow: `0 8px 20px -8px ${ACC}aa`,
+          width: 34, height: 34, flexShrink: 0, borderRadius: 10,
+          background: `linear-gradient(160deg, ${ACC}, #e02547)`, boxShadow: `0 6px 14px -8px ${ACC}aa`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <IconSwap size={24} color="#fff" spin={false} />
+          <IconSwap size={17} color="#fff" spin={false} />
         </div>
         <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-          <div style={{ fontSize: 12.5, color: ACC, fontWeight: 600, letterSpacing: '.02em' }}>Новое предложение об обмене</div>
+          <div style={{ fontSize: 10.5, color: ACC, fontWeight: 600, letterSpacing: '.02em' }}>
+            {incoming ? 'Предложили цену' : 'Ваше предложение'}
+          </div>
           <div style={{
-            fontSize: 18, fontWeight: 700, color: '#F5F2F4', marginTop: 2,
+            fontSize: 13.5, fontWeight: 700, color: '#F5F2F4', marginTop: 1,
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>
             {giftTitle}
@@ -243,42 +250,46 @@ export function OfferCard({ giftTitle, priceTon, offeredTon, fromUsername, onAcc
       </div>
       {/* цена */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 14,
+        display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 12,
         background: '#0e0b12', border: '1px solid #1e1826',
       }}>
         <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 12, color: '#655c6b', marginBottom: 3 }}>Цена лота</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#a99fa8', display: 'flex', alignItems: 'center', gap: 5 }}>
-            {priceTon} <GramIcon size={16} />
+          <div style={{ fontSize: 10, color: '#655c6b', marginBottom: 2 }}>Цена лота</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#a99fa8', display: 'flex', alignItems: 'center', gap: 4 }}>
+            {priceTon} <GramIcon size={14} />
           </div>
         </div>
-        <div style={{ color: `${ACC}cc`, fontSize: 20, fontWeight: 700, margin: '0 2px' }}>→</div>
+        <div style={{ color: `${ACC}cc`, fontSize: 17, fontWeight: 700, margin: '0 2px' }}>→</div>
         <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 12, color: '#655c6b', marginBottom: 3 }}>Предложено</div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: ACC, display: 'flex', alignItems: 'center', gap: 5 }}>
-            {offeredTon} <GramIcon size={16} />
+          <div style={{ fontSize: 10, color: '#655c6b', marginBottom: 2 }}>Предложено</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: ACC, display: 'flex', alignItems: 'center', gap: 4 }}>
+            {offeredTon} <GramIcon size={14} />
           </div>
         </div>
         {discount > 0 && (
           <div style={{
-            marginLeft: 'auto', fontSize: 12, fontWeight: 600, color: '#ffb84d',
-            background: '#ffb84d1a', padding: '4px 10px', borderRadius: 999, flexShrink: 0,
+            marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: '#ffb84d',
+            background: '#ffb84d1a', padding: '3px 8px', borderRadius: 999, flexShrink: 0,
           }}>
             −{discount}%
           </div>
         )}
       </div>
-      {/* от кого */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <OwnerAvatar username={fromUsername} size={30} fallback="letter" />
-        <span style={{ fontSize: 14, color: '#8f868c' }}>От</span>
-        <span style={{ fontSize: 14.5, fontWeight: 700, color: '#F5F2F4' }}>@{fromUsername}</span>
+      {/* от кого / кому */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <OwnerAvatar username={username} size={26} fallback="letter" />
+        <span style={{ fontSize: 12, color: '#8f868c' }}>{incoming ? 'От' : 'Кому'}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: '#F5F2F4' }}>@{username}</span>
       </div>
       {/* кнопки */}
-      <div style={{ display: 'flex', gap: 12 }}>
-        {btn(busy ? '…' : 'Принять', 'accept', onAccept)}
-        {btn(busy ? '…' : 'Отклонить', 'decline', onDecline)}
-      </div>
+      {incoming ? (
+        <div style={{ display: 'flex', gap: 8 }}>
+          {btn(busy ? '…' : 'Принять', 'accept', onAccept)}
+          {btn(busy ? '…' : 'Отклонить', 'decline', onDecline)}
+        </div>
+      ) : (
+        btn(busy ? '…' : 'Отменить предложение', 'decline', onCancel)
+      )}
     </div>
   )
 }

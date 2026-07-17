@@ -187,9 +187,14 @@ export function CheckBadge({ size = 30 }) {
 // ── Аватар владельца: реальная Telegram-аватарка в градиентном кольце.
 // fallback='gem' (по умолчанию, «Владелец» на странице обмена) или
 // fallback='letter' — первая буква ника (карточка входящего оффера) ──
-export function OwnerAvatar({ username, size = 52, fallback = 'gem' }) {
+export function OwnerAvatar({ username, photoUrl, size = 52, fallback = 'gem' }) {
   const [failed, setFailed] = useState(false)
-  const url = username ? `https://t.me/i/userpic/320/${username}.jpg` : null
+  const clean = (username || '').replace(/^@/, '').trim()
+  // Явный photoUrl (напр. текущего юзера из initData) приоритетнее. Для чужих
+  // юзеров пробуем публичную аватарку t.me по нику — но она часто отдаёт
+  // пустой 1×1 пиксель (приватность), который «грузится успешно»: ловим это
+  // в onLoad по naturalWidth и откатываемся на fallback.
+  const url = photoUrl || (clean ? `https://t.me/i/userpic/320/${clean}.jpg` : null)
   return (
     <div style={{
       position: 'relative', width: size, height: size, flexShrink: 0, borderRadius: '999px',
@@ -201,9 +206,14 @@ export function OwnerAvatar({ username, size = 52, fallback = 'gem' }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         {url && !failed
-          ? <img src={url} alt="" onError={() => setFailed(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '999px' }} />
+          ? <img
+              src={url} alt=""
+              onError={() => setFailed(true)}
+              onLoad={e => { if (e.target.naturalWidth <= 1) setFailed(true) }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '999px' }}
+            />
           : fallback === 'letter'
-            ? <span style={{ fontSize: size * 0.42, fontWeight: 700, color: '#F5F2F4' }}>{(username || '?')[0].toUpperCase()}</span>
+            ? <span style={{ fontSize: size * 0.42, fontWeight: 700, color: '#F5F2F4' }}>{(clean || '?')[0].toUpperCase()}</span>
             : <img src={gem} alt="" style={{ width: size * 0.46, height: size * 0.46 }} />}
       </div>
     </div>

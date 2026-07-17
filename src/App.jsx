@@ -5,6 +5,7 @@ import { api } from './api/client'
 import MaintenanceScreen from './components/MaintenanceScreen'
 import NavBar from './components/NavBar'
 import ConfirmSheet from './components/ConfirmSheet'
+import ResultSheet from './components/ResultSheet'
 import Market from './pages/Market'
 import ListingDetail from './pages/ListingDetail'
 import Trade from './pages/Trade'
@@ -119,6 +120,7 @@ export default function App() {
           </Routes>
           <NavBar />
           <ConfirmSheet />
+          <ResultSheet />
         </>
       )}
     </BrowserRouter>
