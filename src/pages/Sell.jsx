@@ -349,7 +349,7 @@ export default function Sell() {
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 Комиссия ruby ({Math.round(FEE_RATE * 100)}%)
               </span>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>− {fmtGram(fee)} <GramIcon size={21} /></span>
+              <span style={{ fontSize: 13, color: '#FA4A66' }}>− {fmtGram(fee)} <GramIcon size={21} /></span>
             </div>
             <div className="divider" style={{ margin: '10px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>

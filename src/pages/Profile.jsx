@@ -276,7 +276,7 @@ export default function Profile() {
       {paidTopUp > 0 && (
         <div style={{ textAlign: 'right', marginTop: 4 }}>
           <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>доплата </span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#3DDC84' }}>
             +{fmtGram(paidTopUp)} <GramIcon size={14} />
           </span>
           <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
@@ -735,7 +735,7 @@ export default function Profile() {
                       {amount > 0 && (
                         <div style={{ textAlign: 'right', marginTop: 4 }}>
                           <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{label} </span>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)' }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#3DDC84' }}>
                             +{fmtGram(amount)} <GramIcon size={18} />
                           </span>
                         </div>
@@ -845,7 +845,7 @@ export default function Profile() {
                       </div>
                       <div style={{
                         fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
-                        color: 'var(--gold)',
+                        color: '#3DDC84',
                       }}>
                         +{fmtGram(tx.amount_ton)} <GramIcon size={19} />
                       </div>
@@ -903,7 +903,7 @@ export default function Profile() {
                     </div>
                     <div style={{
                       fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
-                      color: isBuy ? 'var(--text-secondary)' : 'var(--gold)',
+                      color: isBuy ? '#FA4A66' : '#3DDC84',
                     }}>
                       {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={19} />
                     </div>
