@@ -217,6 +217,18 @@ export default function Profile() {
     return () => { alive = false }
   }, [])
 
+  // Автообновление: входящие офферы, баланс и история подтягиваются сами
+  // раз в 10 с, пока страница открыта (свёрнутое приложение не опрашиваем).
+  // Оба вызова тихие — стейт просто заменяется, экран не мигает.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.hidden) return
+      reloadOffers()
+      reloadProfile()
+    }, 10000)
+    return () => clearInterval(id)
+  }, [])
+
   const handleOfferAction = async (offer, action) => {
     haptic('light')
     setOfferBusyId(offer.offer_id)
@@ -790,7 +802,7 @@ export default function Profile() {
                     pending: ['в обработке', '#8f868c'],
                     sent: ['в обработке', '#8f868c'],
                     confirmed: ['выполнен', '#3DDC84'],
-                    refunded: ['возвращён на баланс', '#e8a13c'],
+                    refunded: ['не выполнен', '#e8a13c', 'средства возвращены на баланс'],
                   }[tx.status] || [tx.status, '#8f868c'])
                   const date = tx.completed_at
                     ? `${new Date(tx.completed_at).toLocaleDateString('ru-RU')} ${new Date(tx.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
@@ -802,6 +814,7 @@ export default function Profile() {
                         label={isDep ? 'Пополнение' : 'Вывод средств'}
                         badge={wdStatus ? wdStatus[0] : null}
                         badgeColor={wdStatus ? wdStatus[1] : undefined}
+                        sub={wdStatus ? wdStatus[2] : undefined}
                         date={date}
                         amount={`${isDep ? '+' : '−'}${fmtGram(tx.amount_ton)}`}
                         amountColor={isDep ? '#3DDC84' : '#FA4A66'}

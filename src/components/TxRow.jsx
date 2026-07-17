@@ -41,7 +41,9 @@ export function TxIcon({ kind }) {
 
 // badgeColor — цвет статуса; в референсе бейдж зелёный (#3DDC84), для других
 // статусов («в обработке», «возвращён на баланс») тот же pill со своим цветом
-export default function TxRow({ kind, label, badge, badgeColor = '#3DDC84', date, amount, amountColor }) {
+// sub — необязательная строка-пояснение под заголовком (например,
+// «средства возвращены на баланс» у невыполненного вывода)
+export default function TxRow({ kind, label, badge, badgeColor = '#3DDC84', sub, date, amount, amountColor }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 10, width: '100%',
@@ -50,16 +52,17 @@ export default function TxRow({ kind, label, badge, badgeColor = '#3DDC84', date
       <TxIcon kind={kind} />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'left' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#F5F2F4' }}>{label}</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#F5F2F4', whiteSpace: 'nowrap' }}>{label}</span>
           {badge && (
             <span style={{
               fontSize: 11, fontWeight: 600, color: badgeColor,
-              background: `${badgeColor}22`, padding: '1px 7px', borderRadius: 999,
+              background: `${badgeColor}22`, padding: '1px 7px', borderRadius: 999, whiteSpace: 'nowrap',
             }}>
               {badge}
             </span>
           )}
         </div>
+        {sub && <span style={{ fontSize: 11, color: '#8f868c' }}>{sub}</span>}
         <span style={{ fontSize: 11, color: '#655c6b' }}>{date}</span>
       </div>
       <span style={{
