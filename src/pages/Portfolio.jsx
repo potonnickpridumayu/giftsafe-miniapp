@@ -434,7 +434,8 @@ export default function Portfolio() {
   const load = useCallback(async () => {
     try {
       const data = await apiCall('/api/portfolio')
-      setGifts(data.gifts || [])
+      // не трогаем стейт, если данные не изменились — как в Market.jsx
+      setGifts(prev => JSON.stringify(prev) === JSON.stringify(data.gifts || []) ? prev : (data.gifts || []))
       setCached('portfolio', data.gifts || [])
     } catch (e) {
       // при живом кэше не затираем показанные подарки пустотой
@@ -446,6 +447,13 @@ export default function Portfolio() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  // Тихое автообновление раз в 15 с — проданные/принятые в обмен подарки
+  // пропадают без ручного перехода между страницами (как в Market.jsx)
+  useEffect(() => {
+    const id = setInterval(() => { if (!document.hidden) load() }, 15000)
+    return () => clearInterval(id)
+  }, [load])
 
   const onWithdrawn = (giftId) => {
     setGifts(prev => prev.filter(g => g.gift_id !== giftId))

@@ -22,7 +22,8 @@ export default function Trade() {
     setError(null)
     try {
       const data = await api.getTrades()
-      setTrades(data)
+      // не трогаем стейт, если данные не изменились — как в Market.jsx
+      setTrades(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data)
       setCached('trades', data)
     } catch (e) {
       if (!getCached('trades')) setError(e.message || 'Не удалось загрузить обмен')
@@ -32,6 +33,13 @@ export default function Trade() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  // Тихое автообновление раз в 15 с — принятые/снятые обмены пропадают
+  // без ручного перехода между страницами (тот же паттерн, что в Market.jsx)
+  useEffect(() => {
+    const id = setInterval(() => { if (!document.hidden) load() }, 15000)
+    return () => clearInterval(id)
+  }, [load])
 
   const items = search
     ? trades.filter(t => t.name?.toLowerCase().includes(search.toLowerCase()))
