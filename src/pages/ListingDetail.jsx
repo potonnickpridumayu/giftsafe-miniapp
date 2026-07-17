@@ -4,8 +4,9 @@ import { api, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
-import { LoadingScreen, IconPurchase, IconReturn, MiniSpin, MiniSpinAccent, BtnShimmer } from '../components/StatusIcons'
+import { LoadingScreen, MiniSpin, MiniSpinAccent, BtnShimmer } from '../components/StatusIcons'
 import StateCard, { IlloError, IlloMissing, InsufficientFundsBanner } from '../components/MarketStates'
+import { showResult } from '../components/ResultSheet'
 import { fmtGram, fmtPercent } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
@@ -23,12 +24,8 @@ export default function ListingDetail() {
   const [loadError, setLoadError] = useState(null)
 
   const [buying, setBuying] = useState(false)
-  const [bought, setBought] = useState(false)
   const [buyError, setBuyError] = useState(null)
-  const [result, setResult] = useState(null)
   const [withdrawing, setWithdrawing] = useState(false)
-  const [withdrawn, setWithdrawn] = useState(false)
-  const [withdrawError, setWithdrawError] = useState(null)
 
   const [editingPrice, setEditingPrice] = useState(false)
   const [newPrice, setNewPrice] = useState('')
@@ -99,10 +96,19 @@ export default function ListingDetail() {
         setBuyError(null)
         try {
           const res = await api.buyListing(item.id)
-          setResult(res)
-          setBought(true)
+          showResult({
+            icon: 'purchase', title: 'Куплено!',
+            sub: `${res?.gift_name || item.name} добавлен в ваш портфель`,
+            onClose: () => navigate('/portfolio'),
+          })
         } catch (e) {
-          setBuyError(e.message || 'Не удалось совершить покупку')
+          // Недостаточно средств оставляем как инлайн-баннер (спец-дизайн со
+          // ссылкой на пополнение), прочие ошибки — во всплывающем окне.
+          if ((e.message || '').startsWith('Недостаточно средств')) {
+            setBuyError(e.message)
+          } else {
+            showResult({ icon: 'error', title: 'Не удалось купить', sub: e.message || 'Попробуйте ещё раз' })
+          }
           haptic('heavy')
         } finally {
           setBuying(false)
@@ -121,9 +127,12 @@ export default function ListingDetail() {
         setWithdrawError(null)
         try {
           await api.withdrawListing(item.id)
-          setWithdrawn(true)
+          showResult({
+            icon: 'return', title: 'Лот снят', sub: 'Подарок снова в вашем портфеле',
+            onClose: () => navigate('/portfolio'),
+          })
         } catch (e) {
-          setWithdrawError(e.message || 'Не удалось снять лот')
+          showResult({ icon: 'error', title: 'Не удалось снять лот', sub: e.message || 'Попробуйте ещё раз' })
           haptic('heavy')
         } finally {
           setWithdrawing(false)
@@ -263,38 +272,11 @@ export default function ListingDetail() {
         </div>
       ))}
 
-      {/* Buy button */}
-      {bought ? (
-        <div style={{ textAlign: 'center', padding: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconPurchase /></div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Куплено!</div>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-            {result?.gift_name || item.name} добавлен в ваш портфель
-          </p>
-          <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/portfolio')}>
-            Перейти в портфель
-          </button>
-        </div>
-      ) : isOwnListing ? (
-        withdrawn ? (
-          <div style={{ textAlign: 'center', padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconReturn /></div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Лот снят</div>
-            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-              Подарок снова в вашем портфеле
-            </p>
-            <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/portfolio')}>
-              В портфель
-            </button>
-          </div>
-        ) : (
+      {/* Buy button — результат покупки/снятия показывается всплывающим
+          окном (ResultSheet), инлайновых экранов успеха больше нет */}
+      {isOwnListing ? (
+        (
           <>
-            {withdrawError && (
-              <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
-                ⚠️ {withdrawError}
-              </div>
-            )}
-
             {editingPrice ? (
               <div className="card" style={{ padding: '12px 14px', marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>Новая цена (Gram)</div>

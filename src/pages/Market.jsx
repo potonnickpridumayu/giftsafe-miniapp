@@ -68,7 +68,7 @@ export default function Market() {
     // Оффер — это предложение цены НИЖЕ текущей: платить больше цены лота
     // бессмысленно (можно просто купить). Не даём отправить такой оффер.
     if (amount >= offerTarget.price) {
-      setOfferError(`Меньше цены лота — ${fmtGram(offerTarget.price)} Gram`)
+      setOfferError(`Оффер больше цены лота (${fmtGram(offerTarget.price)} Gram)`)
       return
     }
     haptic('medium')
@@ -337,8 +337,8 @@ export default function Market() {
                   disabled={offerBusy}
                   style={{ fontSize: 13, marginBottom: 8 }}
                 />
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
-                  От {fmtGram(offerTarget.price * 0.5)} Gram (50%) и строго ниже цены лота {fmtGram(offerTarget.price)} Gram
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10, whiteSpace: 'nowrap' }}>
+                  Оффер должен составлять хотя бы 50% от текущей цены подарка
                 </div>
                 {offerError && (
                   <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {offerError}</div>

@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
 import { IconSuccess, MiniSpin, MiniSpinAccent, BtnShimmer, CheckBadge } from '../components/StatusIcons'
+import { showResult } from '../components/ResultSheet'
 import { fmtGram } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
@@ -50,7 +51,6 @@ export default function Sell() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(null)   // 'address' | 'code'
-  const [done, setDone] = useState(null)
   const pollRef = useRef(null)
 
   const priceNum = parseFloat(String(price).replace(',', '.')) || 0
@@ -119,45 +119,23 @@ export default function Sell() {
         setBusy(true)
         setError(null)
         try {
-          const res = await api.createListing({
+          await api.createListing({
             gift_id: gift.gift_id,
             price: priceNum,
             description: '',
           })
-          setDone(res || {})
           haptic('light')
+          showResult({
+            icon: 'success', title: 'Подарок выставлен!', sub: 'Теперь он на маркете',
+            onClose: () => navigate('/'),
+          })
         } catch (e) {
-          setError(e.message || 'Не удалось выставить лот')
+          showResult({ icon: 'error', title: 'Не удалось выставить', sub: e.message || 'Попробуйте ещё раз' })
           haptic('heavy')
         } finally {
           setBusy(false)
         }
       }
-    )
-  }
-
-  // ── done ──────────────────────────────────────────────────────────────────
-  if (done) {
-    return (
-      <div className="page">
-        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconSuccess /></div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
-            Подарок выставлен!
-          </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6 }}>
-            {done.gift_name ? `«${done.gift_name}» ` : ''}теперь на маркете
-            При продаже Gram придёт вам на баланс.
-          </p>
-          <button
-            className="btn btn-primary btn-full"
-            style={{ marginTop: 20 }}
-            onClick={() => { haptic('light'); navigate('/') }}
-          >
-            В маркет
-          </button>
-        </div>
-      </div>
     )
   }
 

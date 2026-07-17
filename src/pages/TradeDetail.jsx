@@ -4,8 +4,9 @@ import { api, fragmentImage, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
 import GramIcon from '../components/GramIcon'
-import { LoadingScreen, IconSuccess, IconReturn, IconSwap, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar, Chip } from '../components/StatusIcons'
+import { LoadingScreen, IconSwap, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar, Chip } from '../components/StatusIcons'
 import StateCard, { IlloError, IlloMissing } from '../components/MarketStates'
+import { showResult } from '../components/ResultSheet'
 import { fmtGram, fmtPercent } from '../utils/format'
 
 // Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
@@ -83,10 +84,14 @@ export default function TradeDetail() {
     const topUpNum = parseFloat(String(topUp).replace(',', '.')) || 0
     try {
       await api.proposeTradeOffer(item.id, Array.from(selectedGiftIds), topUpNum)
-      setProposed(true)
       setPicking(false)
+      showResult({
+        icon: 'success', title: 'Предложение отправлено!',
+        sub: 'Владелец увидит его в Профиле → Офферы',
+        onClose: () => navigate('/trade'),
+      })
     } catch (e) {
-      setProposeError(e.message || 'Не удалось отправить предложение')
+      showResult({ icon: 'error', title: 'Не удалось отправить', sub: e.message || 'Попробуйте ещё раз' })
       haptic('heavy')
     } finally {
       setProposing(false)
@@ -103,9 +108,12 @@ export default function TradeDetail() {
         setCancelError(null)
         try {
           await api.cancelTrade(item.id)
-          setCancelled(true)
+          showResult({
+            icon: 'return', title: 'Лот снят с обмена', sub: 'Подарок остался в вашем портфеле',
+            onClose: () => navigate('/portfolio'),
+          })
         } catch (e) {
-          setCancelError(e.message || 'Не удалось снять лот')
+          showResult({ icon: 'error', title: 'Не удалось снять лот', sub: e.message || 'Попробуйте ещё раз' })
           haptic('heavy')
         } finally {
           setCancelling(false)
@@ -237,7 +245,7 @@ export default function TradeDetail() {
         display: 'flex', alignItems: 'center', gap: 14, width: '100%', marginBottom: 20,
         padding: '14px 18px', borderRadius: 20, background: '#100d14', border: '1px solid #1e1826',
       }}>
-        <OwnerAvatar username={item.owner} />
+        <OwnerAvatar username={item.owner} name={item.owner_name} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3, textAlign: 'left' }}>
           <span style={{ fontSize: 13, color: '#655c6b', fontWeight: 500 }}>Владелец</span>
           <span style={{ fontSize: 17, fontWeight: 700, color: '#F5F2F4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{item.owner}</span>
@@ -251,41 +259,11 @@ export default function TradeDetail() {
         </div>
       )}
 
-      {proposed ? (
-        <div style={{ textAlign: 'center', padding: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconSuccess /></div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Предложение отправлено!</div>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-            Владелец увидит его в Профиле → Офферы
-          </p>
-          <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/trade')}>
-            К списку обменов
-          </button>
-        </div>
-      ) : isOwnTrade ? (
-        cancelled ? (
-          <div style={{ textAlign: 'center', padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><IconReturn /></div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>Лот снят с обмена</div>
-            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-              Подарок остался в вашем портфеле
-            </p>
-            <button className="btn btn-ghost btn-full" style={{ marginTop: 16 }} onClick={() => navigate('/portfolio')}>
-              В портфель
-            </button>
-          </div>
-        ) : (
-          <>
-            {cancelError && (
-              <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
-                ⚠️ {cancelError}
-              </div>
-            )}
-            <button className="btn btn-ghost btn-full" style={{ gap: 8 }} onClick={handleCancel} disabled={cancelling || soldOut}>
-              {cancelling ? <><MiniSpinAccent size={16} /> Снимаем…</> : soldOut ? 'Лот неактивен' : 'Снять с обмена'}
-            </button>
-          </>
-        )
+      {/* результат предложения/снятия — всплывающим окном (ResultSheet) */}
+      {isOwnTrade ? (
+        <button className="btn btn-ghost btn-full" style={{ gap: 8 }} onClick={handleCancel} disabled={cancelling || soldOut}>
+          {cancelling ? <><MiniSpinAccent size={16} /> Снимаем…</> : soldOut ? 'Лот неактивен' : 'Снять с обмена'}
+        </button>
       ) : soldOut ? (
         <button className="btn btn-ghost btn-full" disabled>
           Лот уже обменян

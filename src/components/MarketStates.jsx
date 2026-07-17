@@ -200,7 +200,7 @@ export function InsufficientFundsBanner({ onDeposit }) {
 // сделок). variant: 'incoming' (мне предложили — Принять/Отклонить) или
 // 'outgoing' (я предложил — Отменить). Пропсы busy рисуют спиннер внутри. ──
 export function OfferCard({
-  variant = 'incoming', giftTitle, priceTon, offeredTon, username,
+  variant = 'incoming', giftTitle, priceTon, offeredTon, username, name,
   onAccept, onDecline, onCancel, busy,
 }) {
   const incoming = variant === 'incoming'
@@ -277,7 +277,7 @@ export function OfferCard({
       </div>
       {/* от кого / кому */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <OwnerAvatar username={username} size={26} />
+        <OwnerAvatar username={username} name={name} size={26} />
         <span style={{ fontSize: 12, color: '#8f868c' }}>{incoming ? 'От' : 'Кому'}</span>
         <span style={{ fontSize: 13, fontWeight: 700, color: '#F5F2F4' }}>@{username}</span>
       </div>

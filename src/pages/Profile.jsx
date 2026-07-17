@@ -7,7 +7,7 @@ import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
 import BrandLogo from '../components/BrandLogo'
 import TxRow from '../components/TxRow'
-import { IconSwap, MiniSpin, MiniSpinAccent } from '../components/StatusIcons'
+import { IconSwap, MiniSpin, MiniSpinAccent, OwnerAvatar } from '../components/StatusIcons'
 import { OfferCard } from '../components/MarketStates'
 import { fmtGram } from '../utils/format'
 import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
@@ -341,27 +341,7 @@ export default function Profile() {
       }}>
         <div style={{ position: 'absolute', width: 150, height: 150, borderRadius: '50%', background: 'var(--gold)', opacity: 0.16, filter: 'blur(38px)', top: -55, left: -35, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', background: 'var(--money-1)', opacity: 0.14, filter: 'blur(32px)', bottom: -40, right: -20, pointerEvents: 'none' }} />
-        {user?.photo_url ? (
-          <img
-            src={user.photo_url}
-            alt=""
-            style={{ width: 72, height: 72, borderRadius: '50%', border: '2px solid var(--gold)' }}
-          />
-        ) : (
-          <div style={{
-            width: 72,
-            height: 72,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--gold-dim), var(--bg-card))',
-            border: '2px solid var(--gold)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 32,
-          }}>
-            {name[0]}
-          </div>
-        )}
+        <OwnerAvatar name={name} username={user?.username} photoUrl={user?.photo_url} size={72} />
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>{name}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 2 }}>{username}</div>
@@ -608,6 +588,7 @@ export default function Profile() {
                             priceTon={fmtGram(o.price_ton)}
                             offeredTon={fmtGram(o.amount_ton)}
                             username={o.from_username}
+                            name={o.from_name}
                             busy={busy}
                             onAccept={() => handleOfferAction(o, 'accept')}
                             onDecline={() => handleOfferAction(o, 'decline')}
@@ -649,6 +630,7 @@ export default function Profile() {
                             priceTon={fmtGram(o.price_ton)}
                             offeredTon={fmtGram(o.amount_ton)}
                             username={o.to_username}
+                            name={o.to_name}
                             busy={busy}
                             onCancel={() => handleOfferAction(o, 'cancel')}
                           />

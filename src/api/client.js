@@ -131,6 +131,7 @@ function normalizeTrade(x) {
     gift_link: first.gift_link || '',
     image_full: first.image_full || '',
     owner: x.owner_username,
+    owner_name: x.owner_name,
     owner_id: x.owner_id,
     status: x.status,
     listed_at: x.created_at ? new Date(x.created_at).getTime() : Date.now(),

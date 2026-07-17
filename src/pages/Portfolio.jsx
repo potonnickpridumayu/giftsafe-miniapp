@@ -10,6 +10,7 @@ import WalletButton from '../components/WalletButton'
 import EmptyState, { IlloCase } from '../components/EmptyState'
 import { LoadingScreen, MiniSpinAccent } from '../components/StatusIcons'
 import StateCard, { IlloSearch } from '../components/MarketStates'
+import { showResult } from '../components/ResultSheet'
 import { fmtGram } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 import { getCached, setCached } from '../utils/dataCache'
@@ -114,9 +115,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
         body: JSON.stringify(isTgGift ? {} : { to_address: to }),
       })
       haptic('medium')
+      showResult({ icon: 'success', title: 'Вывод отправлен', sub: isTgGift ? 'Подарок скоро придёт в Telegram' : 'NFT отправлен на кошелёк' })
       onWithdrawn(gift.gift_id)
     } catch (e) {
-      setError(e.message)
+      showResult({ icon: 'error', title: 'Не удалось вывести', sub: e.message })
       setBusy(false)
     }
   }
@@ -128,9 +130,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       await api.withdrawListing(gift.listing_id)
       haptic('medium')
       setBusy(false)
+      showResult({ icon: 'return', title: 'Лот снят', sub: 'Подарок снова в вашем портфеле' })
       onListed(gift.gift_id)
     } catch (e) {
-      setError(e.message)
+      showResult({ icon: 'error', title: 'Не удалось снять лот', sub: e.message })
       setBusy(false)
     }
   }
@@ -146,9 +149,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       setBusy(false)
       setPanel(null)
       setPrice('')
+      showResult({ icon: 'success', title: 'Выставлено на продажу', sub: 'Подарок теперь на маркете' })
       onListed(gift.gift_id)
     } catch (e) {
-      setError(e.message)
+      showResult({ icon: 'error', title: 'Не удалось выставить', sub: e.message })
       setBusy(false)
     }
   }
@@ -160,9 +164,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       await api.cancelTrade(gift.trade_id)
       haptic('medium')
       setBusy(false)
+      showResult({ icon: 'return', title: 'Снято с обмена', sub: 'Подарок остался в вашем портфеле' })
       onListed(gift.gift_id)
     } catch (e) {
-      setError(e.message)
+      showResult({ icon: 'error', title: 'Не удалось снять с обмена', sub: e.message })
       setBusy(false)
     }
   }
@@ -178,9 +183,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       haptic('medium')
       setBusy(false)
       setPanel(null)
+      showResult({ icon: 'success', title: 'Цена обновлена', sub: `Новая цена — ${fmtGram(p)} Gram` })
       onListed(gift.gift_id)
     } catch (e) {
-      setError(e.message)
+      showResult({ icon: 'error', title: 'Не удалось изменить цену', sub: e.message })
       setBusy(false)
     }
   }

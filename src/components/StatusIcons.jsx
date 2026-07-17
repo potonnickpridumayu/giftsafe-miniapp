@@ -30,10 +30,14 @@ export function Spinner({ size = 88, thick = 6, gem: withGem = true }) {
   )
 }
 
-// Экран «Загрузка…» — спиннер + подпись (внутри .empty-state)
+// Экран «Загрузка…» — спиннер + подпись, по центру экрана (между шапкой и
+// нижним навбаром). Высота держит центр даже когда страница почти пустая.
 export function LoadingScreen({ text = 'Загрузка…' }) {
   return (
-    <div className="empty-state" style={{ gap: 26 }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      gap: 26, minHeight: 'calc(100dvh - var(--nav-h) - var(--tg-top) - 120px)',
+    }}>
       <Spinner size={88} />
       <div style={{ fontSize: 17, fontWeight: 600, color: '#8f868c' }}>{text}</div>
     </div>
@@ -201,11 +205,21 @@ function tgAvatarGradient(key) {
   return TG_AVATAR_GRADIENTS[h % TG_AVATAR_GRADIENTS.length]
 }
 
+// Инициалы как в Telegram: из ИМЕНИ (не ника) — по первой букве до двух слов
+// («Eric Gray» → «EG», «Egor» → «E»). Ник — только запасной вариант.
+function avatarInitials(name, username) {
+  const src = (name || '').trim()
+  if (src) {
+    return src.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase()
+  }
+  return ((username || '').replace(/^@/, '')[0] || '?').toUpperCase()
+}
+
 // ── Аватар пользователя как в Telegram: реальное фото, если приватность
 // позволяет (публичное t.me/i/userpic по нику), иначе — дефолтная аватарка
-// Telegram: первая буква ника на фирменном цветном кружке. Проп photoUrl
+// Telegram: инициалы имени на фирменном цветном кружке. Проп photoUrl
 // (напр. текущий юзер из initData) приоритетнее ника. ──
-export function OwnerAvatar({ username, photoUrl, size = 52 }) {
+export function OwnerAvatar({ username, name, photoUrl, size = 52 }) {
   const [failed, setFailed] = useState(false)
   const clean = (username || '').replace(/^@/, '').trim()
   // t.me отдаёт пустой 1×1 пиксель, когда фото скрыто приватностью — он
@@ -223,15 +237,15 @@ export function OwnerAvatar({ username, photoUrl, size = 52 }) {
     )
   }
 
-  const grad = tgAvatarGradient(clean || 'x')
+  const grad = tgAvatarGradient(name || clean || 'x')
   return (
     <div style={{
       width: size, height: size, flexShrink: 0, borderRadius: '999px',
       background: `linear-gradient(160deg, ${grad[0]}, ${grad[1]})`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fff', fontWeight: 600, fontSize: Math.round(size * 0.42), lineHeight: 1,
+      color: '#fff', fontWeight: 600, fontSize: Math.round(size * 0.4), lineHeight: 1,
     }}>
-      {(clean || '?')[0].toUpperCase()}
+      {avatarInitials(name, username)}
     </div>
   )
 }
