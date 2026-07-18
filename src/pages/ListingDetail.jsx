@@ -266,7 +266,7 @@ export default function ListingDetail() {
       {/* Buy error — недостаточно средств получает фирменный баннер
           из хендоффа market-states, остальные ошибки покупки — как раньше */}
       {buyError && (buyError.startsWith('Недостаточно средств') ? (
-        <InsufficientFundsBanner onDeposit={() => { haptic('light'); navigate('/profile') }} />
+        <InsufficientFundsBanner onDeposit={() => { haptic('light'); navigate('/profile', { state: { openDeposit: true } }) }} />
       ) : (
         <WarnBanner style={{ marginBottom: 12 }}>{buyError}</WarnBanner>
       ))}

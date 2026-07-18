@@ -230,7 +230,7 @@ export default function Sell() {
             Адрес сейфа
           </label>
           <div
-            className="card"
+            className="card selectable"
             onClick={() => handleCopy('address', intent.address)}
             style={{ padding: '12px 14px', marginBottom: 16, fontSize: 12, wordBreak: 'break-all', cursor: 'pointer', border: copied === 'address' ? '1px solid var(--gold)' : undefined }}
           >
@@ -244,7 +244,7 @@ export default function Sell() {
             Ваш код — укажите в комментарии к переводу <span style={{ color: 'var(--gold)' }}>*</span>
           </label>
           <div
-            className="card"
+            className="card selectable"
             onClick={() => handleCopy('code', intent.code)}
             style={{ padding: '12px 14px', marginBottom: 16, fontSize: 16, fontWeight: 700, letterSpacing: 0.5, cursor: 'pointer', border: copied === 'code' ? '1px solid var(--gold)' : undefined }}
           >

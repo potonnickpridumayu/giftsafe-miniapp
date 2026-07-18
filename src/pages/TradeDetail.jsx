@@ -349,7 +349,7 @@ export default function TradeDetail() {
           onClick={openPicker}
           style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
         >
-          <IconSwap size={17} /> Предложить обмен
+          Предложить обмен
         </button>
       )}
     </div>

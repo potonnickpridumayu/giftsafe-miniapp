@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftSlug } from '../api/client'
 import { useTonConnectUI, useTonAddress, useTonWallet, CHAIN } from '@tonconnect/ui-react'
@@ -53,6 +53,7 @@ function HoldStepButton({ onStep, style, children }) {
 
 export default function Profile() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, haptic, openLink } = useTelegram()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -74,6 +75,19 @@ export default function Profile() {
   const [showOffers, setShowOffers] = useState(false)
   const [offerBusyId, setOfferBusyId] = useState(null)
   const [offerError, setOfferError] = useState(null)
+
+  // Пришли с флагом openDeposit (кнопка «Пополнить баланс» из баннера
+  // «Недостаточно средств») — сразу открываем шторку пополнения, а не просто
+  // страницу профиля. Флаг гасим, чтобы шторка не открывалась при возврате.
+  useEffect(() => {
+    if (location.state?.openDeposit) {
+      setShowDeposit(true)
+      setShowWithdraw(false)
+      setDepositStatus(null)
+      setDepositAmount('0.1')
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location.state, location.pathname, navigate])
 
   const SUPPORT_USERNAME = 'giftruby_support'
 
