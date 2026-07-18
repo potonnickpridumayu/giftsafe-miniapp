@@ -125,7 +125,6 @@ export default function ListingDetail() {
       async (ok) => {
         if (!ok) return
         setWithdrawing(true)
-        setWithdrawError(null)
         try {
           await api.withdrawListing(item.id)
           showResult({
