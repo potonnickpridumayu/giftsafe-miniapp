@@ -7,6 +7,7 @@ import GramIcon from '../components/GramIcon'
 import { LoadingScreen, MiniSpin, MiniSpinAccent, BtnShimmer } from '../components/StatusIcons'
 import StateCard, { IlloError, IlloMissing, InsufficientFundsBanner } from '../components/MarketStates'
 import { showResult } from '../components/ResultSheet'
+import WarnBanner, { WarnIcon } from '../components/WarnIcon'
 import { fmtGram, fmtPercent } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
@@ -267,9 +268,7 @@ export default function ListingDetail() {
       {buyError && (buyError.startsWith('Недостаточно средств') ? (
         <InsufficientFundsBanner onDeposit={() => { haptic('light'); navigate('/profile') }} />
       ) : (
-        <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
-          ⚠️ {buyError}
-        </div>
+        <WarnBanner style={{ marginBottom: 12 }}>{buyError}</WarnBanner>
       ))}
 
       {/* Buy button — результат покупки/снятия показывается всплывающим
@@ -299,7 +298,9 @@ export default function ListingDetail() {
                   )
                 })()}
                 {priceError && (
-                  <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {priceError}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>
+                    <WarnIcon size={18} /> {priceError}
+                  </div>
                 )}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button className="btn btn-primary" style={{ flex: 1, position: 'relative', overflow: 'hidden', gap: 8 }} onClick={handleSavePrice} disabled={savingPrice}>

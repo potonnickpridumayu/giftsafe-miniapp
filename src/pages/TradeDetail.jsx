@@ -7,6 +7,7 @@ import GramIcon from '../components/GramIcon'
 import { LoadingScreen, IconSwap, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar, Chip } from '../components/StatusIcons'
 import StateCard, { IlloError, IlloMissing } from '../components/MarketStates'
 import { showResult } from '../components/ResultSheet'
+import { WarnIcon } from '../components/WarnIcon'
 import { fmtGram, fmtPercent } from '../utils/format'
 
 // Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
@@ -323,7 +324,9 @@ export default function TradeDetail() {
           )}
 
           {proposeError && (
-            <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {proposeError}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>
+              <WarnIcon size={18} /> {proposeError}
+            </div>
           )}
           {myGifts && myGifts.length > 0 && selectedGiftIds.size === 0 && (
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>

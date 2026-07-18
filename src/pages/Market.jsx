@@ -7,6 +7,7 @@ import EmptyState, { IlloListing } from '../components/EmptyState'
 import StateCard, { IlloError, IlloSearch } from '../components/MarketStates'
 import { LoadingScreen, IconSuccess, MiniSpin, BtnShimmer } from '../components/StatusIcons'
 import { showResult } from '../components/ResultSheet'
+import { WarnIcon } from '../components/WarnIcon'
 import FiltersSheet from '../components/FiltersSheet'
 import { api } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
@@ -341,7 +342,9 @@ export default function Market() {
                   Оффер должен составлять хотя бы 50% от текущей цены подарка
                 </div>
                 {offerError && (
-                  <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>⚠️ {offerError}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>
+                    <WarnIcon size={18} /> {offerError}
+                  </div>
                 )}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button className="btn btn-primary" style={{ flex: 1, position: 'relative', overflow: 'hidden', gap: 8 }} onClick={submitOffer} disabled={offerBusy}>

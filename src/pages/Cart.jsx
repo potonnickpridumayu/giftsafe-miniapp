@@ -8,6 +8,7 @@ import { useCartIds, removeFromCart, pruneCart } from '../utils/cart'
 import GramIcon from '../components/GramIcon'
 import { LoadingScreen, MiniSpin, BtnShimmer, CheckBadge } from '../components/StatusIcons'
 import StateCard, { IlloError } from '../components/MarketStates'
+import WarnBanner from '../components/WarnIcon'
 
 function lotPlural(n) {
   const mod10 = n % 10, mod100 = n % 100
@@ -114,9 +115,9 @@ export default function Cart() {
             </div>
           )}
           {buyReport.fail.map(f => (
-            <div key={f.name} className="card" style={{ padding: '10px 14px', fontSize: 13, lineHeight: 1.6, color: '#ff6b6b', marginBottom: 4 }}>
-              ⚠️ {f.name}: {f.reason}
-            </div>
+            <WarnBanner key={f.name} style={{ marginBottom: 4, fontSize: 13 }}>
+              {f.name}: {f.reason}
+            </WarnBanner>
           ))}
         </div>
       )}

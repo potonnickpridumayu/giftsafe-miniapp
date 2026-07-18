@@ -5,6 +5,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import GramIcon from '../components/GramIcon'
 import { IconSuccess, MiniSpin, MiniSpinAccent, BtnShimmer, CheckBadge } from '../components/StatusIcons'
 import { showResult } from '../components/ResultSheet'
+import WarnBanner from '../components/WarnIcon'
 import { fmtGram } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
 
@@ -185,9 +186,7 @@ export default function Sell() {
           </div>
 
           {error && (
-            <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
-              ⚠️ {error}
-            </div>
+            <WarnBanner style={{ marginBottom: 12 }}>{error}</WarnBanner>
           )}
 
           <button
@@ -255,13 +254,9 @@ export default function Sell() {
             </div>
           </div>
 
-          <div style={{
-            padding: '12px 14px', marginBottom: 20,
-            background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)',
-            borderRadius: 'var(--radius-lg)', fontSize: 13, color: '#f59e0b', lineHeight: 1.5,
-          }}>
-            ⚠️ Без кода в комментарии мы не сможем привязать NFT к вам. Проверьте код перед отправкой.
-          </div>
+          <WarnBanner style={{ marginBottom: 20, lineHeight: 1.5 }}>
+            Без кода в комментарии мы не сможем привязать NFT к вам. Проверьте код перед отправкой.
+          </WarnBanner>
 
           <div className="card" style={{ padding: '14px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             <MiniSpinAccent size={16} /> Ждём ваш NFT… Проверяем каждые 10 секунд, страницу можно не обновлять.
@@ -338,9 +333,7 @@ export default function Sell() {
           </div>
 
           {error && (
-            <div className="card" style={{ padding: '10px 14px', marginBottom: 12, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
-              ⚠️ {error}
-            </div>
+            <WarnBanner style={{ marginBottom: 12 }}>{error}</WarnBanner>
           )}
 
           <button

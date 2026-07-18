@@ -9,6 +9,7 @@ import BrandLogo from '../components/BrandLogo'
 import TxRow from '../components/TxRow'
 import { IconSwap, MiniSpin, MiniSpinAccent, OwnerAvatar } from '../components/StatusIcons'
 import { OfferCard } from '../components/MarketStates'
+import WarnBanner from '../components/WarnIcon'
 import { fmtGram } from '../utils/format'
 import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
 
@@ -565,9 +566,7 @@ export default function Profile() {
           {item.label === 'Офферы' && showOffers && (
             <div style={{ marginBottom: 8 }}>
               {offerError && (
-                <div className="card" style={{ padding: '10px 14px', marginBottom: 6, border: '1px solid #f5555540', color: '#ff6b6b', fontSize: 13 }}>
-                  ⚠️ {offerError}
-                </div>
+                <WarnBanner style={{ marginBottom: 6 }}>{offerError}</WarnBanner>
               )}
               {!offers || (offers.incoming.length === 0 && offers.outgoing.length === 0) ? (
                 <div className="card" style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-muted)' }}>
