@@ -200,8 +200,8 @@ export function InsufficientFundsBanner({ onDeposit }) {
 // сделок). variant: 'incoming' (мне предложили — Принять/Отклонить) или
 // 'outgoing' (я предложил — Отменить). Пропсы busy рисуют спиннер внутри. ──
 export function OfferCard({
-  variant = 'incoming', giftTitle, priceTon, offeredTon, username, name,
-  onAccept, onDecline, onCancel, busy,
+  variant = 'incoming', giftTitle, priceTon, offeredTon, username, name, userId,
+  onAccept, onDecline, onCancel, busy, busyAction,
 }) {
   const incoming = variant === 'incoming'
   const discount = priceTon > 0 ? Math.round((1 - offeredTon / priceTon) * 100) : 0
@@ -277,15 +277,15 @@ export function OfferCard({
       </div>
       {/* от кого / кому */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <OwnerAvatar username={username} name={name} size={26} />
+        <OwnerAvatar username={username} name={name} userId={userId} size={26} />
         <span style={{ fontSize: 12, color: '#8f868c' }}>{incoming ? 'От' : 'Кому'}</span>
         <span style={{ fontSize: 13, fontWeight: 700, color: '#F5F2F4' }}>@{username}</span>
       </div>
       {/* кнопки */}
       {incoming ? (
         <div style={{ display: 'flex', gap: 8 }}>
-          {btn(busy ? '…' : 'Принять', 'accept', onAccept)}
-          {btn(busy ? '…' : 'Отклонить', 'decline', onDecline)}
+          {btn(busy && busyAction === 'accept' ? '…' : 'Принять', 'accept', onAccept)}
+          {btn(busy && busyAction === 'decline' ? '…' : 'Отклонить', 'decline', onDecline)}
         </div>
       ) : (
         btn(busy ? '…' : 'Отменить предложение', 'decline', onCancel)

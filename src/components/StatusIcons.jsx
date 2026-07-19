@@ -188,8 +188,10 @@ export function CheckBadge({ size = 30 }) {
   )
 }
 
-// Палитра дефолтных аватарок Telegram (7 градиентов). Цвет выбираем по хэшу
-// ника — как сам клиент, чтобы у юзера был стабильный «свой» цвет.
+// Палитра дефолтных аватарок Telegram (7 градиентов) — в том же ПОРЯДКЕ, что
+// и у клиента: красный, оранжевый, фиолетовый, зелёный, бирюзовый, синий,
+// розовый. Порядок важен: Telegram выбирает цвет по user_id как
+// `abs(user_id) % 7` и индексирует ровно этот список.
 const TG_AVATAR_GRADIENTS = [
   ['#ff885e', '#ff516a'], // красный
   ['#ffcd6a', '#ffa85c'], // оранжевый
@@ -199,7 +201,15 @@ const TG_AVATAR_GRADIENTS = [
   ['#72d5fd', '#2a9ef1'], // синий
   ['#ffa3b6', '#ff5c8a'], // розовый
 ]
-function tgAvatarGradient(key) {
+// Цвет кружка — как у самого Telegram: по user_id (`abs(id) % 7`). Тогда наша
+// дефолтная аватарка совпадает по цвету с той, что Telegram рисует по фото
+// профиля (в Профиле оно приходит из initData). Без id — запасной вариант по
+// хэшу имени/ника (цвет уже НЕ гарантированно совпадёт с Telegram).
+function tgAvatarGradient(userId, key) {
+  const id = Number(userId)
+  if (userId != null && Number.isFinite(id)) {
+    return TG_AVATAR_GRADIENTS[Math.abs(id) % 7]
+  }
   let h = 0
   for (let i = 0; i < key.length; i++) h += key.charCodeAt(i)
   return TG_AVATAR_GRADIENTS[h % TG_AVATAR_GRADIENTS.length]
@@ -219,7 +229,7 @@ function avatarInitials(name, username) {
 // позволяет (публичное t.me/i/userpic по нику), иначе — дефолтная аватарка
 // Telegram: инициалы имени на фирменном цветном кружке. Проп photoUrl
 // (напр. текущий юзер из initData) приоритетнее ника. ──
-export function OwnerAvatar({ username, name, photoUrl, size = 52 }) {
+export function OwnerAvatar({ username, name, photoUrl, userId, size = 52 }) {
   const [failed, setFailed] = useState(false)
   const clean = (username || '').replace(/^@/, '').trim()
   // t.me отдаёт пустой 1×1 пиксель, когда фото скрыто приватностью — он
@@ -237,7 +247,7 @@ export function OwnerAvatar({ username, name, photoUrl, size = 52 }) {
     )
   }
 
-  const grad = tgAvatarGradient(name || clean || 'x')
+  const grad = tgAvatarGradient(userId, name || clean || 'x')
   return (
     <div style={{
       width: size, height: size, flexShrink: 0, borderRadius: '999px',

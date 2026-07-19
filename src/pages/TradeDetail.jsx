@@ -246,7 +246,7 @@ export default function TradeDetail() {
         display: 'flex', alignItems: 'center', gap: 14, width: '100%', marginBottom: 20,
         padding: '14px 18px', borderRadius: 20, background: '#100d14', border: '1px solid #1e1826',
       }}>
-        <OwnerAvatar username={item.owner} name={item.owner_name} />
+        <OwnerAvatar username={item.owner} name={item.owner_name} userId={item.owner_id} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3, textAlign: 'left' }}>
           <span style={{ fontSize: 13, color: '#655c6b', fontWeight: 500 }}>Владелец</span>
           <span style={{ fontSize: 17, fontWeight: 700, color: '#F5F2F4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{item.owner}</span>

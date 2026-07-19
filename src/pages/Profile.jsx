@@ -74,6 +74,9 @@ export default function Profile() {
   const [offers, setOffers] = useState(null)
   const [showOffers, setShowOffers] = useState(false)
   const [offerBusyId, setOfferBusyId] = useState(null)
+  // Какое именно действие в полёте ('accept'|'decline'|'cancel') — чтобы
+  // спиннер крутился ТОЛЬКО в нажатой кнопке, а вторая осталась с подписью.
+  const [offerBusyAction, setOfferBusyAction] = useState(null)
   const [offerError, setOfferError] = useState(null)
 
   // Пришли с флагом openDeposit (кнопка «Пополнить баланс» из баннера
@@ -248,6 +251,7 @@ export default function Profile() {
   const handleOfferAction = async (offer, action) => {
     haptic('light')
     setOfferBusyId(offer.offer_id)
+    setOfferBusyAction(action)
     setOfferError(null)
     const api_ = offer.kind === 'listing'
       ? { accept: api.acceptListingOffer, decline: api.declineListingOffer, cancel: api.cancelListingOffer }
@@ -262,6 +266,7 @@ export default function Profile() {
       haptic('heavy')
     } finally {
       setOfferBusyId(null)
+      setOfferBusyAction(null)
     }
   }
 
@@ -356,7 +361,7 @@ export default function Profile() {
       }}>
         <div style={{ position: 'absolute', width: 150, height: 150, borderRadius: '50%', background: 'var(--gold)', opacity: 0.16, filter: 'blur(38px)', top: -55, left: -35, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', background: 'var(--money-1)', opacity: 0.14, filter: 'blur(32px)', bottom: -40, right: -20, pointerEvents: 'none' }} />
-        <OwnerAvatar name={name} username={user?.username} photoUrl={user?.photo_url} size={72} />
+        <OwnerAvatar name={name} username={user?.username} photoUrl={user?.photo_url} userId={user?.id} size={72} />
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>{name}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 2 }}>{username}</div>
@@ -602,7 +607,9 @@ export default function Profile() {
                             offeredTon={fmtGram(o.amount_ton)}
                             username={o.from_username}
                             name={o.from_name}
+                            userId={o.from_user_id}
                             busy={busy}
+                            busyAction={offerBusyAction}
                             onAccept={() => handleOfferAction(o, 'accept')}
                             onDecline={() => handleOfferAction(o, 'decline')}
                           />
@@ -620,11 +627,11 @@ export default function Profile() {
                         <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                           <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
                             disabled={busy} onClick={() => handleOfferAction(o, 'accept')}>
-                            {busy ? <MiniSpin size={14} /> : 'Принять'}
+                            {busy && offerBusyAction === 'accept' ? <MiniSpin size={14} /> : 'Принять'}
                           </button>
                           <button className="btn btn-ghost" style={{ flex: 1, fontSize: 12, padding: '8px' }}
                             disabled={busy} onClick={() => handleOfferAction(o, 'decline')}>
-                            {busy ? <MiniSpinAccent size={14} /> : 'Отклонить'}
+                            {busy && offerBusyAction === 'decline' ? <MiniSpinAccent size={14} /> : 'Отклонить'}
                           </button>
                         </div>
                       </div>
@@ -645,6 +652,7 @@ export default function Profile() {
                             username={o.to_username}
                             name={o.to_name}
                             busy={busy}
+                            busyAction={offerBusyAction}
                             onCancel={() => handleOfferAction(o, 'cancel')}
                           />
                         </div>

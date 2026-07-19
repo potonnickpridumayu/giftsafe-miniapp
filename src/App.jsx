@@ -48,6 +48,21 @@ export default function App() {
 
   useEffect(() => {
     const splash = window.rubySplash
+
+    // Экран техработ идёт БЕЗ вступительной анимации: и по ?maintenance=1, и
+    // когда сервер реально лёг, гасим сплэш немедленно и показываем «мы чиним»,
+    // не докручивая цикл логотипа. Затухание сплэша — CSS по opacity (живёт на
+    // композиторе), так что кратковременное соседство с rAF техэкрана не рвётся.
+    const goMaintenance = () => {
+      setMaintenance(true)
+      if (splash) splash.finish()
+      setShowContent(true)
+    }
+
+    // Форс-режим (?maintenance=1) — сразу техэкран, без сплэша и без сетевых
+    // проверок (иначе живой сервер увёл бы в вечный reload, см. эффект ниже).
+    if (FORCED_MAINTENANCE) { goMaintenance(); return undefined }
+
     const data = Promise.race([
       prefetchAll(),
       new Promise(r => setTimeout(r, SPLASH_CAP_MS)),
@@ -64,7 +79,7 @@ export default function App() {
       const down = [listings, trades].every(
         (r) => r.status === 'rejected' && (r.reason?.network || r.reason?.status >= 500)
       )
-      if (down) setMaintenance(true)
+      if (down) goMaintenance()
     })
 
     if (!splash) return () => { alive = false } // сплэш не поднялся — просто показываем app
@@ -96,11 +111,9 @@ export default function App() {
     return () => clearInterval(id)
   }, [maintenance])
 
-  // Экран техработ перекрывает всё: поверх него ничего интерактивного.
-  // Как и контент, монтируется не раньше начала затухания сплэша (showContent):
-  // его rAF-рендер живёт на том же главном потоке, что и анимация сплэша, —
-  // ранний монтаж дал бы те же рывки, что мы уже чинили в C-9.
-  if (maintenance) return showContent ? <MaintenanceScreen /> : null
+  // Экран техработ перекрывает всё: поверх него ничего интерактивного. Показываем
+  // сразу, без вступительной анимации сплэша — goMaintenance() уже погасил сплэш.
+  if (maintenance) return <MaintenanceScreen />
 
   return (
     <BrowserRouter>
