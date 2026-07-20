@@ -7,7 +7,8 @@ import { IconPurchase, IconSuccess, IconReturn } from './StatusIcons'
 // Заменяет tg.showAlert (системный текст снизу) для action-результатов.
 let openListener = null
 
-// opts: { icon: 'purchase'|'success'|'return'|'error', title, sub, onClose }
+// opts: { icon: 'purchase'|'success'|'return'|'error', custom?: node, title, sub, onClose }
+// custom — произвольный визуал вместо иконки (напр. анимация обмена).
 export function showResult(opts) {
   if (openListener) openListener(opts)
 }
@@ -75,9 +76,13 @@ export default function ResultSheet() {
             : 'rsSlideUp 0.28s cubic-bezier(.2,.8,.3,1)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
-          {isError ? <IconErrorBig size={90} /> : <Icon size={90} />}
-        </div>
+        {req.custom ? (
+          <div style={{ marginBottom: 12 }}>{req.custom}</div>
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+            {isError ? <IconErrorBig size={90} /> : <Icon size={90} />}
+          </div>
+        )}
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, fontWeight: 700, color: '#F5F2F4' }}>
           {req.title}
         </div>

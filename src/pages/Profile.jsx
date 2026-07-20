@@ -12,6 +12,8 @@ import { OfferCard } from '../components/MarketStates'
 import WarnBanner from '../components/WarnIcon'
 import { fmtGram } from '../utils/format'
 import { setIncomingOffers } from '../utils/offers'
+import { showResult } from '../components/ResultSheet'
+import TradeSwapResult from '../components/TradeSwapResult'
 import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
 
 // Комиссия площадки с доплаты при обмене — та же, что и на Маркете (MARKET_FEE
@@ -265,7 +267,24 @@ export default function Profile() {
       await api_[action](offer.offer_id)
       haptic(action === 'accept' ? 'medium' : 'light')
       await reloadOffers()
-      if (action === 'accept') await reloadProfile()
+      if (action === 'accept') {
+        await reloadProfile()
+        // Принятый обмен — всплывающее окно с анимацией: подарки меняются
+        // местами, между ними крутятся стрелки. target_gifts — что отдал
+        // владелец лота (я), offered_gifts — что пришло от предложившего.
+        if (offer.kind === 'trade') {
+          showResult({
+            custom: (
+              <TradeSwapResult
+                leftGifts={offer.target_gifts || []}
+                rightGifts={offer.offered_gifts || []}
+              />
+            ),
+            title: 'Обмен принят',
+            sub: 'Подарки обменялись местами',
+          })
+        }
+      }
     } catch (e) {
       setOfferError(e.message || 'Не удалось выполнить действие')
       haptic('heavy')
