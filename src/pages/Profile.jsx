@@ -278,6 +278,13 @@ export default function Profile() {
               <TradeSwapResult
                 leftGifts={offer.target_gifts || []}
                 rightGifts={offer.offered_gifts || []}
+                leftUser={{
+                  username: user?.username,
+                  name: user ? user.first_name + (user.last_name ? ' ' + user.last_name : '') : '',
+                  photoUrl: user?.photo_url,
+                  userId: user?.id,
+                }}
+                rightUser={{ username: offer.from_username, userId: offer.from_user_id }}
               />
             ),
             title: 'Обмен принят',

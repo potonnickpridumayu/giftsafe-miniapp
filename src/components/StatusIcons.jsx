@@ -1,25 +1,41 @@
 // Фирменные статусы/лоадеры вместо эмодзи (⌛ ✅ 🎉 📤 🔄) — перенос 1:1 из
 // дизайн-хендоффа design_handoff_status_icons (ре-дизайн ruby). Цвета, размеры
 // и тайминги финальные — захардкожены нарочно. Keyframes st* в global.css.
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gem from '../assets/gem.png'
 
 const ACC = '#FA4A66'
 const OK = '#3DDC84'
 
 // ── Брендовый спиннер: дуга-градиент + пульсирующий гем в центре ──
+// Круг и гем появляются ОДНОВРЕМЕННО: пока png гема не загрузился, спиннер
+// скрыт целиком — иначе первый показ выглядел как «круг, потом ромб».
 export function Spinner({ size = 88, thick = 6, gem: withGem = true }) {
+  const showGem = withGem && size >= 48
+  const [gemReady, setGemReady] = useState(!showGem)
+  const imgRef = useRef(null)
+
+  // Кэшированный png не всегда стреляет onLoad после маунта — проверяем сами.
+  useEffect(() => {
+    if (!showGem) return
+    const img = imgRef.current
+    if (img && img.complete && img.naturalWidth > 0) setGemReady(true)
+  }, [showGem])
+
   const mask = `radial-gradient(farthest-side, transparent calc(100% - ${thick}px), #000 calc(100% - ${thick}px + 1px))`
   return (
-    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+    <div style={{
+      position: 'relative', width: size, height: size, flexShrink: 0,
+      visibility: gemReady ? 'visible' : 'hidden',
+    }}>
       <div style={{
         position: 'absolute', inset: 0, borderRadius: '999px',
         background: `conic-gradient(from 0deg, transparent 0%, ${ACC} 70%, #ff8ba0 100%)`,
         WebkitMask: mask, mask,
         animation: 'stSpin 1s linear infinite',
       }} />
-      {withGem && size >= 48 && (
-        <img src={gem} alt="" style={{
+      {showGem && (
+        <img ref={imgRef} src={gem} alt="" onLoad={() => setGemReady(true)} style={{
           position: 'absolute', left: '50%', top: '50%', width: size * 0.42, height: size * 0.42,
           margin: `-${size * 0.21}px 0 0 -${size * 0.21}px`,
           animation: 'stPulse 1.6s ease-in-out infinite',

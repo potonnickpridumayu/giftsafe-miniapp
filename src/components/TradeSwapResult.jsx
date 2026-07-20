@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { fragmentImage } from '../api/client'
-import { IconSwap } from './StatusIcons'
+import { IconSwap, OwnerAvatar } from './StatusIcons'
 
 // Визуал для всплывающего окна «Обмен принят»: подарки владельца слева и
 // подарки контрагента справа ОДИН РАЗ меняются местами по дуге и замирают в
@@ -16,7 +16,7 @@ const SWAP_MS = 1400
 
 function GiftRow({ gifts, thumb, innerRef }) {
   return (
-    <div ref={innerRef} style={{ display: 'flex', gap: 6, alignItems: 'center', zIndex: 1 }}>
+    <div ref={innerRef} style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
       {gifts.map((g, i) => {
         const src = fragmentImage(g.gift_name, g.gift_number, g.nft_address)
         return (
@@ -35,7 +35,24 @@ function GiftRow({ gifts, thumb, innerRef }) {
   )
 }
 
-export default function TradeSwapResult({ leftGifts = [], rightGifts = [] }) {
+// Шапка стороны: аватарка + ник. Стоит НАД подарками и не участвует в
+// анимации — подписи отмечают, чья это сторона, а подарки летают под ними.
+function SideHead({ user }) {
+  if (!user?.username && !user?.name) return null
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8 }}>
+      <OwnerAvatar username={user.username} name={user.name} photoUrl={user.photoUrl} userId={user.userId} size={22} />
+      <span style={{
+        fontSize: 12, fontWeight: 700, color: '#F5F2F4', maxWidth: 110,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>
+        @{user.username || user.name}
+      </span>
+    </div>
+  )
+}
+
+export default function TradeSwapResult({ leftGifts = [], rightGifts = [], leftUser, rightUser }) {
   const leftRef = useRef(null)
   const rightRef = useRef(null)
   const arrowRef = useRef(null)
@@ -74,17 +91,23 @@ export default function TradeSwapResult({ leftGifts = [], rightGifts = [] }) {
   const maxPer = Math.max(leftGifts.length, rightGifts.length)
   const thumb = maxPer >= 4 ? 34 : maxPer === 3 ? 40 : 48
 
+  const hasHeads = !!(leftUser || rightUser)
+
   return (
     <div style={{
       position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      gap: 64, height: 120, marginBottom: 10, maxWidth: '100%',
+      gap: 64, height: hasHeads ? 150 : 120, marginBottom: 10, maxWidth: '100%',
       visibility: ready ? 'visible' : 'hidden',
     }}>
-      <GiftRow gifts={leftGifts} thumb={thumb} innerRef={leftRef} />
+      <div>
+        <SideHead user={leftUser} />
+        <GiftRow gifts={leftGifts} thumb={thumb} innerRef={leftRef} />
+      </div>
 
-      {/* стрелки обмена — в центре, под рядами */}
+      {/* стрелки обмена — в центре, под рядами (на уровне подарков) */}
       <div style={{
         position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', zIndex: 0,
+        marginTop: hasHeads ? 15 : 0,
         filter: 'drop-shadow(0 0 10px rgba(138,120,224,.6))',
       }}>
         <div ref={arrowRef} style={{ display: 'flex' }}>
@@ -92,7 +115,10 @@ export default function TradeSwapResult({ leftGifts = [], rightGifts = [] }) {
         </div>
       </div>
 
-      <GiftRow gifts={rightGifts} thumb={thumb} innerRef={rightRef} />
+      <div>
+        <SideHead user={rightUser} />
+        <GiftRow gifts={rightGifts} thumb={thumb} innerRef={rightRef} />
+      </div>
     </div>
   )
 }
