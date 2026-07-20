@@ -6,7 +6,7 @@ import TgGiftSticker from '../components/TgGiftSticker'
 import GiftCard from '../components/GiftCard'
 import GramIcon from '../components/GramIcon'
 import { IconLayoutGrid, IconList } from '@tabler/icons-react'
-import { LoadingScreen, IconSwap, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar, Chip } from '../components/StatusIcons'
+import { LoadingScreen, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar } from '../components/StatusIcons'
 import StateCard, { IlloError, IlloMissing } from '../components/MarketStates'
 import { showResult } from '../components/ResultSheet'
 import { WarnIcon } from '../components/WarnIcon'
@@ -291,7 +291,7 @@ export default function TradeDetail() {
           textAlign: 'left',
         }}>
           <div style={{ fontSize: 11.5, fontWeight: 600, color: '#FA4A66', letterSpacing: '.03em', marginBottom: 5, textTransform: 'uppercase' }}>
-            Комментарий владельца
+            Комментарий к обмену
           </div>
           <div style={{ fontSize: 15.5, lineHeight: 1.45, color: '#F5F2F4', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
             {item.note}
@@ -299,18 +299,24 @@ export default function TradeDetail() {
         </div>
       )}
 
-      {/* Компактная строка владельца: уменьшенная аватарка и отступы, чтобы
-          не забирать место у комментария выше. */}
+      {/* Строка владельца: только аватарка + «Владелец» + ник (чип «На обмен»
+          убран по просьбе пользователя). Аватарка в мягком фиолетовом кольце —
+          фирменный цвет обменов. */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12, width: '100%', marginBottom: 20,
-        padding: '10px 14px', borderRadius: 16, background: '#100d14', border: '1px solid #1e1826',
+        padding: '10px 14px', borderRadius: 16,
+        background: 'linear-gradient(135deg, #16111d 0%, #100d14 60%)', border: '1px solid #1e1826',
       }}>
-        <OwnerAvatar username={item.owner} name={item.owner_name} userId={item.owner_id} size={40} />
+        <div style={{
+          padding: 2, borderRadius: '999px', flexShrink: 0,
+          background: 'linear-gradient(160deg, #9d8be866, #7a63d033)',
+        }}>
+          <OwnerAvatar username={item.owner} name={item.owner_name} userId={item.owner_id} size={40} />
+        </div>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1, textAlign: 'left' }}>
-          <span style={{ fontSize: 11.5, color: '#655c6b', fontWeight: 500 }}>Владелец</span>
+          <span style={{ fontSize: 11.5, color: '#655c6b', fontWeight: 500, letterSpacing: '.02em' }}>Владелец</span>
           <span style={{ fontSize: 15, fontWeight: 700, color: '#F5F2F4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{item.owner}</span>
         </div>
-        <Chip icon={<IconSwap size={14} />} label="На обмен" filled style={{ padding: '6px 12px', fontSize: 13 }} />
       </div>
 
       {/* результат предложения/снятия — всплывающим окном (ResultSheet) */}

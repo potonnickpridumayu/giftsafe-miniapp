@@ -3,13 +3,16 @@ import { fragmentImage } from '../api/client'
 import { IconSwap } from './StatusIcons'
 
 // Визуал для всплывающего окна «Обмен принят»: подарки владельца слева и
-// подарки контрагента справа меняются местами по дуге, между ними крутятся
-// стрелки обмена. Ширина растёт с числом подарков (ряды становятся длиннее).
+// подарки контрагента справа ОДИН РАЗ меняются местами по дуге и замирают в
+// новом положении — обмен завершён. Стрелки в центре стоят на месте и
+// крутятся только пока подарки летят, потом останавливаются насовсем
+// (по явному требованию пользователя — без бесконечного цикла).
 //
-// Анимацию рядов гоняем через Web Animations API (element.animate), а НЕ через
-// CSS @keyframes с var(--dx): var() внутри keyframes некоторые WebView (iOS
-// Telegram) не интерполируют — окно всплывало бы, но подарки стояли на месте.
-// WAPI берёт готовые пиксельные значения и работает везде.
+// Анимация — через Web Animations API (element.animate) с готовыми px:
+// var() внутри CSS @keyframes некоторые WebView (iOS Telegram) не
+// интерполируют, подарки стояли бы на месте.
+
+const SWAP_MS = 1400
 
 function GiftRow({ gifts, thumb, innerRef }) {
   return (
@@ -35,34 +38,37 @@ function GiftRow({ gifts, thumb, innerRef }) {
 export default function TradeSwapResult({ leftGifts = [], rightGifts = [] }) {
   const leftRef = useRef(null)
   const rightRef = useRef(null)
+  const arrowRef = useRef(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const l = leftRef.current, r = rightRef.current
+    const l = leftRef.current, r = rightRef.current, arrow = arrowRef.current
     if (!l || !r) return
     // Расстояние между центрами рядов. offsetLeft/offsetWidth не зависят от
-    // CSS-transform, поэтому меряются корректно даже после старта анимации.
+    // CSS-transform, поэтому меряются корректно и после старта анимации.
     const dx = (r.offsetLeft + r.offsetWidth / 2) - (l.offsetLeft + l.offsetWidth / 2)
     if (!dx) { setReady(true); return }
-    const opts = { duration: 2200, iterations: Infinity, easing: 'ease-in-out' }
-    // Левый ряд уходит вправо (на слот правого) и обратно; в момент встречи в
-    // центре поднимается вверх, правый — вниз, чтобы не столкнуться.
+    const opts = { duration: SWAP_MS, iterations: 1, easing: 'ease-in-out', fill: 'forwards' }
+    // Один пролёт: левый ряд по верхней дуге на место правого, правый — по
+    // нижней навстречу. fill:forwards оставляет их в обменянном положении.
     const la = l.animate([
       { transform: 'translate(0px,0px)' },
-      { transform: `translate(${dx * 0.5}px,-34px)`, offset: 0.25 },
-      { transform: `translate(${dx}px,0px)`, offset: 0.5 },
-      { transform: `translate(${dx * 0.5}px,34px)`, offset: 0.75 },
-      { transform: 'translate(0px,0px)' },
+      { transform: `translate(${dx * 0.5}px,-34px)`, offset: 0.5 },
+      { transform: `translate(${dx}px,0px)` },
     ], opts)
     const ra = r.animate([
       { transform: 'translate(0px,0px)' },
-      { transform: `translate(${-dx * 0.5}px,34px)`, offset: 0.25 },
-      { transform: `translate(${-dx}px,0px)`, offset: 0.5 },
-      { transform: `translate(${-dx * 0.5}px,-34px)`, offset: 0.75 },
-      { transform: 'translate(0px,0px)' },
+      { transform: `translate(${-dx * 0.5}px,34px)`, offset: 0.5 },
+      { transform: `translate(${-dx}px,0px)` },
     ], opts)
+    // Стрелки: стоят на месте, крутятся ровно пока летят подарки (2 оборота),
+    // и останавливаются вместе с ними — обмен завершён.
+    const aa = arrow?.animate(
+      [{ transform: 'rotate(0deg)' }, { transform: 'rotate(720deg)' }],
+      { duration: SWAP_MS, iterations: 1, easing: 'ease-in-out', fill: 'forwards' },
+    )
     setReady(true)
-    return () => { la.cancel(); ra.cancel() }
+    return () => { la.cancel(); ra.cancel(); aa?.cancel() }
   }, [leftGifts, rightGifts])
 
   const maxPer = Math.max(leftGifts.length, rightGifts.length)
@@ -76,12 +82,14 @@ export default function TradeSwapResult({ leftGifts = [], rightGifts = [] }) {
     }}>
       <GiftRow gifts={leftGifts} thumb={thumb} innerRef={leftRef} />
 
-      {/* крутящиеся стрелки обмена — в центре, под рядами */}
+      {/* стрелки обмена — в центре, под рядами */}
       <div style={{
         position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', zIndex: 0,
-        animation: 'stSpin 2.4s linear infinite', filter: 'drop-shadow(0 0 10px rgba(138,120,224,.6))',
+        filter: 'drop-shadow(0 0 10px rgba(138,120,224,.6))',
       }}>
-        <IconSwap size={40} color="#9d8be8" spin={false} />
+        <div ref={arrowRef} style={{ display: 'flex' }}>
+          <IconSwap size={40} color="#9d8be8" spin={false} />
+        </div>
       </div>
 
       <GiftRow gifts={rightGifts} thumb={thumb} innerRef={rightRef} />
