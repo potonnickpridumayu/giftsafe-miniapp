@@ -1,6 +1,13 @@
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { IconBuildingStore, IconArrowsExchange, IconBriefcase, IconUser } from '@tabler/icons-react'
+import { api } from '../api/client'
+import { getIncomingOffers, setIncomingOffers, subscribeOffers } from '../utils/offers'
+
+// Как часто навбар сам проверяет входящие офферы (вне вкладки Профиль). Реже,
+// чем Profile (10 с) — там цена промедления выше; здесь бейдж «есть офферы».
+const OFFERS_POLL_MS = 20000
 
 // Иконки как в утверждённом макете (Tabler outline). Активная — розовая
 // с неоновым свечением через drop-shadow (не box-shadow: он квадратный).
@@ -15,6 +22,31 @@ export default function NavBar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { haptic } = useTelegram()
+  const [offerCount, setOfferCount] = useState(getIncomingOffers())
+
+  // Бейдж входящих офферов на «Профиле» виден с любой вкладки. Слушаем общий
+  // счётчик (его же обновляет Profile после действий) и сами опрашиваем офферы
+  // раз в 20 с, пока приложение открыто. Вне Telegram эндпоинты дают 401 —
+  // молча ловим, бейдж остаётся пустым.
+  useEffect(() => subscribeOffers(setOfferCount), [])
+
+  useEffect(() => {
+    let alive = true
+    const refresh = async () => {
+      if (document.hidden) return
+      try {
+        const [trades, listings] = await Promise.all([
+          api.getMyTradeOffers(),
+          api.getMyListingOffers(),
+        ])
+        if (!alive) return
+        setIncomingOffers((trades?.incoming?.length || 0) + (listings?.incoming?.length || 0))
+      } catch { /* не авторизованы или сеть — бейдж не трогаем */ }
+    }
+    refresh()
+    const id = setInterval(refresh, OFFERS_POLL_MS)
+    return () => { alive = false; clearInterval(id) }
+  }, [])
 
   return (
     <nav style={{
@@ -35,6 +67,7 @@ export default function NavBar() {
         const active = path === '/'
           ? location.pathname === '/'
           : location.pathname.startsWith(path)
+        const badge = path === '/profile' ? offerCount : 0
         return (
           <button
             key={path}
@@ -52,15 +85,27 @@ export default function NavBar() {
               padding: '6px 0',
             }}
           >
-            <Icon
-              size={23}
-              stroke={1.8}
-              style={{
-                color: active ? 'var(--gold)' : 'var(--text-muted)',
-                filter: active ? 'drop-shadow(0 0 4px rgba(255, 45, 85, 0.55)) drop-shadow(0 0 14px rgba(255, 45, 85, 0.35))' : 'none',
-                transition: 'color 0.2s, filter 0.2s',
-              }}
-            />
+            <span style={{ position: 'relative', display: 'inline-flex' }}>
+              <Icon
+                size={23}
+                stroke={1.8}
+                style={{
+                  color: active ? 'var(--gold)' : 'var(--text-muted)',
+                  filter: active ? 'drop-shadow(0 0 4px rgba(255, 45, 85, 0.55)) drop-shadow(0 0 14px rgba(255, 45, 85, 0.35))' : 'none',
+                  transition: 'color 0.2s, filter 0.2s',
+                }}
+              />
+              {badge > 0 && (
+                <span style={{
+                  position: 'absolute', top: -5, right: -9, minWidth: 16, height: 16, padding: '0 4px',
+                  boxSizing: 'border-box', borderRadius: 999, background: '#FA4A66',
+                  color: '#fff', fontSize: 10, fontWeight: 700, lineHeight: '16px', textAlign: 'center',
+                  boxShadow: '0 0 0 2px rgba(12,7,16,0.95)',
+                }}>
+                  {badge > 99 ? '99+' : badge}
+                </span>
+              )}
+            </span>
             <span style={{
               fontSize: 10,
               fontWeight: 600,

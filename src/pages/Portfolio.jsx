@@ -183,7 +183,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       haptic('medium')
       setBusy(false)
       setPanel(null)
-      showResult({ icon: 'success', title: 'Цена обновлена', sub: `Новая цена — ${fmtGram(p)} Gram` })
+      showResult({ icon: 'success', title: 'Цена изменена', sub: `Новая цена — ${fmtGram(p)} Gram` })
       onListed(gift.gift_id)
     } catch (e) {
       showResult({ icon: 'error', title: 'Не удалось изменить цену', sub: e.message })

@@ -240,25 +240,37 @@ export default function TradeDetail() {
         </div>
       )}
 
-      {/* OwnerRow из хендоффа: реальная TG-аватарка (t.me/i/userpic по username,
-          гем — fallback) в градиентном кольце + чип «На обмен» */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 14, width: '100%', marginBottom: 20,
-        padding: '14px 18px', borderRadius: 20, background: '#100d14', border: '1px solid #1e1826',
-      }}>
-        <OwnerAvatar username={item.owner} name={item.owner_name} userId={item.owner_id} />
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3, textAlign: 'left' }}>
-          <span style={{ fontSize: 13, color: '#655c6b', fontWeight: 500 }}>Владелец</span>
-          <span style={{ fontSize: 17, fontWeight: 700, color: '#F5F2F4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{item.owner}</span>
-        </div>
-        <Chip icon={<IconSwap size={15} />} label="На обмен" filled />
-      </div>
-
+      {/* Комментарий владельца — главный ориентир для меняющегося: что владелец
+          хочет получить за обмен. Поэтому он выше и заметнее компактной строки
+          владельца (акцентная рамка, крупный текст). */}
       {item.note && (
-        <div className="card" style={{ padding: '12px 14px', marginBottom: 20, fontSize: 13, color: 'var(--text-secondary)' }}>
-          {item.note}
+        <div style={{
+          marginBottom: 14, padding: '14px 16px', borderRadius: 16,
+          background: 'linear-gradient(180deg, #FA4A6614, #FA4A6608)', border: '1px solid #FA4A6633',
+          textAlign: 'left',
+        }}>
+          <div style={{ fontSize: 11.5, fontWeight: 600, color: '#FA4A66', letterSpacing: '.03em', marginBottom: 5, textTransform: 'uppercase' }}>
+            Комментарий владельца
+          </div>
+          <div style={{ fontSize: 15.5, lineHeight: 1.45, color: '#F5F2F4', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            {item.note}
+          </div>
         </div>
       )}
+
+      {/* Компактная строка владельца: уменьшенная аватарка и отступы, чтобы
+          не забирать место у комментария выше. */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12, width: '100%', marginBottom: 20,
+        padding: '10px 14px', borderRadius: 16, background: '#100d14', border: '1px solid #1e1826',
+      }}>
+        <OwnerAvatar username={item.owner} name={item.owner_name} userId={item.owner_id} size={40} />
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1, textAlign: 'left' }}>
+          <span style={{ fontSize: 11.5, color: '#655c6b', fontWeight: 500 }}>Владелец</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#F5F2F4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{item.owner}</span>
+        </div>
+        <Chip icon={<IconSwap size={14} />} label="На обмен" filled style={{ padding: '6px 12px', fontSize: 13 }} />
+      </div>
 
       {/* результат предложения/снятия — всплывающим окном (ResultSheet) */}
       {isOwnTrade ? (
@@ -347,7 +359,13 @@ export default function TradeDetail() {
         <button
           className="btn btn-primary btn-full"
           onClick={openPicker}
-          style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)' }}
+          style={{
+            fontSize: 15, padding: '14px', color: '#fff', border: 'none',
+            // Фиолетовый — фирменный цвет обменов (ярлыки/иконки свопа), чтобы
+            // кнопка не сливалась с рубиновой «Купить». Двойная тень = свечение.
+            background: 'linear-gradient(180deg, #9d8be8, #7a63d0)',
+            boxShadow: '0 10px 26px -6px rgba(138,120,224,.75), 0 0 26px rgba(138,120,224,.55)',
+          }}
         >
           Предложить обмен
         </button>

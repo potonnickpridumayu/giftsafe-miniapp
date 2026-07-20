@@ -11,6 +11,7 @@ import { IconSwap, MiniSpin, MiniSpinAccent, OwnerAvatar } from '../components/S
 import { OfferCard } from '../components/MarketStates'
 import WarnBanner from '../components/WarnIcon'
 import { fmtGram } from '../utils/format'
+import { setIncomingOffers } from '../utils/offers'
 import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
 
 // Комиссия площадки с доплаты при обмене — та же, что и на Маркете (MARKET_FEE
@@ -213,16 +214,20 @@ export default function Profile() {
         api.getMyTradeOffers(),
         api.getMyListingOffers(),
       ])
+      const incoming = [
+        ...trades.incoming.map(o => ({ ...o, kind: 'trade' })),
+        ...listings.incoming.map(o => ({ ...o, kind: 'listing' })),
+      ]
       setOffers({
-        incoming: [
-          ...trades.incoming.map(o => ({ ...o, kind: 'trade' })),
-          ...listings.incoming.map(o => ({ ...o, kind: 'listing' })),
-        ],
+        incoming,
         outgoing: [
           ...trades.outgoing.map(o => ({ ...o, kind: 'trade' })),
           ...listings.outgoing.map(o => ({ ...o, kind: 'listing' })),
         ],
       })
+      // Держим бейдж навбара в синхроне: после принятия/отклонения оффера он
+      // гаснет сразу, не дожидаясь 20-секундного тика поллера навбара.
+      setIncomingOffers(incoming.length)
     } catch {}
   }
 
