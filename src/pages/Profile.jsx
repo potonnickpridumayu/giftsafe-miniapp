@@ -653,7 +653,7 @@ export default function Profile() {
                           <IconSwap size={12} color="#8a7fd6" /> Предлагают обмен
                         </div>
                         {tradeOfferGiftSide(o.from_username, o.offered_gifts, o.top_up_ton)}
-                        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
+                        <div style={{ textAlign: 'center', fontSize: 30, color: '#8a7fd6', fontWeight: 700, lineHeight: 1, margin: '6px 0' }}>⇅</div>
                         {tradeOfferGiftSide(user?.username || 'вы', o.target_gifts, 0)}
                         <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                           <button className="btn btn-primary" style={{ flex: 1, fontSize: 12, padding: '8px' }}
@@ -695,7 +695,7 @@ export default function Profile() {
                           <IconSwap size={12} color="#8a7fd6" /> Ваше предложение
                         </div>
                         {tradeOfferGiftSide(user?.username || 'вы', o.offered_gifts, o.top_up_ton)}
-                        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>⇅</div>
+                        <div style={{ textAlign: 'center', fontSize: 30, color: '#8a7fd6', fontWeight: 700, lineHeight: 1, margin: '6px 0' }}>⇅</div>
                         {tradeOfferGiftSide(o.to_username, o.target_gifts, 0)}
                         <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px', marginTop: 10 }}
                           disabled={busy} onClick={() => handleOfferAction(o, 'cancel')}>
@@ -790,10 +790,10 @@ export default function Profile() {
                         grossTopUp > 0 ? (isFrom ? grossTopUp : netTopUp) : 0,
                         isFrom ? 'доплатил(а)' : 'получил(а)'
                       )}
-                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>
-                        ⇅
+                      <div style={{ textAlign: 'center', margin: '6px 0' }}>
+                        <div style={{ fontSize: 30, color: '#8a7fd6', fontWeight: 700, lineHeight: 1 }}>⇅</div>
                         {tx.fee_ton > 0 && (
-                          <span> · комиссия {fmtGram(tx.fee_ton)} <GramIcon size={17} /></span>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>комиссия {fmtGram(tx.fee_ton)} <GramIcon size={17} /></div>
                         )}
                       </div>
                       {giftSide(

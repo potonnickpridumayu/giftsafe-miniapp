@@ -225,10 +225,10 @@ export default function MarketHistory() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {left.map((g, j) => <GiftRow key={`l${j}`} gift={g} haptic={haptic} openLink={openLink} />)}
               </div>
-              <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', margin: '5px 0' }}>
-                ⇅
+              <div style={{ textAlign: 'center', margin: '6px 0' }}>
+                <div style={{ fontSize: 30, color: '#8a7fd6', fontWeight: 700, lineHeight: 1 }}>⇅</div>
                 {it.top_up_ton > 0 && (
-                  <span> · доплата {fmtGram(it.top_up_ton)} <GramIcon size={13} /></span>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>доплата {fmtGram(it.top_up_ton)} <GramIcon size={13} /></div>
                 )}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -253,7 +253,7 @@ export default function MarketHistory() {
             {it.kind === 'price' ? (
               <div style={{ flexShrink: 0, textAlign: 'right' }}>
                 {it.old_price_ton != null && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600, textDecoration: 'line-through', textDecorationColor: '#8f868c' }}>
                     {fmtGram(it.old_price_ton)}
                   </div>
                 )}

@@ -12,7 +12,7 @@ import { IconSwap, OwnerAvatar } from './StatusIcons'
 // var() внутри CSS @keyframes некоторые WebView (iOS Telegram) не
 // интерполируют, подарки стояли бы на месте.
 
-const SWAP_MS = 1400
+const SWAP_MS = 2400
 
 function GiftRow({ gifts, thumb, innerRef }) {
   return (
