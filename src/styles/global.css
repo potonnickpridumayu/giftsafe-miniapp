@@ -371,23 +371,6 @@ html, body {
 @keyframes rsSlideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
 @keyframes rsSlideDown { from { transform: translateY(0) } to { transform: translateY(100%) } }
 
-/* Обмен принят — подарки меняются местами по дуге (левый уходит вверх, правый
-   вниз, чтобы не столкнуться в центре), --dx = расстояние между центрами. */
-@keyframes tsSwapL {
-  0%   { transform: translate(0, 0) }
-  25%  { transform: translate(calc(var(--dx) * 0.5), -34px) }
-  50%  { transform: translate(var(--dx), 0) }
-  75%  { transform: translate(calc(var(--dx) * 0.5), 34px) }
-  100% { transform: translate(0, 0) }
-}
-@keyframes tsSwapR {
-  0%   { transform: translate(0, 0) }
-  25%  { transform: translate(calc(var(--dx) * -0.5), 34px) }
-  50%  { transform: translate(calc(var(--dx) * -1), 0) }
-  75%  { transform: translate(calc(var(--dx) * -0.5), -34px) }
-  100% { transform: translate(0, 0) }
-}
-
 /* Анимации состояний маркета (дизайн-хендофф market-states, 1:1) — все на
    transform/opacity, GPU-лёгкие */
 @keyframes msFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }

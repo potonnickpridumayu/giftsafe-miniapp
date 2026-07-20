@@ -3,7 +3,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
 import { useTelegram } from '../hooks/useTelegram'
 import TgGiftSticker from '../components/TgGiftSticker'
+import GiftCard from '../components/GiftCard'
 import GramIcon from '../components/GramIcon'
+import { IconLayoutGrid, IconList } from '@tabler/icons-react'
 import { LoadingScreen, IconSwap, MiniSpin, MiniSpinAccent, BtnShimmer, OwnerAvatar, Chip } from '../components/StatusIcons'
 import StateCard, { IlloError, IlloMissing } from '../components/MarketStates'
 import { showResult } from '../components/ResultSheet'
@@ -13,6 +15,15 @@ import { fmtGram, fmtPercent } from '../utils/format'
 // Комиссия площадки — та же, что и на Маркете (MARKET_FEE на бэкенде),
 // берётся только с доплаты при принятии оффера.
 const FEE_RATE = 0.03
+
+// Русское склонение «подарок / подарка / подарков»
+function giftWord(n) {
+  const a = Math.abs(n) % 100, b = a % 10
+  if (a > 10 && a < 20) return 'подарков'
+  if (b === 1) return 'подарок'
+  if (b >= 2 && b <= 4) return 'подарка'
+  return 'подарков'
+}
 
 export default function TradeDetail() {
   const { id } = useParams()
@@ -27,6 +38,9 @@ export default function TradeDetail() {
   const [cancelled, setCancelled] = useState(false)
   const [cancelError, setCancelError] = useState(null)
 
+  // Мульти-подарочный лот: по умолчанию карточки (как на маркете/обмене),
+  // кнопкой сворачивается в компактные строки.
+  const [compactGifts, setCompactGifts] = useState(false)
   const [picking, setPicking] = useState(false)
   const [myGifts, setMyGifts] = useState(null)
   const [selectedGiftIds, setSelectedGiftIds] = useState(() => new Set())
@@ -217,26 +231,53 @@ export default function TradeDetail() {
         </>
       ) : (
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 10 }}>
-            {item.giftCount} подарка на обмен
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 10, textAlign: 'center' }}>
+            {item.giftCount} {giftWord(item.giftCount)}
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {item.gifts.map(g => (
-              <div
-                key={g.gift_id}
-                className="card"
-                style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 10, cursor: g.gift_link ? 'pointer' : 'default' }}
-                onClick={g.gift_link ? () => { haptic('light'); openLink(g.gift_link) } : undefined}
-              >
-                <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
-                  <img src={g.image_full || g.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {g.name}{g.number ? ` #${g.number}` : ''}
-                </div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+            <button
+              onClick={() => { haptic('light'); setCompactGifts(v => !v) }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999,
+                background: '#1a1420', border: '1px solid #2a2230', color: 'var(--text-secondary)',
+                fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)',
+              }}
+            >
+              {compactGifts
+                ? <><IconLayoutGrid size={14} stroke={2} /> Карточками</>
+                : <><IconList size={14} stroke={2} /> Списком</>}
+            </button>
           </div>
+
+          {compactGifts ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {item.gifts.map(g => (
+                <div
+                  key={g.gift_id}
+                  className="card"
+                  style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 10, cursor: g.gift_link ? 'pointer' : 'default' }}
+                  onClick={g.gift_link ? () => { haptic('light'); openLink(g.gift_link) } : undefined}
+                >
+                  <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-card-hover)' }}>
+                    <img src={g.image_full || g.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {g.name}{g.number ? ` #${g.number}` : ''}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+              {item.gifts.map(g => (
+                <GiftCard
+                  key={g.gift_id}
+                  item={g}
+                  onClick={() => { haptic('light'); if (g.gift_link) openLink(g.gift_link) }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
