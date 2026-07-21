@@ -229,8 +229,8 @@ export default function Market() {
 
         {/* Полоса статистики */}
         <div className="rd-statstrip" style={{ marginTop: 12 }}>
-          <span>Флор <b>{floor}</b> <img src="/ruby-gem-256.png" width={17} height={17} className="rd-gem" alt="" /></span>
-          <span>Листинги <b>{listings.length}</b></span>
+          <span>Флор <b>{floor}</b><img src="/ruby-gem-256.png" width={17} height={17} className="rd-gem" alt="" /></span>
+          <span>На продаже <b>{listings.length}</b></span>
         </div>
 
         <div style={{ marginTop: 12 }}>

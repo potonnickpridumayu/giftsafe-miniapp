@@ -776,7 +776,7 @@ body::before {
   background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft); white-space: nowrap;
 }
 .rd-statstrip b { color: #fff; font-weight: 800; }
-.rd-statstrip .rd-gem { vertical-align: -4px; margin-left: 1px; }
+.rd-statstrip .rd-gem { vertical-align: -4px; margin-left: -3px; }
 
 /* ── Гем-иконка цены рядом с числом ── */
 .rd-gem { display: inline-block; vertical-align: -3px; flex-shrink: 0; }
@@ -800,7 +800,7 @@ body::before {
 }
 .rd-pill-num { top: 8px; left: 8px; background: rgba(0, 0, 0, 0.4); color: #fff; }
 .rd-pill-status { top: 8px; right: 8px; }
-.rd-pill-free { background: rgba(0, 0, 0, 0.35); color: #fff; }
+.rd-pill-free { background: rgba(43, 140, 255, 0.95); color: #fff; }
 .rd-pill-trade { background: rgba(168, 85, 247, 0.85); color: #fff; }
 .rd-pill-sale { background: rgba(250, 74, 102, 0.9); color: #fff; }
 .rd-card-body { padding: 8px 9px 9px; }
@@ -813,6 +813,8 @@ body::before {
   font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 800;
 }
 .rd-buy:disabled { opacity: .6; }
+/* Рубин-гем на красной кнопке сливался с фоном — белое свечение отделяет его */
+.rd-buy .rd-gem { filter: drop-shadow(0 0 2.5px rgba(255, 255, 255, 0.95)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
 .rd-ownplate {
   width: 100%; height: 34px; border-radius: 10px; margin-top: 8px;
   background: var(--rd-surf); border: 1px solid var(--rd-line);
