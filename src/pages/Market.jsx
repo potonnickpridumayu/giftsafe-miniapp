@@ -1,6 +1,6 @@
 ﻿import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconAdjustments, IconShoppingCart, IconHistory } from '@tabler/icons-react'
+import { IconAdjustments, IconShoppingCart, IconActivity } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
 import AppHeader from '../components/AppHeader'
 import EmptyState, { IlloListing } from '../components/EmptyState'
@@ -185,7 +185,7 @@ export default function Market() {
     <div className="rd-page">
       <AppHeader wordmark>
         <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность маркета">
-          <IconHistory size={18} stroke={1.9} />
+          <IconActivity size={18} stroke={1.9} />
         </button>
         <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/cart') }} aria-label="Корзина">
           <IconShoppingCart size={18} stroke={1.9} />
