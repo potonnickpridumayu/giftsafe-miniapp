@@ -79,7 +79,7 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
             disabled={buyBusy}
             onClick={(e) => { e.stopPropagation(); onBuy(item) }}
           >
-            {buyBusy ? <MiniSpin size={16} /> : <>{fmtGram(item.price)} <Gem /></>}
+            {buyBusy ? <MiniSpin size={18} /> : <>{fmtGram(item.price)} <Gem size={24} /></>}
           </button>
         )}
         {isOwnListing && (
