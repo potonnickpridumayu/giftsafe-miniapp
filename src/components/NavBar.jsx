@@ -4,6 +4,8 @@ import { useTelegram } from '../hooks/useTelegram'
 import { IconBuildingStore, IconArrowsExchange, IconBriefcase, IconUser } from '@tabler/icons-react'
 import { api } from '../api/client'
 import { getIncomingOffers, setIncomingOffers, subscribeOffers } from '../utils/offers'
+import { showResult } from './ResultSheet'
+import TradeSwapResult from './TradeSwapResult'
 
 // Как часто навбар сам проверяет входящие офферы (вне вкладки Профиль). Реже,
 // чем Profile (10 с) — там цена промедления выше; здесь бейдж «есть офферы».
@@ -21,7 +23,7 @@ const tabs = [
 export default function NavBar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { haptic } = useTelegram()
+  const { haptic, user } = useTelegram()
   const [offerCount, setOfferCount] = useState(getIncomingOffers())
 
   // Бейдж входящих офферов на «Профиле» виден с любой вкладки. Слушаем общий
@@ -47,6 +49,42 @@ export default function NavBar() {
     const id = setInterval(refresh, OFFERS_POLL_MS)
     return () => { alive = false; clearInterval(id) }
   }, [])
+
+  // Анимация «Обмен принят» для обоих участников: принявший видит её сразу в
+  // Профиле, а второй (и любой, у кого приложение было закрыто в момент
+  // принятия) — здесь, при заходе и на опросе. Сервер отдаёт непоказанные
+  // обмены и тут же помечает их показанными, поэтому повторно не проигрываем.
+  useEffect(() => {
+    if (!user?.id) return undefined
+    let alive = true
+    const checkSwaps = async () => {
+      if (document.hidden) return
+      try {
+        const swaps = await api.getUnseenSwaps()
+        if (!alive || !swaps?.length) return
+        const s = swaps[swaps.length - 1] // самый свежий
+        const iAmProposer = s.from_user_id === user.id
+        const myName = user.first_name + (user.last_name ? ' ' + user.last_name : '')
+        showResult({
+          custom: (
+            <TradeSwapResult
+              leftGifts={iAmProposer ? s.offered_gifts : s.target_gifts}
+              rightGifts={iAmProposer ? s.target_gifts : s.offered_gifts}
+              leftUser={{ username: user.username, name: myName, photoUrl: user.photo_url, userId: user.id }}
+              rightUser={iAmProposer
+                ? { username: s.to_username, userId: s.to_user_id }
+                : { username: s.from_username, userId: s.from_user_id }}
+            />
+          ),
+          title: 'Обмен принят',
+          sub: 'Подарки обменялись местами',
+        })
+      } catch { /* не авторизованы или сеть — тихо ждём следующего тика */ }
+    }
+    checkSwaps()
+    const id = setInterval(checkSwaps, OFFERS_POLL_MS)
+    return () => { alive = false; clearInterval(id) }
+  }, [user?.id])
 
   return (
     <nav style={{

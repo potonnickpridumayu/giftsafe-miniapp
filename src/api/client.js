@@ -194,6 +194,9 @@ export const api = {
       method: 'POST', body: JSON.stringify({ offered_gift_ids, top_up_ton }),
     }),
   getMyTradeOffers: () => request('/trades/offers/mine'),
+  // Завершённые обмены, которые ещё не показывали анимацией (сервер сразу
+  // помечает их показанными — повторно не придут).
+  getUnseenSwaps: () => request('/trades/swaps/unseen'),
   acceptTradeOffer: (offerId) => request(`/trades/offers/${offerId}/accept`, { method: 'POST' }),
   declineTradeOffer: (offerId) => request(`/trades/offers/${offerId}/decline`, { method: 'POST' }),
   cancelTradeOffer: (offerId) => request(`/trades/offers/${offerId}/cancel`, { method: 'POST' }),
