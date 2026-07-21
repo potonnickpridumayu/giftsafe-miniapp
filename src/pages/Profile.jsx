@@ -390,7 +390,7 @@ export default function Profile() {
           <div className="rd-ballabel">Баланс · Gram</div>
           <div className="rd-balrow">
             <span className="rd-balnum">{loading ? '…' : fmtGram(balance)}</span>
-            <img src="/ruby-gem-256.png" width={46} height={46} alt="" />
+            <img src="/ruby-gem-256.png" width={54} height={54} alt="" />
           </div>
 
           <div className="rd-balbtns">

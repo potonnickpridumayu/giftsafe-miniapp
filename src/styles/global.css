@@ -802,7 +802,7 @@ body::before {
 .rd-pill-status { top: 8px; right: 8px; }
 .rd-pill-free { background: rgba(0, 0, 0, 0.35); color: #fff; }
 .rd-pill-trade { background: rgba(168, 85, 247, 0.85); color: #fff; }
-.rd-pill-price { background: var(--rd-gold); color: #3a2503; }
+.rd-pill-sale { background: rgba(250, 74, 102, 0.9); color: #fff; }
 .rd-card-body { padding: 8px 9px 9px; }
 .rd-card-name { font-size: 12.5px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rd-card-seller { font-size: 10.5px; color: var(--rd-dim-2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -875,7 +875,7 @@ body::before {
   font-size: 12.5px; font-weight: 600; color: var(--rd-dim);
 }
 .rd-ballabel { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; color: var(--rd-dim-2); margin-top: 22px; text-transform: uppercase; }
-.rd-balrow { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; }
+.rd-balrow { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 8px; }
 .rd-balrow img { filter: drop-shadow(0 0 10px rgba(255, 46, 84, 0.8)); }
 .rd-balnum { font-family: 'Russo One', sans-serif; font-size: 42px; color: #fff; text-shadow: 0 0 30px rgba(255, 46, 84, 0.65); line-height: 1; }
 .rd-balchips { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }

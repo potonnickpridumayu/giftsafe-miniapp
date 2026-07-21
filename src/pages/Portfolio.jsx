@@ -202,7 +202,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
         />
         <span className="rd-pill rd-pill-num">#{gift.gift_number}</span>
         {gift.on_sale ? (
-          <span className="rd-pill rd-pill-status rd-pill-price">{fmtGram(gift.price_ton)} <GramIcon size={15} /></span>
+          <span className="rd-pill rd-pill-status rd-pill-sale">На продаже</span>
         ) : gift.on_trade ? (
           <span className="rd-pill rd-pill-status rd-pill-trade">В обмене</span>
         ) : (
@@ -212,6 +212,11 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
 
       <div className="rd-card-body">
         <div className="rd-card-name" style={{ marginBottom: 2 }}>{gift.gift_name}</div>
+        {gift.on_sale && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 6 }}>
+            {fmtGram(gift.price_ton)} <GramIcon size={17} />
+          </div>
+        )}
 
         {canTrade && (
           gift.on_sale ? (

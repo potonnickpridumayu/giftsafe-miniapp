@@ -21,7 +21,6 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
   const rarityColor = giftAccentColor(item.gift_id ?? item.id)
   // Свой лот на маркете: цена есть, а кнопки «Купить» нет.
   const isOwnListing = item.price != null && !onBuy
-  const seller = item.seller_username || item.owner
   const num = item.number
     ? (String(item.number).startsWith('#') ? item.number : `#${item.number}`)
     : timeAgo(item.listed_at)
@@ -73,7 +72,6 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
 
       <div className="rd-card-body">
         <div className="rd-card-name">{item.name}</div>
-        <div className="rd-card-seller">{seller ? `@${seller}` : 'На обмен'}</div>
 
         {onBuy && (
           <button

@@ -257,16 +257,17 @@ export default function MarketHistory() {
                     {fmtGram(it.old_price_ton)}
                   </div>
                 )}
-                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--money-1, var(--gold))' }}>
-                  {fmtGram(it.price_ton)} <GramIcon size={16} />
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--money-1, var(--gold))', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
+                  {fmtGram(it.price_ton)} <GramIcon size={24} />
                 </div>
               </div>
             ) : itemPrice(it) != null ? (
               <div style={{
                 fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                 color: 'var(--money-1, var(--gold))',
+                display: 'flex', alignItems: 'center', gap: 2,
               }}>
-                {fmtGram(itemPrice(it))} <GramIcon size={16} />
+                {fmtGram(itemPrice(it))} <GramIcon size={24} />
               </div>
             ) : null}
           </div>
