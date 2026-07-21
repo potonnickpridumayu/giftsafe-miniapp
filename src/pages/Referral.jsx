@@ -71,7 +71,7 @@ export default function Referral() {
         ← Назад
       </button>
 
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4, letterSpacing: '-0.5px' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
         Рефералы
       </h1>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 20px' }}>

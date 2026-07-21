@@ -383,7 +383,7 @@ export default function TradeDetail() {
           )}
 
           {proposeError && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--red)', fontSize: 13, marginBottom: 10 }}>
               <WarnIcon size={18} /> {proposeError}
             </div>
           )}

@@ -284,7 +284,7 @@ export default function ListingDetail() {
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
                   placeholder={String(item.price)}
-                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', fontSize: 15, marginBottom: 10 }}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: 15, marginBottom: 10 }}
                 />
                 {(() => {
                   const p = parseFloat(String(newPrice).replace(',', '.')) || 0
@@ -297,7 +297,7 @@ export default function ListingDetail() {
                   )
                 })()}
                 {priceError && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ff6b6b', fontSize: 13, marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--red)', fontSize: 13, marginBottom: 10 }}>
                     <WarnIcon size={18} /> {priceError}
                   </div>
                 )}
