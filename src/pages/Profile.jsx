@@ -742,7 +742,7 @@ export default function Profile() {
                       {amount > 0 && (
                         <div style={{ textAlign: 'right', marginTop: 4 }}>
                           <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{label} </span>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: '#3DDC84' }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#3DDC84', display: 'inline-flex', alignItems: 'center', gap: 2, verticalAlign: 'middle' }}>
                             +{fmtGram(amount)} <GramIcon size={18} />
                           </span>
                         </div>
@@ -773,7 +773,7 @@ export default function Profile() {
                       <div style={{ textAlign: 'center', margin: '6px 0' }}>
                         <div style={{ fontSize: 30, color: '#8a7fd6', fontWeight: 700, lineHeight: 1 }}>⇅</div>
                         {tx.fee_ton > 0 && (
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>комиссия {fmtGram(tx.fee_ton)} <GramIcon size={17} /></div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, display: 'inline-flex', alignItems: 'center', gap: 2 }}>комиссия {fmtGram(tx.fee_ton)} <GramIcon size={17} /></div>
                         )}
                       </div>
                       {giftSide(
@@ -914,6 +914,7 @@ export default function Profile() {
                     <div style={{
                       fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0,
                       color: isBuy ? '#FA4A66' : '#3DDC84',
+                      display: 'flex', alignItems: 'center', gap: 2,
                     }}>
                       {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={19} />
                     </div>
