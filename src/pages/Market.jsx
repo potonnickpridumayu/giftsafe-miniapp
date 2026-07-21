@@ -1,8 +1,8 @@
 ﻿import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconAdjustments, IconShoppingCart, IconHistory, IconX } from '@tabler/icons-react'
+import { IconAdjustments, IconShoppingCart, IconHistory } from '@tabler/icons-react'
 import GiftCard from '../components/GiftCard'
-import BrandLogo from '../components/BrandLogo'
+import AppHeader from '../components/AppHeader'
 import EmptyState, { IlloListing } from '../components/EmptyState'
 import StateCard, { IlloError, IlloSearch } from '../components/MarketStates'
 import { LoadingScreen, IconSuccess, MiniSpin, BtnShimmer } from '../components/StatusIcons'
@@ -33,6 +33,8 @@ export default function Market() {
   const navigate = useNavigate()
   const { haptic, user, showConfirm } = useTelegram()
   const [search, setSearch] = useState('')
+  // Чип-фильтр по коллекции (визуальный, поверх общих фильтров)
+  const [collection, setCollection] = useState(null)
   // Фильтры и сортировка общие с Историей маркета (utils/marketFilters)
   const filters = useMarketFilters()
   const [showFilters, setShowFilters] = useState(false)
@@ -149,8 +151,18 @@ export default function Market() {
     return { models: [...models], backdrops: [...backdrops], symbols: [...symbols] }
   }, [listings])
 
+  // Коллекции для чипов — уникальные имена/коллекции из текущих лотов
+  const collections = useMemo(
+    () => [...new Set(listings.map(l => l.collection_name || l.name).filter(Boolean))],
+    [listings],
+  )
+  const floor = listings.length
+    ? fmtGram(Math.min(...listings.map(l => l.price).filter(p => p != null)))
+    : '—'
+
   const items = useMemo(() => {
     let list = [...listings]
+    if (collection) list = list.filter(i => (i.collection_name || i.name) === collection)
     if (search) list = list.filter(i => i.name?.toLowerCase().includes(search.toLowerCase()))
     const numQ = filters.number.replace('#', '').trim()
     if (numQ) list = list.filter(i => String(i.number || '').replace('#', '').includes(numQ))
@@ -165,131 +177,95 @@ export default function Market() {
     else if (filters.sort === 'price_desc') list.sort((a, b) => b.price - a.price)
     else list.sort((a, b) => b.listed_at - a.listed_at)
     return list
-  }, [listings, search, filters])
+  }, [listings, search, filters, collection])
 
   const filtersActive = marketFiltersActive(filters)
 
   return (
-    <div className="page">
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <BrandLogo />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            {loading ? 'Загрузка…' : `${listings.length} ${plural(listings.length)}`}
-          </p>
-          <button
-            onClick={() => { haptic('light'); navigate('/history') }}
-            aria-label="Активность маркета"
-            style={{
-              background: 'none', border: 'none',
-              color: 'var(--text-primary)', cursor: 'pointer', padding: 4,
-              display: 'flex', alignItems: 'center',
-            }}
-          >
-            <IconHistory size={22} stroke={1.8} />
-          </button>
-          <button
-            onClick={() => { haptic('light'); navigate('/cart') }}
-            aria-label="Корзина"
-            style={{
-              position: 'relative', background: 'none', border: 'none',
-              color: 'var(--text-primary)', cursor: 'pointer', padding: 4,
-              display: 'flex', alignItems: 'center',
-            }}
-          >
-            <IconShoppingCart size={22} stroke={1.8} />
-            {cartIds.length > 0 && (
-              <span style={{
-                position: 'absolute', top: -3, right: -5,
-                minWidth: 16, height: 16, borderRadius: 999, padding: '0 4px',
-                background: 'var(--gold)', color: '#fff5f7',
-                fontSize: 10, fontWeight: 700, lineHeight: '16px', textAlign: 'center',
-              }}>
-                {cartIds.length}
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Search + filter button */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <input
-          className="input"
-          placeholder="Поиск подарков..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1 }}
-        />
-        <button
-          onClick={() => { haptic('light'); setShowFilters(true) }}
-          className={`chip${filtersActive ? ' active' : ''}`}
-          style={{ flexShrink: 0, padding: '0 14px' }}
-          aria-label="Фильтры"
-        >
-          <IconAdjustments size={19} stroke={1.8} />
+    <div className="rd-page">
+      <AppHeader wordmark>
+        <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность маркета">
+          <IconHistory size={18} stroke={1.9} />
         </button>
-        {filtersActive && (
+        <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/cart') }} aria-label="Корзина">
+          <IconShoppingCart size={18} stroke={1.9} />
+          {cartIds.length > 0 && (
+            <span style={{
+              position: 'absolute', top: -5, right: -5, minWidth: 16, height: 16, padding: '0 4px',
+              borderRadius: 999, background: '#ff4d6f', color: '#fff', fontSize: 10, fontWeight: 800,
+              lineHeight: '16px', textAlign: 'center', boxShadow: '0 0 0 2px #0c0710',
+            }}>{cartIds.length}</span>
+          )}
+        </button>
+      </AppHeader>
+
+      <div className="rd-body">
+        {/* Поиск + кнопка фильтров */}
+        <div className="rd-searchrow">
+          <input
+            className="rd-search"
+            placeholder="Поиск подарков..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
           <button
-            onClick={() => { haptic('light'); resetMarketFilters() }}
-            className="chip"
-            style={{ flexShrink: 0, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 4 }}
-            aria-label="Очистить фильтры"
+            onClick={() => { haptic('light'); setShowFilters(true) }}
+            className={`rd-sqbtn${filtersActive ? ' active' : ''}`}
+            aria-label="Фильтры"
           >
-            <IconX size={16} stroke={2} />
+            <IconAdjustments size={20} stroke={1.9} />
           </button>
-        )}
-      </div>
-
-      {/* Чипы коллекций убраны (2026-07-14): вернём одной строкой,
-          когда появятся коллекции NFT/модели и т.д. */}
-
-      {/* Content */}
-      {loading ? (
-        <LoadingScreen text="Загружаем маркет…" />
-      ) : error ? (
-        <StateCard
-          illo={<IlloError />}
-          title="Ошибка загрузки"
-          sub={error}
-          cta="Повторить"
-          onCta={() => { haptic('medium'); load() }}
-        />
-      ) : listings.length === 0 ? (
-        <EmptyState
-          illo={<IlloListing />}
-          title="Пока нет объявлений"
-          sub="Будьте первым — выставьте свой подарок!"
-          cta="+ Выставить подарок"
-          onCta={() => { haptic('medium'); navigate('/sell') }}
-        />
-      ) : items.length === 0 ? (
-        <StateCard
-          illo={<IlloSearch />}
-          title="Ничего не найдено"
-          sub="Попробуйте изменить фильтры или поисковый запрос."
-        />
-      ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 9,
-        }}>
-          {items.map(item => (
-            <GiftCard
-              key={item.id}
-              item={item}
-              onClick={() => { haptic('light'); navigate(`/listing/${item.id}`) }}
-              onOffer={item.seller_id !== user?.id ? openOffer : undefined}
-              onCartToggle={item.seller_id !== user?.id ? (it) => { haptic('light'); toggleCart(it.id) } : undefined}
-              inCart={cartIds.includes(item.id)}
-              onBuy={item.seller_id !== user?.id ? quickBuy : undefined}
-              buyBusy={buyingId === item.id}
-            />
-          ))}
         </div>
-      )}
+
+        {/* Чипы коллекций */}
+        {collections.length > 0 && (
+          <div className="rd-chips" style={{ marginTop: 12 }}>
+            <button className={`rd-fchip${!collection ? ' active' : ''}`} onClick={() => { haptic('light'); setCollection(null) }}>Все</button>
+            {collections.map(c => (
+              <button key={c} className={`rd-fchip${collection === c ? ' active' : ''}`} onClick={() => { haptic('light'); setCollection(c) }}>{c}</button>
+            ))}
+          </div>
+        )}
+
+        {/* Полоса статистики */}
+        <div className="rd-statstrip" style={{ marginTop: 12 }}>
+          <span>Флор <b>{floor}</b> <img src="/ruby-gem-256.png" width={17} height={17} className="rd-gem" alt="" /></span>
+          <span>Листинги <b>{listings.length}</b></span>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          {loading ? (
+            <LoadingScreen text="Загружаем маркет…" />
+          ) : error ? (
+            <StateCard illo={<IlloError />} title="Ошибка загрузки" sub={error} cta="Повторить" onCta={() => { haptic('medium'); load() }} />
+          ) : listings.length === 0 ? (
+            <EmptyState
+              illo={<IlloListing />}
+              title="Пока нет объявлений"
+              sub="Будьте первым — выставьте свой подарок!"
+              cta="+ Выставить подарок"
+              onCta={() => { haptic('medium'); navigate('/sell') }}
+            />
+          ) : items.length === 0 ? (
+            <StateCard illo={<IlloSearch />} title="Ничего не найдено" sub="Попробуйте изменить фильтры или поисковый запрос." />
+          ) : (
+            <div className="rd-grid">
+              {items.map(item => (
+                <GiftCard
+                  key={item.id}
+                  item={item}
+                  onClick={() => { haptic('light'); navigate(`/listing/${item.id}`) }}
+                  onOffer={item.seller_id !== user?.id ? openOffer : undefined}
+                  onCartToggle={item.seller_id !== user?.id ? (it) => { haptic('light'); toggleCart(it.id) } : undefined}
+                  inCart={cartIds.includes(item.id)}
+                  onBuy={item.seller_id !== user?.id ? quickBuy : undefined}
+                  buyBusy={buyingId === item.id}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>{/* /rd-body */}
 
       {/* Предложить цену */}
       {offerTarget && (
@@ -359,27 +335,6 @@ export default function Market() {
           </div>
         </div>
       )}
-
-      {/* Sell FAB — только когда есть объявления */}
-      {listings.length > 0 && (
-        <div style={{ position: 'fixed', right: 16, bottom: 84, zIndex: 50 }}>
-          <button
-            className="btn btn-primary"
-            onClick={() => { haptic('medium'); navigate('/sell') }}
-            style={{
-              borderRadius: '50%',
-              width: 58,
-              height: 58,
-              padding: 0,
-              fontSize: 26,
-              lineHeight: 1,
-            }}
-          >
-            +
-          </button>
-        </div>
-      )}
-
 
       {/* Filters bottom sheet — общий с Историей маркета */}
       <FiltersSheet open={showFilters} onClose={() => setShowFilters(false)} options={attrOptions} haptic={haptic} />

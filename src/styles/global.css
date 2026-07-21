@@ -3,7 +3,7 @@
    --gold (историческое имя) = основной акцент; --money-* = золото цен. */
 
 :root {
-  --bg-base: #0a0608;
+  --bg-base: #0c0710;
   --bg-card: #140a0e;
   --bg-card-hover: #1c0c12;
   --bg-input: #17090e;
@@ -624,3 +624,275 @@ html, body {
 }
 .stat-tile-value { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--text-primary); }
 .stat-tile-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDESIGN v4 — дизайн-хендофф (Маркет / Обмен / Портфель / Профиль + общий
+   хедер и таббар). Всё под префиксом .rd-*, чтобы не задеть остальные экраны.
+   Токены: фон #0c0710 + амбиент; глясс-поверхности; ruby-градиент; шрифты
+   Manrope / Unbounded (wordmark) / Russo One (крупные цифры).
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --rd-ruby: linear-gradient(140deg, #ff4d6f, #e01d4e);
+  --rd-glow: 0 8px 24px rgba(255, 46, 84, 0.4);
+  --rd-surf: rgba(255, 255, 255, 0.05);
+  --rd-surf-2: rgba(255, 255, 255, 0.04);
+  --rd-line: rgba(255, 255, 255, 0.09);
+  --rd-line-soft: rgba(255, 255, 255, 0.07);
+  --rd-dim: rgba(255, 255, 255, 0.5);
+  --rd-dim-2: rgba(255, 255, 255, 0.45);
+  --rd-gold: #ffd166;
+}
+/* Амбиентное свечение сверху по центру */
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: 140%; height: 380px; pointer-events: none; z-index: 0;
+  background: radial-gradient(50% 100% at 50% 0%, rgba(255, 46, 84, 0.30), transparent 72%);
+  filter: blur(30px);
+}
+#root { position: relative; z-index: 1; }
+
+.rd-page {
+  font-family: 'Manrope', sans-serif;
+  max-width: 480px; width: 100%; margin: 0 auto;
+  padding: var(--tg-top) 0 calc(var(--nav-h) + 30px + var(--safe-bottom));
+}
+.rd-body { padding: 14px 12px 0; }
+.rd-num { font-family: 'Russo One', sans-serif; font-weight: 400; }
+
+/* ── Хедер: плавающая стеклянная пилюля ── */
+.rd-header {
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 12px 0; padding: 9px 10px; border-radius: 20px;
+  background: var(--rd-surf); border: 1px solid var(--rd-line);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+.rd-logo {
+  width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0; object-fit: cover;
+  box-shadow: 0 4px 16px rgba(255, 46, 84, 0.45); cursor: pointer;
+}
+.rd-wordmark { font-family: 'Unbounded', sans-serif; font-weight: 600; font-size: 16px; color: #fff; cursor: pointer; }
+.rd-htitle { font-weight: 800; font-size: 16px; color: #fff; }
+.rd-hspace { flex: 1; }
+.rd-chip {
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0;
+  padding: 7px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff;
+  background: var(--rd-surf); border: 1px solid var(--rd-line);
+}
+.rd-chip-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; flex-shrink: 0; box-shadow: 0 0 6px #4ade80; }
+.rd-iconbtn {
+  width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  background: var(--rd-surf); border: 1px solid var(--rd-line); color: #fff;
+  position: relative;
+}
+
+/* ── Нижняя навигация: плавающий стеклянный док ── */
+.rd-nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
+  padding: 0 12px calc(12px + var(--safe-bottom));
+  pointer-events: none;
+}
+.rd-nav-inner {
+  display: flex; gap: 4px; padding: 7px; border-radius: 22px;
+  max-width: 456px; margin: 0 auto; pointer-events: auto;
+  background: rgba(18, 12, 22, 0.72); border: 1px solid var(--rd-line);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.rd-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  padding: 9px 0; border: none; background: none; cursor: pointer; border-radius: 15px;
+  color: var(--rd-dim-2); position: relative;
+  transition: color .15s, background .15s;
+}
+.rd-tab-label { font-size: 10px; font-weight: 700; }
+.rd-tab.active {
+  color: #ff6b8d;
+  background: rgba(255, 46, 84, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 46, 84, 0.25);
+}
+.rd-tab-badge {
+  position: absolute; top: 4px; right: calc(50% - 20px);
+  min-width: 15px; height: 15px; padding: 0 4px; border-radius: 999px;
+  background: #ff4d6f; color: #fff; font-size: 9px; font-weight: 800; line-height: 15px; text-align: center;
+  box-shadow: 0 0 0 2px rgba(18, 12, 22, 0.9);
+}
+
+/* ── Стат-карточки ── */
+.rd-stats { display: grid; gap: 10px; }
+.rd-stat {
+  background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft); border-radius: 16px;
+  padding: 14px 10px; text-align: center;
+}
+.rd-stat-value { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+.rd-stat-value.gold { color: var(--rd-gold); }
+.rd-stat-label { font-size: 10.5px; color: var(--rd-dim-2); margin-top: 5px; }
+
+/* ── Кнопки-CTA ── */
+.rd-cta {
+  width: 100%; height: 48px; border-radius: 14px; border: none; cursor: pointer;
+  font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 15px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.rd-cta--outline { background: rgba(255, 46, 84, 0.1); border: 1px solid rgba(255, 46, 84, 0.35); color: #ff8aa4; }
+.rd-cta--ruby { background: var(--rd-ruby); color: #fff; box-shadow: var(--rd-glow); }
+.rd-cta--gold { background: linear-gradient(140deg, #ffd166, #f59e0b); color: #3a2503; }
+.rd-cta--glass { background: var(--rd-surf); border: 1px solid var(--rd-line); color: #fff; }
+.rd-cta:active { transform: scale(0.98); }
+.rd-cta:disabled { opacity: 0.5; }
+
+/* ── Ряд фильтр-чипов ── */
+.rd-chips { display: flex; gap: 8px; overflow-x: auto; margin: 0 -12px; padding: 0 12px; scrollbar-width: none; }
+.rd-chips::-webkit-scrollbar { display: none; }
+.rd-fchip {
+  flex-shrink: 0; white-space: nowrap; cursor: pointer;
+  padding: 9px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; color: #fff;
+  background: var(--rd-surf); border: 1px solid var(--rd-line);
+}
+.rd-fchip.active { background: var(--rd-ruby); border-color: transparent; box-shadow: var(--rd-glow); }
+
+/* ── Поиск + кнопка фильтров ── */
+.rd-searchrow { display: flex; gap: 8px; }
+.rd-search {
+  flex: 1; height: 44px; border-radius: 14px; padding: 0 14px 0 40px;
+  background: var(--rd-surf); border: 1px solid var(--rd-line); color: #fff; font-size: 14px;
+  font-family: 'Manrope', sans-serif; outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23ffffff88' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 13px center;
+}
+.rd-search::placeholder { color: var(--rd-dim-2); }
+.rd-sqbtn {
+  width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--rd-surf); border: 1px solid var(--rd-line); color: #fff;
+}
+.rd-sqbtn.active { background: var(--rd-ruby); border-color: transparent; box-shadow: var(--rd-glow); }
+
+/* ── Полоса статистики маркета ── */
+.rd-statstrip {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 10px 14px; border-radius: 14px; font-size: 11px; color: var(--rd-dim-2);
+  background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft); white-space: nowrap;
+}
+.rd-statstrip b { color: #fff; font-weight: 800; }
+.rd-statstrip .rd-gem { vertical-align: -4px; margin-left: 1px; }
+
+/* ── Гем-иконка цены рядом с числом ── */
+.rd-gem { display: inline-block; vertical-align: -3px; flex-shrink: 0; }
+
+/* ── Сетка + карточка Маркета ── */
+.rd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rd-card {
+  border-radius: 16px; overflow: hidden; cursor: pointer; position: relative;
+  background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft);
+  transition: transform .15s;
+}
+.rd-card:active { transform: scale(0.98); }
+.rd-card-art {
+  position: relative; height: 118px; display: flex; align-items: center; justify-content: center;
+  font-size: 54px; overflow: hidden;
+}
+.rd-card-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rd-pill {
+  position: absolute; z-index: 2; white-space: nowrap;
+  font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+}
+.rd-pill-num { top: 8px; left: 8px; background: rgba(0, 0, 0, 0.4); color: #fff; }
+.rd-pill-status { top: 8px; right: 8px; }
+.rd-pill-free { background: rgba(0, 0, 0, 0.35); color: #fff; }
+.rd-pill-trade { background: rgba(168, 85, 247, 0.85); color: #fff; }
+.rd-pill-price { background: var(--rd-gold); color: #3a2503; }
+.rd-card-body { padding: 8px 9px 9px; }
+.rd-card-name { font-size: 12.5px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-card-seller { font-size: 10.5px; color: var(--rd-dim-2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-buy {
+  width: 100%; height: 34px; border-radius: 10px; border: none; cursor: pointer; margin-top: 8px;
+  background: var(--rd-ruby); color: #fff; box-shadow: var(--rd-glow);
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 800;
+}
+.rd-buy:disabled { opacity: .6; }
+.rd-ownplate {
+  width: 100%; height: 34px; border-radius: 10px; margin-top: 8px;
+  background: var(--rd-surf); border: 1px solid var(--rd-line);
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: 13px; font-weight: 800; color: #fff;
+}
+.rd-ownplate .rd-ownlabel { color: var(--rd-dim-2); font-weight: 700; }
+
+/* Мелкие круглые кнопки на арте (оффер / корзина) */
+.rd-artbtn {
+  position: absolute; z-index: 2; width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  background: rgba(10, 6, 8, 0.55); border: 1px solid rgba(255,255,255,.14); color: #fff;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.rd-artbtn.cart { bottom: 8px; right: 8px; }
+.rd-artbtn.offer { bottom: 8px; left: 8px; }
+.rd-artbtn.active { background: var(--rd-ruby); border-color: transparent; }
+
+/* ── Секционный лейбл ── */
+.rd-seclabel { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; color: var(--rd-dim-2); text-transform: uppercase; }
+
+/* ── Лот-строка (Обмен) ── */
+.rd-lot {
+  display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px;
+  background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft); cursor: pointer;
+}
+.rd-lot-art { position: relative; width: 62px; height: 62px; border-radius: 14px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+.rd-lot-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rd-lot-dot { position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; z-index: 1; }
+.rd-lot-main { flex: 1; min-width: 0; }
+.rd-lot-name { font-size: 14px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-lot-sub { font-size: 11.5px; color: var(--rd-dim-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-lot-btn {
+  flex-shrink: 0; padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  background: var(--rd-surf); border: 1px solid var(--rd-line); color: #fff;
+  font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 700; white-space: nowrap;
+}
+
+/* ── Стопка кнопок действий в карточке Портфеля ── */
+.rd-act { width: 100%; height: 34px; border-radius: 10px; border: none; cursor: pointer; margin-top: 6px;
+  font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; gap: 5px; }
+.rd-act--ruby { background: var(--rd-ruby); color: #fff; box-shadow: var(--rd-glow); }
+.rd-act--glass { background: var(--rd-surf); border: 1px solid var(--rd-line); color: #fff; }
+.rd-act:disabled { opacity: .55; }
+
+/* ── Профиль ── */
+.rd-prof { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.rd-avatar-ring {
+  width: 92px; height: 92px; border-radius: 50%; padding: 3px;
+  background: conic-gradient(from 210deg, #ff4d6f, #ff8aa4, #a855f7, #ff4d6f);
+  box-shadow: 0 8px 30px rgba(255, 46, 84, 0.4);
+}
+.rd-avatar-ring > * { width: 100%; height: 100%; border-radius: 50%; display: block; }
+.rd-pname { font-size: 22px; font-weight: 800; color: #fff; margin-top: 14px; }
+.rd-handle {
+  display: inline-block; margin-top: 8px; padding: 5px 12px; border-radius: 999px;
+  background: var(--rd-surf); border: 1px solid var(--rd-line);
+  font-size: 12.5px; font-weight: 600; color: var(--rd-dim);
+}
+.rd-ballabel { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; color: var(--rd-dim-2); margin-top: 22px; text-transform: uppercase; }
+.rd-balrow { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; }
+.rd-balrow img { filter: drop-shadow(0 0 10px rgba(255, 46, 84, 0.8)); }
+.rd-balnum { font-family: 'Russo One', sans-serif; font-size: 42px; color: #fff; text-shadow: 0 0 30px rgba(255, 46, 84, 0.65); line-height: 1; }
+.rd-balchips { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
+.rd-balchip { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--rd-surf); border: 1px solid var(--rd-line); color: var(--rd-dim); white-space: nowrap; }
+.rd-balchip.green { background: rgba(74, 222, 128, 0.14); border-color: rgba(74, 222, 128, 0.3); color: #4ade80; }
+.rd-balbtns { display: flex; gap: 10px; width: 100%; margin-top: 18px; }
+.rd-balbtn { flex: 1; height: 46px; border-radius: 14px; border: none; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 800; }
+.rd-balbtn--ruby { background: var(--rd-ruby); color: #fff; box-shadow: var(--rd-glow); }
+.rd-balbtn--glass { background: var(--rd-surf); border: 1px solid var(--rd-line); color: #fff; }
+
+/* Меню профиля одной глясс-панелью */
+.rd-menu { border-radius: 20px; background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft); overflow: hidden; }
+.rd-menu-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; border-bottom: 1px solid var(--rd-line-soft); background: none; width: 100%; text-align: left; }
+.rd-menu-row:last-child { border-bottom: none; }
+.rd-menu-ico { width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255, 46, 84, 0.13); color: #ff6b8d; }
+.rd-menu-body { flex: 1; min-width: 0; }
+.rd-menu-title { font-size: 14.5px; font-weight: 700; color: #fff; }
+.rd-menu-sub { font-size: 11.5px; color: var(--rd-dim-2); margin-top: 1px; }
+.rd-menu-chev { color: var(--rd-dim-2); flex-shrink: 0; }
+.rd-menu-badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--rd-ruby); color: #fff; font-size: 10px; font-weight: 800; line-height: 18px; text-align: center; flex-shrink: 0; }

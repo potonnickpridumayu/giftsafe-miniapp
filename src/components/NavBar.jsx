@@ -87,75 +87,28 @@ export default function NavBar() {
   }, [user?.id])
 
   return (
-    <nav style={{
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 'calc(64px + env(safe-area-inset-bottom, 0px))',
-      background: 'rgba(12, 7, 16, 0.95)',
-      backdropFilter: 'blur(20px)',
-      borderTop: '1px solid var(--border)',
-      display: 'flex',
-      alignItems: 'stretch',
-      zIndex: 100,
-      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-    }}>
-      {tabs.map(({ path, Icon, label }) => {
-        const active = path === '/'
-          ? location.pathname === '/'
-          : location.pathname.startsWith(path)
-        const badge = path === '/profile' ? offerCount : 0
-        return (
-          <button
-            key={path}
-            onClick={() => { haptic('light'); navigate(path) }}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 3,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '6px 0',
-            }}
-          >
-            <span style={{ position: 'relative', display: 'inline-flex' }}>
-              <Icon
-                size={23}
-                stroke={1.8}
-                style={{
-                  color: active ? 'var(--gold)' : 'var(--text-muted)',
-                  filter: active ? 'drop-shadow(0 0 4px rgba(255, 45, 85, 0.55)) drop-shadow(0 0 14px rgba(255, 45, 85, 0.35))' : 'none',
-                  transition: 'color 0.2s, filter 0.2s',
-                }}
-              />
+    <nav className="rd-nav">
+      <div className="rd-nav-inner">
+        {tabs.map(({ path, Icon, label }) => {
+          const active = path === '/'
+            ? location.pathname === '/'
+            : location.pathname.startsWith(path)
+          const badge = path === '/profile' ? offerCount : 0
+          return (
+            <button
+              key={path}
+              className={`rd-tab${active ? ' active' : ''}`}
+              onClick={() => { haptic('light'); navigate(path) }}
+            >
+              <Icon size={20} stroke={2} />
+              <span className="rd-tab-label">{label}</span>
               {badge > 0 && (
-                <span style={{
-                  position: 'absolute', top: -5, right: -9, minWidth: 16, height: 16, padding: '0 4px',
-                  boxSizing: 'border-box', borderRadius: 999, background: '#FA4A66',
-                  color: '#fff', fontSize: 10, fontWeight: 700, lineHeight: '16px', textAlign: 'center',
-                  boxShadow: '0 0 0 2px rgba(12,7,16,0.95)',
-                }}>
-                  {badge > 99 ? '99+' : badge}
-                </span>
+                <span className="rd-tab-badge">{badge > 99 ? '99+' : badge}</span>
               )}
-            </span>
-            <span style={{
-              fontSize: 10,
-              fontWeight: 600,
-              color: active ? 'var(--gold-light)' : 'var(--text-muted)',
-              fontFamily: 'var(--font-body)',
-              transition: 'color 0.2s',
-            }}>
-              {label}
-            </span>
-          </button>
-        )
-      })}
+            </button>
+          )
+        })}
+      </div>
     </nav>
   )
 }

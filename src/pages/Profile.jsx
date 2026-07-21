@@ -5,7 +5,8 @@ import { api, fragmentImage, giftSlug } from '../api/client'
 import { useTonConnectUI, useTonAddress, useTonWallet, CHAIN } from '@tonconnect/ui-react'
 import { beginCell } from '@ton/core'
 import GramIcon from '../components/GramIcon'
-import BrandLogo from '../components/BrandLogo'
+import AppHeader from '../components/AppHeader'
+import WalletButton from '../components/WalletButton'
 import TxRow from '../components/TxRow'
 import { IconSwap, MiniSpin, MiniSpinAccent, OwnerAvatar } from '../components/StatusIcons'
 import { OfferCard } from '../components/MarketStates'
@@ -370,64 +371,42 @@ export default function Profile() {
   ]
 
   return (
-    <div className="page">
-      <div style={{ marginBottom: 16 }}>
-        <BrandLogo />
-      </div>
+    <div className="rd-page">
+      <AppHeader title="Профиль">
+        <WalletButton />
+        <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность">
+          <IconHistory size={18} stroke={1.9} />
+        </button>
+      </AppHeader>
 
-      {/* Hero: аватар + баланс в одной карточке с мягкими световыми пятнами на фоне */}
-      <div style={{
-        position: 'relative',
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-xl)',
-        padding: '22px 20px',
-        marginBottom: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 10,
-        overflow: 'hidden',
-        textAlign: 'center',
-      }}>
-        <div style={{ position: 'absolute', width: 150, height: 150, borderRadius: '50%', background: 'var(--gold)', opacity: 0.16, filter: 'blur(38px)', top: -55, left: -35, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', background: 'var(--money-1)', opacity: 0.14, filter: 'blur(32px)', bottom: -40, right: -20, pointerEvents: 'none' }} />
-        <OwnerAvatar name={name} username={user?.username} photoUrl={user?.photo_url} userId={user?.id} size={72} />
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700 }}>{name}</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 2 }}>{username}</div>
-        </div>
+      <div className="rd-body">
+        <div className="rd-prof">
+          <div className="rd-avatar-ring">
+            <OwnerAvatar name={name} username={user?.username} photoUrl={user?.photo_url} userId={user?.id} size={86} />
+          </div>
+          <div className="rd-pname">{name}</div>
+          <div className="rd-handle">{username}</div>
 
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, letterSpacing: 0.5 }}>
-          БАЛАНС
-        </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700 }}>
-          <span className="money-text">{loading ? '…' : fmtGram(balance)}</span>
-          {!loading && <GramIcon size={26} style={{ marginLeft: -1 }} />}
-        </div>
-        <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 14 }}>
-          <button
-            onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
-            style={{
-              flex: 1, padding: '11px 14px', borderRadius: 999,
-              background: 'var(--gold-radial)', boxShadow: 'var(--gold-glow)',
-              color: '#fff5f7', fontWeight: 600, letterSpacing: '0.2px', fontSize: 14,
-              border: 'none', cursor: 'pointer',
-            }}
-          >
-            Пополнить
-          </button>
-          <button
-            onClick={() => { haptic('light'); setShowWithdraw(v => !v); setShowDeposit(false); setWithdrawStatus(null); setWithdrawAmount('0.1') }}
-            style={{
-              flex: 1, padding: '11px 14px', borderRadius: 999,
-              background: 'transparent', color: 'var(--gold)', fontWeight: 700, fontSize: 14,
-              border: '1px solid var(--gold)', cursor: 'pointer',
-            }}
-          >
-            Вывести
-          </button>
-        </div>
+          <div className="rd-ballabel">Баланс · Gram</div>
+          <div className="rd-balrow">
+            <img src="/ruby-gem-256.png" width={40} height={40} alt="" />
+            <span className="rd-balnum">{loading ? '…' : fmtGram(balance)}</span>
+          </div>
+
+          <div className="rd-balbtns">
+            <button
+              className="rd-balbtn rd-balbtn--ruby"
+              onClick={() => { haptic('light'); setShowDeposit(v => !v); setShowWithdraw(false); setDepositStatus(null); setDepositAmount('0.1') }}
+            >
+              Пополнить
+            </button>
+            <button
+              className="rd-balbtn rd-balbtn--glass"
+              onClick={() => { haptic('light'); setShowWithdraw(v => !v); setShowDeposit(false); setWithdrawStatus(null); setWithdrawAmount('0.1') }}
+            >
+              Вывести
+            </button>
+          </div>
         {/* Шторка пополнения/вывода: крупная, с явной идентичностью направления —
             пополнение золотое (деньги приходят), вывод крэмзовый (уходят) */}
         {(showDeposit || showWithdraw) && (() => {
@@ -550,16 +529,17 @@ export default function Profile() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+      <div className="rd-stats" style={{ gridTemplateColumns: '1fr 1fr 1fr', marginTop: 20 }}>
         {stats.map(s => (
-          <div key={s.label} className="stat-tile">
-            <div className="stat-tile-value" style={{ fontSize: 18 }}>{s.value}</div>
-            <div className="stat-tile-label">{s.label}</div>
+          <div key={s.label} className="rd-stat">
+            <div className="rd-stat-value">{s.value}</div>
+            <div className="rd-stat-label">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Menu */}
+      <div className="rd-menu" style={{ marginTop: 20 }}>
       {[
         {
           icon: <IconUsers size={18} stroke={1.8} />, label: 'Рефералы',
@@ -596,16 +576,16 @@ export default function Profile() {
         },
       ].map((item, i) => (
         <div key={i}>
-          <button className="list-row" onClick={item.onClick}>
-            <span className="list-row-icon">{item.icon}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{item.label}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{item.sub}</div>
+          <button className="rd-menu-row" onClick={item.onClick}>
+            <span className="rd-menu-ico">{item.icon}</span>
+            <div className="rd-menu-body">
+              <div className="rd-menu-title">{item.label}</div>
+              <div className="rd-menu-sub">{item.sub}</div>
             </div>
-            {item.badge > 0 && <span className="list-row-badge">{item.badge}</span>}
+            {item.badge > 0 && <span className="rd-menu-badge">{item.badge}</span>}
             <IconChevronRight
-              size={16}
-              className="list-row-chevron"
+              size={18}
+              className="rd-menu-chev"
               style={{
                 transform: (item.label === 'История сделок' && showHistory) || (item.label === 'Офферы' && showOffers)
                   ? 'rotate(90deg)' : 'none',
@@ -944,6 +924,8 @@ export default function Profile() {
           )}
         </div>
       ))}
+      </div>{/* /rd-menu */}
+      </div>{/* /rd-body */}
     </div>
   )
 }

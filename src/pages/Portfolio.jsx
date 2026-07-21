@@ -2,10 +2,10 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
-import { IconPencil } from '@tabler/icons-react'
+import { IconPencil, IconHistory } from '@tabler/icons-react'
 import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
-import BrandLogo from '../components/BrandLogo'
+import AppHeader from '../components/AppHeader'
 import WalletButton from '../components/WalletButton'
 import EmptyState, { IlloCase } from '../components/EmptyState'
 import { LoadingScreen, MiniSpinAccent } from '../components/StatusIcons'
@@ -192,98 +192,55 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   }
 
   return (
-    <div className="card" style={{ padding: 8 }}>
-      <div style={{
-        position: 'relative', display: 'flex', flexDirection: 'column',
-        overflow: 'hidden', borderRadius: 'var(--radius-md)', marginBottom: 8,
-      }}>
-        <div className="poster-art" style={{
-          background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
-        }}>
-          <TgGiftSticker
-            image={fragmentImage(gift.gift_name, gift.gift_number, gift.nft_address) || gift.image_url}
-            stickerId={gift.tg_sticker}
-            backdrop={gift.tg_backdrop}
-            pad="17%"
-          />
-          <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
-          {gift.on_sale ? (
-            <div className="poster-ribbon">НА ПРОДАЖЕ</div>
-          ) : gift.on_trade ? (
-            <div className="poster-ribbon" style={{ background: 'var(--blue)' }}>В ОБМЕНЕ</div>
-          ) : null}
-        </div>
-
-        <div className="poster-info">
-          <div className="poster-name-line">
-            <span className="poster-name">{gift.gift_name}</span>
-            {gift.gift_number && <span className="poster-num">#{gift.gift_number}</span>}
-          </div>
-          {gift.on_sale && gift.price_ton != null && (
-            <div className="poster-price">{fmtGram(gift.price_ton)} <GramIcon size={17} /></div>
-          )}
-        </div>
+    <div className="rd-card" style={{ cursor: 'default' }}>
+      <div className="rd-card-art" style={{ height: 110, background: `radial-gradient(circle at 40% 30%, ${rarityColor}59, ${rarityColor}1f 75%)` }}>
+        <TgGiftSticker
+          image={fragmentImage(gift.gift_name, gift.gift_number, gift.nft_address) || gift.image_url}
+          stickerId={gift.tg_sticker}
+          backdrop={gift.tg_backdrop}
+          pad="14%"
+        />
+        <span className="rd-pill rd-pill-num">#{gift.gift_number}</span>
+        {gift.on_sale ? (
+          <span className="rd-pill rd-pill-status rd-pill-price">{fmtGram(gift.price_ton)} <GramIcon size={15} /></span>
+        ) : gift.on_trade ? (
+          <span className="rd-pill rd-pill-status rd-pill-trade">В обмене</span>
+        ) : (
+          <span className="rd-pill rd-pill-status rd-pill-free">Свободен</span>
+        )}
       </div>
 
-      {canTrade && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {gift.on_sale ? (
-              <>
-                <button
-                  className="btn btn-ghost"
-                  style={rowBtnStyle}
-                  onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}
-                >
-                  <IconPencil size={12} stroke={2} style={{ flexShrink: 0 }} />
-                  <span style={ellipsisStyle}>{panel === 'editPrice' ? 'Скрыть' : 'Изменить цену'}</span>
-                </button>
-                <button
-                  className="btn btn-ghost"
-                  style={rowBtnStyle}
-                  disabled={busy}
-                  onClick={delist}
-                >
-                  <span style={ellipsisStyle}>{busy ? <MiniSpinAccent size={15} /> : 'Снять с продажи'}</span>
-                </button>
-              </>
-            ) : gift.on_trade ? (
-              <button
-                className="btn btn-ghost"
-                style={rowBtnStyle}
-                disabled={busy}
-                onClick={cancelTrade}
-              >
-                <span style={ellipsisStyle}>{busy ? <MiniSpinAccent size={15} /> : 'Снять с обмена'}</span>
+      <div className="rd-card-body">
+        <div className="rd-card-name" style={{ marginBottom: 2 }}>{gift.gift_name}</div>
+
+        {canTrade && (
+          gift.on_sale ? (
+            <>
+              <button className="rd-act rd-act--glass" onClick={() => { setNewPrice(String(gift.price_ton ?? '')); togglePanel('editPrice') }}>
+                <IconPencil size={13} stroke={2} /> {panel === 'editPrice' ? 'Скрыть' : 'Изменить цену'}
               </button>
-            ) : (
-              <>
-                <button
-                  className="btn btn-primary"
-                  style={rowBtnStyle}
-                  onClick={() => togglePanel('sell')}
-                >
-                  <span style={ellipsisStyle}>{panel === 'sell' ? 'Скрыть' : 'Продать'}</span>
-                </button>
-                <button
-                  className="btn btn-ghost"
-                  style={rowBtnStyle}
-                  onClick={() => { haptic('light'); onStartTrade(gift.gift_id) }}
-                >
-                  <span style={ellipsisStyle}>Обменять</span>
-                </button>
-                {/* Вывод доступен только для свободного подарка — на продаже/в
-                    обмене он заблокирован на бэке, поэтому кнопку не показываем */}
-                <button
-                  className="btn btn-ghost"
-                  style={rowBtnStyle}
-                  onClick={() => togglePanel('withdraw')}
-                >
-                  {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
-                </button>
-              </>
-            )}
-        </div>
-      )}
+              <button className="rd-act rd-act--glass" disabled={busy} onClick={delist}>
+                {busy ? <MiniSpinAccent size={15} /> : 'Снять с продажи'}
+              </button>
+            </>
+          ) : gift.on_trade ? (
+            <button className="rd-act rd-act--glass" disabled={busy} onClick={cancelTrade}>
+              {busy ? <MiniSpinAccent size={15} /> : 'Снять с обмена'}
+            </button>
+          ) : (
+            <>
+              <button className="rd-act rd-act--ruby" onClick={() => togglePanel('sell')}>
+                {panel === 'sell' ? 'Скрыть' : 'Продать'}
+              </button>
+              <button className="rd-act rd-act--glass" onClick={() => { haptic('light'); onStartTrade(gift.gift_id) }}>
+                Обменять
+              </button>
+              <button className="rd-act rd-act--glass" onClick={() => togglePanel('withdraw')}>
+                {panel === 'withdraw' ? 'Скрыть' : 'Вывести'}
+              </button>
+            </>
+          )
+        )}
 
       {panel === null && error && (
         <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 8 }}>{error}</div>
@@ -402,6 +359,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
           </button>
         </div>
       )}
+      </div>{/* /rd-card-body */}
     </div>
   )
 }
@@ -538,44 +496,39 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="page">
-      <div style={{ marginBottom: 20 }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 12, marginBottom: 16,
-        }}>
-          <BrandLogo />
-          <WalletButton />
-        </div>
+    <div className="rd-page">
+      <AppHeader title="Портфель">
+        <WalletButton />
+        <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность">
+          <IconHistory size={18} stroke={1.9} />
+        </button>
+      </AppHeader>
 
-        <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+      <div className="rd-body">
+        <div className="rd-stats" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
           {[
             { label: 'Подарков', value: gifts === null ? '…' : gifts.length },
             { label: 'На продаже', value: gifts === null ? '…' : onSaleCount },
             { label: 'В обмене', value: gifts === null ? '…' : onTradeCount },
           ].map(stat => (
-            <div key={stat.label} className="stat-tile">
-              <div className="stat-tile-value">{stat.value}</div>
-              <div className="stat-tile-label">{stat.label}</div>
+            <div key={stat.label} className="rd-stat">
+              <div className="rd-stat-value">{stat.value}</div>
+              <div className="rd-stat-label">{stat.label}</div>
             </div>
           ))}
         </div>
 
-        <button
-          className="btn btn-dark-glow btn-full"
-          onClick={() => { haptic('medium'); navigate('/sell') }}
-        >
+        <button className="rd-cta rd-cta--outline" style={{ marginTop: 12 }} onClick={() => { haptic('medium'); navigate('/sell') }}>
           + Добавить подарок
         </button>
 
         {(gifts || []).length > 0 && (
-          <div className="chips-row" style={{ marginTop: 12, flexWrap: 'nowrap', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', justifyContent: 'center' }}>
+          <div className="rd-chips" style={{ marginTop: 12 }}>
             {STATUS_FILTERS.map(f => (
               <button
                 key={f.value}
                 onClick={() => { haptic('light'); setStatusFilter(f.value) }}
-                className={`chip${statusFilter === f.value ? ' active' : ''}`}
-                style={{ padding: '7px 10px', fontSize: 12, flexShrink: 0 }}
+                className={`rd-fchip${statusFilter === f.value ? ' active' : ''}`}
               >
                 {f.label}
               </button>
@@ -583,31 +536,28 @@ export default function Portfolio() {
           </div>
         )}
 
-      </div>
-
-      {gifts === null ? (
-        <LoadingScreen text="Загружаем портфель…" />
-      ) : gifts.length === 0 ? (
-        <EmptyState
-          illo={<IlloCase />}
-          title="Портфель пуст"
-          sub={error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
-        />
-      ) : visibleGifts.length === 0 ? (
-        <StateCard
-          illo={<IlloSearch />}
-          title="Таких подарков нет"
-          sub="Попробуйте другой фильтр"
-        />
-      ) : (
-        <div style={{ columnCount: 2, columnGap: 9 }}>
-          {visibleGifts.map(gift => (
-            <div key={gift.gift_id} style={{ breakInside: 'avoid', marginBottom: 9 }}>
-              <GiftCard gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
+        <div style={{ marginTop: 14 }}>
+          {gifts === null ? (
+            <LoadingScreen text="Загружаем портфель…" />
+          ) : gifts.length === 0 ? (
+            <EmptyState
+              illo={<IlloCase />}
+              title="Портфель пуст"
+              sub={error ? `Не удалось загрузить: ${error}` : 'Добавьте свой подарок или купите на маркете'}
+            />
+          ) : visibleGifts.length === 0 ? (
+            <StateCard illo={<IlloSearch />} title="Таких подарков нет" sub="Попробуйте другой фильтр" />
+          ) : (
+            <div style={{ columnCount: 2, columnGap: 10 }}>
+              {visibleGifts.map(gift => (
+                <div key={gift.gift_id} style={{ breakInside: 'avoid', marginBottom: 10 }}>
+                  <GiftCard gift={gift} onWithdrawn={onWithdrawn} onListed={onListed} onStartTrade={openTradePicker} haptic={haptic} />
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      )}
+      </div>{/* /rd-body */}
 
       {tradePicker && (
         <div

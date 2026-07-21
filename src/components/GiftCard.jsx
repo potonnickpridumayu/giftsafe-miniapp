@@ -1,5 +1,4 @@
 import { IconMessageDollar, IconShoppingCartPlus, IconCheck } from '@tabler/icons-react'
-import GramIcon from './GramIcon'
 import TgGiftSticker from './TgGiftSticker'
 import { MiniSpin } from './StatusIcons'
 import { giftAccentColor } from '../api/client'
@@ -13,25 +12,24 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}д назад`
 }
 
-// Геометрия нижнего слота карточки. Кнопка «Купить» и плашка своего лота
-// делят её один в один — иначе карточки в ряду сетки разной высоты.
-const PLATE_STYLE = {
-  width: '100%', minWidth: 0, padding: '7px 6px',
-  borderRadius: 'var(--radius-md)',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
-  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17,
-  letterSpacing: 0.3,
+// PNG-гем вплотную к числу (≈1.2× кегля). Из assets/ruby-gem-256.png.
+function Gem({ size = 17 }) {
+  return <img src="/ruby-gem-256.png" width={size} height={size} className="rd-gem" alt="" />
 }
 
 export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart, onBuy, buyBusy }) {
   const rarityColor = giftAccentColor(item.gift_id ?? item.id)
   // Свой лот на маркете: цена есть, а кнопки «Купить» нет.
   const isOwnListing = item.price != null && !onBuy
+  const seller = item.seller_username || item.owner
+  const num = item.number
+    ? (String(item.number).startsWith('#') ? item.number : `#${item.number}`)
+    : timeAgo(item.listed_at)
 
   return (
-    <div className="poster-card" onClick={onClick}>
-      <div className="poster-art" style={{
-        background: `radial-gradient(circle at 35% 25%, ${rarityColor}33, var(--bg-card-hover) 72%)`,
+    <div className="rd-card" onClick={onClick}>
+      <div className="rd-card-art" style={{
+        background: `radial-gradient(circle at 40% 30%, ${rarityColor}59, ${rarityColor}1f 75%)`,
       }}>
         {item.tg_sticker
           ? <TgGiftSticker
@@ -45,80 +43,54 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
             ? <img src={item.image_full || item.image_url} alt={item.name} />
             : item.emoji}
 
-        <div className="poster-gem" style={{ background: rarityColor, boxShadow: `0 0 8px ${rarityColor}` }} />
+        <span className="rd-pill rd-pill-num">{num}</span>
 
         {item.giftCount > 1 && (
-          <span style={{
-            position: 'absolute', top: 8, right: 8, fontSize: 11, fontWeight: 700,
-            background: 'rgba(0,0,0,0.55)', color: '#fff', borderRadius: 999,
-            padding: '2px 7px', zIndex: 1,
-          }}>
+          <span className="rd-pill" style={{ top: 8, right: 8, background: 'rgba(0,0,0,0.55)', color: '#fff' }}>
             ×{item.giftCount}
           </span>
         )}
 
         {onOffer && (
           <button
-            className="poster-offer-btn"
+            className="rd-artbtn offer"
             onClick={(e) => { e.stopPropagation(); onOffer(item) }}
             aria-label="Предложить цену"
           >
-            <IconMessageDollar size={13} stroke={2} />
+            <IconMessageDollar size={14} stroke={2} />
           </button>
         )}
-
         {onCartToggle && (
           <button
-            className={`poster-cart-btn${inCart ? ' active' : ''}`}
+            className={`rd-artbtn cart${inCart ? ' active' : ''}`}
             onClick={(e) => { e.stopPropagation(); onCartToggle(item) }}
             aria-label={inCart ? 'Убрать из корзины' : 'В корзину'}
           >
-            {inCart ? <IconCheck size={13} stroke={2.5} /> : <IconShoppingCartPlus size={13} stroke={2} />}
+            {inCart ? <IconCheck size={14} stroke={2.5} /> : <IconShoppingCartPlus size={14} stroke={2} />}
           </button>
         )}
       </div>
 
-      <div className="poster-info">
-        <div className="poster-name-line">
-          <span className="poster-name">{item.name}</span>
-          <span className="poster-num">
-            {item.number
-              ? (String(item.number).startsWith('#') ? item.number : `#${item.number}`)
-              : timeAgo(item.listed_at)}
-          </span>
-        </div>
-        {/* Цена живёт в нижнем слоте — кнопкой на чужих лотах, плашкой на своих.
-            В инфо-строке она была бы дублем, поэтому здесь только имя и номер. */}
-        {item.price == null && (
-          <div className="poster-sub" style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
-            {item.owner ? `@${item.owner}` : 'На обмен'}
-          </div>
-        )}
-      </div>
+      <div className="rd-card-body">
+        <div className="rd-card-name">{item.name}</div>
+        <div className="rd-card-seller">{seller ? `@${seller}` : 'На обмен'}</div>
 
-      {onBuy && (
-        <div style={{ padding: '5px 6px 6px' }}>
+        {onBuy && (
           <button
-            className="btn btn-primary"
-            style={PLATE_STYLE}
+            className="rd-buy"
             disabled={buyBusy}
             onClick={(e) => { e.stopPropagation(); onBuy(item) }}
           >
-            {buyBusy ? <MiniSpin size={16} /> : <>{fmtGram(item.price)} <GramIcon size={25} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
+            {buyBusy ? <MiniSpin size={16} /> : <>{fmtGram(item.price)} <Gem /></>}
           </button>
-        </div>
-      )}
-
-      {isOwnListing && (
-        <div style={{ padding: '5px 6px 6px' }}>
-          <div className="btn poster-own-plate" style={{ ...PLATE_STYLE, gap: 5 }}>
-            <span className="poster-own-label">Ваш лот</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-              {fmtGram(item.price)} <GramIcon size={25} />
-            </span>
+        )}
+        {isOwnListing && (
+          <div className="rd-ownplate">
+            <span className="rd-ownlabel">Ваш лот</span>
+            {fmtGram(item.price)} <Gem size={16} />
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
