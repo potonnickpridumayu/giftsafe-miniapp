@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
-import { IconPencil, IconActivity } from '@tabler/icons-react'
+import { IconPencil, IconActivity, IconChevronDown } from '@tabler/icons-react'
 import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
 import AppHeader from '../components/AppHeader'
@@ -74,6 +74,7 @@ function scrollToPanel(el, offset = 90) {
 }
 
 function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
+  const [expanded, setExpanded] = useState(false)
   const [panel, setPanel] = useState(null)
   const [address, setAddress] = useState('')
   const [price, setPrice] = useState('')
@@ -192,13 +193,16 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   }
 
   return (
-    <div className="rd-card" style={{ cursor: 'default' }}>
-      <div className="rd-card-art" style={{ height: 110, background: `radial-gradient(circle at 40% 30%, ${rarityColor}59, ${rarityColor}1f 75%)` }}>
+    <div
+      className="rd-card"
+      style={{ cursor: 'pointer' }}
+      onClick={() => { haptic('light'); if (expanded) setPanel(null); setExpanded(v => !v) }}
+    >
+      <div className="rd-card-art" style={{ background: `radial-gradient(circle at 40% 30%, ${rarityColor}59, ${rarityColor}1f 75%)` }}>
         <TgGiftSticker
           image={fragmentImage(gift.gift_name, gift.gift_number, gift.nft_address) || gift.image_url}
           stickerId={gift.tg_sticker}
           backdrop={gift.tg_backdrop}
-          pad="14%"
         />
         <span className="rd-pill rd-pill-num">#{gift.gift_number}</span>
         {gift.on_sale ? (
@@ -211,9 +215,17 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       </div>
 
       <div className="rd-card-body">
-        <div className="rd-card-name" style={{ marginBottom: 2 }}>{gift.gift_name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div className="rd-card-name" style={{ flex: 1, minWidth: 0 }}>{gift.gift_name}</div>
+          <IconChevronDown
+            size={16}
+            style={{ flexShrink: 0, color: 'var(--rd-dim-2)', transition: 'transform .2s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+          />
+        </div>
+
+        {expanded && <div onClick={e => e.stopPropagation()}>
         {gift.on_sale && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, fontWeight: 800, color: '#fff', margin: '8px 0 2px' }}>
             {fmtGram(gift.price_ton)} <GramIcon size={17} />
           </div>
         )}
@@ -364,6 +376,7 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
           </button>
         </div>
       )}
+      </div>}
       </div>{/* /rd-card-body */}
     </div>
   )

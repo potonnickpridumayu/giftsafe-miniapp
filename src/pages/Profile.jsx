@@ -390,7 +390,7 @@ export default function Profile() {
           <div className="rd-ballabel">Баланс · Gram</div>
           <div className="rd-balrow">
             <span className="rd-balnum">{loading ? '…' : fmtGram(balance)}</span>
-            <img src="/ruby-gem-256.png" width={54} height={54} alt="" />
+            <img src="/ruby-gem-256.png" width={54} height={54} alt="" style={{ marginLeft: -10 }} />
           </div>
 
           <div className="rd-balbtns">
@@ -916,7 +916,7 @@ export default function Profile() {
                       color: isBuy ? '#FA4A66' : '#3DDC84',
                       display: 'flex', alignItems: 'center', gap: 2,
                     }}>
-                      {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={19} />
+                      {isBuy ? '−' : '+'}{fmtGram(displayAmount)} <GramIcon size={24} />
                     </div>
                   </div>
                 )

@@ -339,9 +339,9 @@ export default function ListingDetail() {
           className="btn btn-primary btn-full"
           onClick={handleBuy}
           disabled={buying}
-          style={{ fontSize: 15, padding: '14px', boxShadow: 'var(--gold-glow)', gap: 1, position: 'relative', overflow: 'hidden' }}
+          style={{ fontSize: 15, padding: '14px', background: 'var(--rd-buy)', boxShadow: 'var(--rd-buy-glow)', gap: 1, position: 'relative', overflow: 'hidden' }}
         >
-          {buying ? <><BtnShimmer /><MiniSpin /> <span style={{ marginLeft: 8 }}>Покупаем…</span></> : <>Купить за {fmtGram(total)} <GramIcon size={24} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }} /></>}
+          {buying ? <><BtnShimmer /><MiniSpin /> <span style={{ marginLeft: 8 }}>Покупаем…</span></> : <>Купить за {fmtGram(total)} <GramIcon size={24} /></>}
         </button>
       )}
     </div>
