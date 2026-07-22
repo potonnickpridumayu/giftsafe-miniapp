@@ -813,7 +813,7 @@ body::before {
    свечением снизу; вспышка яркости при нажатии */
 .rd-buy {
   position: relative; overflow: hidden; box-sizing: border-box;
-  width: 100%; height: 44px; border-radius: 22px; margin-top: 8px; cursor: pointer;
+  width: 100%; height: 36px; border-radius: 18px; margin-top: 8px; cursor: pointer;
   background: #191632; border: 1px solid rgba(151, 131, 255, .5);
   transition: filter .15s, border-color .15s;
   display: flex; align-items: center; justify-content: center; gap: 5px;
