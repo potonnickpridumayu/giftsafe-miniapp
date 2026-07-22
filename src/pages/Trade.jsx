@@ -51,14 +51,7 @@ export default function Trade() {
       </AppHeader>
 
       <div className="rd-body">
-        <div className="rd-stats" style={{ gridTemplateColumns: '1fr' }}>
-          <div className="rd-stat">
-            <div className="rd-stat-value">{loading ? '…' : trades.length}</div>
-            <div className="rd-stat-label">в обмене</div>
-          </div>
-        </div>
-
-        <button className="rd-cta rd-cta--outline" style={{ marginTop: 12 }} onClick={goPortfolioTrade}>
+        <button className="rd-cta rd-cta--outline" onClick={goPortfolioTrade}>
           + Выставить на обмен
         </button>
 
