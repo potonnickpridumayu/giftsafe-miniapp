@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, fragmentImage, giftAccentColor } from '../api/client'
-import { IconPencil, IconActivity, IconChevronDown } from '@tabler/icons-react'
+import { IconPencil, IconChevronDown } from '@tabler/icons-react'
+import MarketActivityIcon from '../components/MarketActivityIcon'
 import GramIcon from '../components/GramIcon'
 import TgGiftSticker from '../components/TgGiftSticker'
 import AppHeader from '../components/AppHeader'
@@ -518,7 +519,7 @@ export default function Portfolio() {
       <AppHeader title="Портфель">
         <WalletButton />
         <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность маркета">
-          <IconActivity size={18} stroke={1.9} />
+          <MarketActivityIcon size={20} />
         </button>
       </AppHeader>
 

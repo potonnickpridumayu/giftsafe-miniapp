@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconActivity } from '@tabler/icons-react'
 import AppHeader from '../components/AppHeader'
+import MarketActivityIcon from '../components/MarketActivityIcon'
 import GiftCard from '../components/GiftCard'
 import EmptyState, { IlloSwap } from '../components/EmptyState'
 import { LoadingScreen } from '../components/StatusIcons'
@@ -39,28 +39,22 @@ export default function Trade() {
     return () => clearInterval(id)
   }, [load])
 
-  const giftsTotal = trades.reduce((sum, t) => sum + (t.giftCount || 1), 0)
-
   const goPortfolioTrade = () => { haptic('medium'); navigate('/portfolio', { state: { openTradePicker: true } }) }
 
   return (
     <div className="rd-page">
       <AppHeader title="Обмен">
-        <span className="rd-chip">{trades.length} в обмене</span>
+        <span className="rd-chip">Лотов на обмен: {trades.length}</span>
         <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность маркета">
-          <IconActivity size={18} stroke={1.9} />
+          <MarketActivityIcon size={20} />
         </button>
       </AppHeader>
 
       <div className="rd-body">
-        <div className="rd-stats" style={{ gridTemplateColumns: '1fr 1fr' }}>
+        <div className="rd-stats" style={{ gridTemplateColumns: '1fr' }}>
           <div className="rd-stat">
             <div className="rd-stat-value">{loading ? '…' : trades.length}</div>
-            <div className="rd-stat-label">Лотов на обмен</div>
-          </div>
-          <div className="rd-stat">
-            <div className="rd-stat-value">{loading ? '…' : giftsTotal}</div>
-            <div className="rd-stat-label">Подарков</div>
+            <div className="rd-stat-label">в обмене</div>
           </div>
         </div>
 

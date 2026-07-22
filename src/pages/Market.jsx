@@ -1,6 +1,7 @@
 ﻿import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconAdjustments, IconShoppingCart, IconActivity } from '@tabler/icons-react'
+import { IconAdjustments, IconShoppingCart } from '@tabler/icons-react'
+import MarketActivityIcon from '../components/MarketActivityIcon'
 import GiftCard from '../components/GiftCard'
 import AppHeader from '../components/AppHeader'
 import EmptyState, { IlloListing } from '../components/EmptyState'
@@ -185,7 +186,7 @@ export default function Market() {
     <div className="rd-page">
       <AppHeader wordmark>
         <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность маркета">
-          <IconActivity size={18} stroke={1.9} />
+          <MarketActivityIcon size={20} />
         </button>
         <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/cart') }} aria-label="Корзина">
           <IconShoppingCart size={18} stroke={1.9} />
@@ -229,8 +230,8 @@ export default function Market() {
 
         {/* Полоса статистики */}
         <div className="rd-statstrip" style={{ marginTop: 12 }}>
-          <span>Флор <b>{floor}</b><img src="/ruby-gem-256.png" width={17} height={17} className="rd-gem" alt="" /></span>
-          <span>На продаже <b>{listings.length}</b></span>
+          <span>Флор: <b>{floor}</b><img src="/ruby-gem-256.png" width={17} height={17} className="rd-gem" alt="" /></span>
+          <span>На продаже: <b>{listings.length}</b></span>
         </div>
 
         <div style={{ marginTop: 12 }}>

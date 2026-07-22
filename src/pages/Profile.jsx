@@ -15,7 +15,8 @@ import { fmtGram } from '../utils/format'
 import { setIncomingOffers } from '../utils/offers'
 import { showResult } from '../components/ResultSheet'
 import TradeSwapResult from '../components/TradeSwapResult'
-import { IconUsers, IconMessageCircleDollar, IconHistory, IconActivity, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
+import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
+import MarketActivityIcon from '../components/MarketActivityIcon'
 
 // Комиссия площадки с доплаты при обмене — та же, что и на Маркете (MARKET_FEE
 // на бэкенде). Здесь только для превью «сколько получит владелец лота»,
@@ -375,7 +376,7 @@ export default function Profile() {
       <AppHeader title="Профиль">
         <WalletButton />
         <button className="rd-iconbtn" onClick={() => { haptic('light'); navigate('/history') }} aria-label="Активность маркета">
-          <IconActivity size={18} stroke={1.9} />
+          <MarketActivityIcon size={20} />
         </button>
       </AppHeader>
 
