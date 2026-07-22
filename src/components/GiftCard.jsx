@@ -79,7 +79,10 @@ export default function GiftCard({ item, onClick, onOffer, onCartToggle, inCart,
             disabled={buyBusy}
             onClick={(e) => { e.stopPropagation(); onBuy(item) }}
           >
-            {buyBusy ? <MiniSpin size={18} /> : <>{fmtGram(item.price)} <Gem size={28} /></>}
+            {buyBusy ? <MiniSpin size={18} /> : <>
+              <span className="rd-buy-price">{fmtGram(item.price)}</span>
+              <img className="rd-buy-gem" src="/ruby-gem-trimmed.png" alt="" />
+            </>}
           </button>
         )}
         {isOwnListing && (

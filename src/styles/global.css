@@ -787,7 +787,7 @@ body::before {
 /* ── Сетка + карточка Маркета ── */
 .rd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .rd-card {
-  border-radius: 16px; cursor: pointer; position: relative;
+  border-radius: 16px; overflow: hidden; cursor: pointer; position: relative;
   background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft);
   transition: transform .15s;
 }
@@ -795,7 +795,6 @@ body::before {
 .rd-card-art {
   position: relative; height: 150px; display: flex; align-items: center; justify-content: center;
   font-size: 54px; overflow: hidden;
-  border-radius: 16px 16px 0 0;
 }
 .rd-card-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .rd-pill {
@@ -810,18 +809,31 @@ body::before {
 .rd-card-body { padding: 8px 9px 9px; }
 .rd-card-name { font-size: 12.5px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rd-card-seller { font-size: 10.5px; color: var(--rd-dim-2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Кнопка-цена (дизайн-хендофф): тёмная пилюля с контуром и «дышащим»
+   свечением снизу; вспышка яркости при нажатии */
 .rd-buy {
-  width: 100%; height: 42px; border-radius: 11px; border: none; cursor: pointer; margin-top: 8px;
-  background: var(--rd-buy); color: #fff; box-shadow: var(--rd-buy-glow);
+  position: relative; overflow: hidden; box-sizing: border-box;
+  width: 100%; height: 44px; border-radius: 22px; margin-top: 8px; cursor: pointer;
+  background: #191632; border: 1px solid rgba(151, 131, 255, .5);
+  transition: filter .15s, border-color .15s;
   display: flex; align-items: center; justify-content: center; gap: 5px;
-  font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800;
-  animation: rdBuyGlow 2.4s ease-in-out infinite;
+  font-family: 'Manrope', sans-serif;
 }
-.rd-buy:disabled { opacity: .6; animation: none; }
-/* Пульсирующая подсветка ровным ореолом со всех сторон — «манит нажать» */
-@keyframes rdBuyGlow {
-  0%, 100% { box-shadow: 0 0 12px 0 rgba(90, 70, 230, 0.45); }
-  50% { box-shadow: 0 0 26px 4px rgba(124, 108, 255, 0.85); }
+.rd-buy:hover  { filter: brightness(1.25); border-color: rgba(178, 162, 255, .8); }
+.rd-buy:active { filter: brightness(1.5);  border-color: rgba(205, 196, 255, 1); }
+.rd-buy:disabled { opacity: .6; }
+/* Постоянное свечение снизу, наполовину спрятанное за нижним краем */
+.rd-buy::before {
+  content: ""; position: absolute; left: 50%; bottom: -40px;
+  width: 170px; height: 70px; margin-left: -85px; border-radius: 50%;
+  background: #6C5CE7; filter: blur(22px);
+  animation: rdBuyGlow 2.6s ease-in-out infinite;
+}
+@keyframes rdBuyGlow { 0%, 100% { opacity: .45; } 50% { opacity: .95; } }
+.rd-buy-price { position: relative; font-weight: 800; font-size: 20px; color: #fff; }
+.rd-buy-gem {
+  position: relative; width: 25px; height: auto;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .3)) drop-shadow(0 0 6px rgba(255, 140, 170, .6));
 }
 .rd-ownplate {
   width: 100%; height: 34px; border-radius: 10px; margin-top: 8px;
