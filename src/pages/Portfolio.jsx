@@ -526,9 +526,9 @@ export default function Portfolio() {
       <div className="rd-body">
         <div className="rd-stats" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
           {[
-            { label: 'Подарков', value: gifts === null ? '…' : gifts.length },
-            { label: 'На продаже', value: gifts === null ? '…' : onSaleCount },
-            { label: 'В обмене', value: gifts === null ? '…' : onTradeCount },
+            { label: 'Всего подарков:', value: gifts === null ? '…' : gifts.length },
+            { label: 'На продаже:', value: gifts === null ? '…' : onSaleCount },
+            { label: 'В обмене:', value: gifts === null ? '…' : onTradeCount },
           ].map(stat => (
             <div key={stat.label} className="rd-stat">
               <div className="rd-stat-value">{stat.value}</div>

@@ -690,13 +690,12 @@ body::before {
   position: relative;
 }
 
-/* Значок активности маркета (эквалайзер): покой — статичен; .on — пляшет рубином */
+/* Значок активности маркета (эквалайзер): столбики пляшут всегда */
 .mkt-eq .eqb { transform-box: fill-box; transform-origin: center bottom; }
-.mkt-eq.on { color: #ff5c7a; filter: drop-shadow(0 0 5px rgba(255, 60, 110, .6)); }
-.mkt-eq.on .eqb1 { animation: mktEq .82s ease-in-out infinite alternate; }
-.mkt-eq.on .eqb2 { animation: mktEq .82s ease-in-out .12s infinite alternate; }
-.mkt-eq.on .eqb3 { animation: mktEq .82s ease-in-out .24s infinite alternate; }
-.mkt-eq.on .eqb4 { animation: mktEq .82s ease-in-out .36s infinite alternate; }
+.mkt-eq .eqb1 { animation: mktEq .82s ease-in-out infinite alternate; }
+.mkt-eq .eqb2 { animation: mktEq .82s ease-in-out .12s infinite alternate; }
+.mkt-eq .eqb3 { animation: mktEq .82s ease-in-out .24s infinite alternate; }
+.mkt-eq .eqb4 { animation: mktEq .82s ease-in-out .36s infinite alternate; }
 @keyframes mktEq { from { transform: scaleY(.4); } to { transform: scaleY(1); } }
 
 /* ── Нижняя навигация: плавающий стеклянный док ── */
@@ -737,11 +736,11 @@ body::before {
 .rd-stats { display: grid; gap: 10px; }
 .rd-stat {
   background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft); border-radius: 16px;
-  padding: 14px 10px; text-align: center;
+  padding: 14px 6px; text-align: center;
 }
-.rd-stat-value { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+.rd-stat-value { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; white-space: nowrap; }
 .rd-stat-value.gold { color: var(--rd-gold); }
-.rd-stat-label { font-size: 10.5px; color: var(--rd-dim-2); margin-top: 5px; }
+.rd-stat-label { font-size: 9.5px; color: var(--rd-dim-2); margin-top: 5px; white-space: nowrap; }
 
 /* ── Кнопки-CTA ── */
 .rd-cta {
