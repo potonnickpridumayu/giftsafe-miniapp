@@ -157,10 +157,6 @@ export default function Market() {
     () => [...new Set(listings.map(l => l.collection_name || l.name).filter(Boolean))],
     [listings],
   )
-  const floor = listings.length
-    ? fmtGram(Math.min(...listings.map(l => l.price).filter(p => p != null)))
-    : '—'
-
   const items = useMemo(() => {
     let list = [...listings]
     if (collection) list = list.filter(i => (i.collection_name || i.name) === collection)
@@ -179,6 +175,12 @@ export default function Market() {
     else list.sort((a, b) => b.listed_at - a.listed_at)
     return list
   }, [listings, search, filters, collection])
+
+  // Флор считаем по ТЕКУЩЕЙ выборке (с учётом фильтров/поиска). Без фильтров
+  // items === все лоты, значит флор = минимальная цена на всём маркете.
+  const floor = items.length
+    ? fmtGram(Math.min(...items.map(i => i.price).filter(p => p != null)))
+    : '—'
 
   const filtersActive = marketFiltersActive(filters)
 

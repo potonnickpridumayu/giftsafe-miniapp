@@ -690,13 +690,8 @@ body::before {
   position: relative;
 }
 
-/* Значок активности маркета (эквалайзер): столбики пляшут всегда */
-.mkt-eq .eqb { transform-box: fill-box; transform-origin: center bottom; }
-.mkt-eq .eqb1 { animation: mktEq .82s ease-in-out infinite alternate; }
-.mkt-eq .eqb2 { animation: mktEq .82s ease-in-out .12s infinite alternate; }
-.mkt-eq .eqb3 { animation: mktEq .82s ease-in-out .24s infinite alternate; }
-.mkt-eq .eqb4 { animation: mktEq .82s ease-in-out .36s infinite alternate; }
-@keyframes mktEq { from { transform: scaleY(.4); } to { transform: scaleY(1); } }
+/* Значок активности маркета (эквалайзер): статичный, рубиновый */
+.mkt-eq { color: #ff5c7a; filter: drop-shadow(0 0 5px rgba(255, 60, 110, .55)); }
 
 /* ── Нижняя навигация: плавающий стеклянный док ── */
 .rd-nav {
