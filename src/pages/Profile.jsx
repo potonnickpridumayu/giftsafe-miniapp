@@ -557,7 +557,7 @@ export default function Profile() {
         {
           icon: <IconHistory size={18} stroke={1.8} />, label: 'История сделок',
           sub: totalDeals > txs.length
-            ? `${totalDeals} завершённых транзакций (показаны последние ${txs.length})`
+            ? <>{totalDeals} завершённых транзакций<br />(показаны последние {txs.length})</>
             : `${totalDeals} завершённых транзакций`,
           onClick: () => { haptic('light'); setShowHistory(v => !v) },
         },
