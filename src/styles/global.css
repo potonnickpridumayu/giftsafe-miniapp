@@ -787,7 +787,7 @@ body::before {
 /* ── Сетка + карточка Маркета ── */
 .rd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .rd-card {
-  border-radius: 16px; overflow: hidden; cursor: pointer; position: relative;
+  border-radius: 16px; cursor: pointer; position: relative;
   background: var(--rd-surf-2); border: 1px solid var(--rd-line-soft);
   transition: transform .15s;
 }
@@ -795,6 +795,7 @@ body::before {
 .rd-card-art {
   position: relative; height: 150px; display: flex; align-items: center; justify-content: center;
   font-size: 54px; overflow: hidden;
+  border-radius: 16px 16px 0 0;
 }
 .rd-card-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .rd-pill {
@@ -813,14 +814,14 @@ body::before {
   width: 100%; height: 42px; border-radius: 11px; border: none; cursor: pointer; margin-top: 8px;
   background: var(--rd-buy); color: #fff; box-shadow: var(--rd-buy-glow);
   display: flex; align-items: center; justify-content: center; gap: 5px;
-  font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 800;
+  font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800;
   animation: rdBuyGlow 2.4s ease-in-out infinite;
 }
 .rd-buy:disabled { opacity: .6; animation: none; }
-/* Пульсирующая подсветка — «манит нажать» */
+/* Пульсирующая подсветка ровным ореолом со всех сторон — «манит нажать» */
 @keyframes rdBuyGlow {
-  0%, 100% { box-shadow: 0 8px 22px -6px rgba(90, 70, 230, 0.5); }
-  50% { box-shadow: 0 10px 28px -4px rgba(124, 108, 255, 0.9); }
+  0%, 100% { box-shadow: 0 0 12px 0 rgba(90, 70, 230, 0.45); }
+  50% { box-shadow: 0 0 26px 4px rgba(124, 108, 255, 0.85); }
 }
 .rd-ownplate {
   width: 100%; height: 34px; border-radius: 10px; margin-top: 8px;
