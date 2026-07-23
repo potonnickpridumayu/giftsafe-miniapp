@@ -15,7 +15,7 @@ import { fmtGram } from '../utils/format'
 import { setIncomingOffers } from '../utils/offers'
 import { showResult } from '../components/ResultSheet'
 import TradeSwapResult from '../components/TradeSwapResult'
-import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight } from '@tabler/icons-react'
+import { IconUsers, IconMessageCircleDollar, IconHistory, IconHelpCircle, IconChevronRight, IconArrowDownLeft, IconArrowUpRight, IconTag } from '@tabler/icons-react'
 import MarketActivityIcon from '../components/MarketActivityIcon'
 
 // Комиссия площадки с доплаты при обмене — та же, что и на Маркете (MARKET_FEE
@@ -78,6 +78,9 @@ export default function Profile() {
   const [showHistory, setShowHistory] = useState(false)
   const [offers, setOffers] = useState(null)
   const [showOffers, setShowOffers] = useState(false)
+  const [orders, setOrders] = useState(null)
+  const [showOrders, setShowOrders] = useState(false)
+  const [orderBusyId, setOrderBusyId] = useState(null)
   const [offerBusyId, setOfferBusyId] = useState(null)
   // Какое именно действие в полёте ('accept'|'decline'|'cancel') — чтобы
   // спиннер крутился ТОЛЬКО в нажатой кнопке, а вторая осталась с подписью.
@@ -235,6 +238,31 @@ export default function Profile() {
     } catch {}
   }
 
+  const reloadOrders = async () => {
+    try {
+      setOrders(await api.getMyOrders())
+    } catch {}
+  }
+
+  const handleCancelOrder = async (order) => {
+    haptic('light')
+    setOrderBusyId(order.order_id)
+    try {
+      const res = await api.cancelOrder(order.order_id)
+      haptic('medium')
+      await reloadOrders()
+      await reloadProfile()
+      showResult({
+        icon: 'return', title: 'Ордер отменён',
+        sub: `${fmtGram(res.refunded)} Gram вернулись на баланс`,
+      })
+    } catch (e) {
+      showResult({ icon: 'error', title: 'Не удалось отменить', sub: e.message })
+    } finally {
+      setOrderBusyId(null)
+    }
+  }
+
   useEffect(() => {
     let alive = true
     api.getProfile()
@@ -242,6 +270,7 @@ export default function Profile() {
       .catch(e => { if (alive) setError(e.message || 'Ошибка загрузки') })
       .finally(() => { if (alive) setLoading(false) })
     reloadOffers()
+    reloadOrders()
     return () => { alive = false }
   }, [])
 
@@ -252,6 +281,7 @@ export default function Profile() {
     const id = setInterval(() => {
       if (document.hidden) return
       reloadOffers()
+      reloadOrders()
       reloadProfile()
     }, 10000)
     return () => clearInterval(id)
@@ -556,6 +586,13 @@ export default function Profile() {
           onClick: () => { haptic('light'); setShowOffers(v => !v) },
         },
         {
+          icon: <IconTag size={18} stroke={1.8} />, label: 'Мои ордеры',
+          sub: orders
+            ? `${orders.filter(o => o.status === 'active').length} активных · заявки на покупку`
+            : 'Заявки на покупку',
+          onClick: () => { haptic('light'); setShowOrders(v => !v) },
+        },
+        {
           icon: <IconHistory size={18} stroke={1.8} />, label: 'История сделок',
           sub: totalDeals > txs.length
             ? <>{totalDeals} завершённых транзакций<br />(показаны последние {txs.length})</>
@@ -588,7 +625,7 @@ export default function Profile() {
               size={18}
               className="rd-menu-chev"
               style={{
-                transform: (item.label === 'История сделок' && showHistory) || (item.label === 'Офферы' && showOffers)
+                transform: (item.label === 'История сделок' && showHistory) || (item.label === 'Офферы' && showOffers) || (item.label === 'Мои ордеры' && showOrders)
                   ? 'rotate(90deg)' : 'none',
                 transition: 'transform 0.15s',
               }}
@@ -687,6 +724,46 @@ export default function Profile() {
                   })}
                 </>
               )}
+            </div>
+          )}
+          {item.label === 'Мои ордеры' && showOrders && (
+            <div style={{ marginBottom: 8 }}>
+              {!orders || orders.length === 0 ? (
+                <div className="card" style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Ордеров пока нет. Создать можно на странице подарка на Маркете.
+                </div>
+              ) : orders.map(o => {
+                const busy = orderBusyId === o.order_id
+                const statusLabel = o.status === 'active' ? 'Активен'
+                  : o.status === 'filled' ? 'Исполнен' : 'Отменён'
+                const statusColor = o.status === 'active' ? '#3ddc84'
+                  : o.status === 'filled' ? '#8a7fd6' : 'var(--text-muted)'
+                const title = `${o.gift_name}${o.kind === 'gift' && o.gift_number ? ` #${o.gift_number}` : ''}`
+                return (
+                  <div key={o.order_id} className="card" style={{ padding: '10px 16px', marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>
+                        <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
+                          {o.kind === 'gift' ? 'Конкретный подарок' : 'Любой из коллекции'}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 15, fontWeight: 800, justifyContent: 'flex-end' }}>
+                          {fmtGram(o.amount_ton)} <GramIcon size={15} />
+                        </div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: statusColor, marginTop: 2 }}>{statusLabel}</div>
+                      </div>
+                    </div>
+                    {o.status === 'active' && (
+                      <button className="btn btn-ghost btn-full" style={{ fontSize: 12, padding: '8px', marginTop: 10 }}
+                        disabled={busy} onClick={() => handleCancelOrder(o)}>
+                        {busy ? <MiniSpinAccent size={14} /> : 'Отменить и вернуть заморозку'}
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           )}
           {item.label === 'История сделок' && showHistory && (

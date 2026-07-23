@@ -7,6 +7,7 @@ import GramIcon from '../components/GramIcon'
 import { LoadingScreen, MiniSpin, MiniSpinAccent, BtnShimmer } from '../components/StatusIcons'
 import StateCard, { IlloError, IlloMissing, InsufficientFundsBanner } from '../components/MarketStates'
 import { showResult } from '../components/ResultSheet'
+import CreateOrderSheet from '../components/CreateOrderSheet'
 import WarnBanner, { WarnIcon } from '../components/WarnIcon'
 import { fmtGram, fmtPercent } from '../utils/format'
 import { MAX_PRICE_ERROR, overMaxPrice } from '../utils/limits'
@@ -28,6 +29,7 @@ export default function ListingDetail() {
   const [buyError, setBuyError] = useState(null)
   const [withdrawing, setWithdrawing] = useState(false)
 
+  const [showOrderSheet, setShowOrderSheet] = useState(false)
   const [editingPrice, setEditingPrice] = useState(false)
   const [newPrice, setNewPrice] = useState('')
   const [savingPrice, setSavingPrice] = useState(false)
@@ -343,6 +345,28 @@ export default function ListingDetail() {
         >
           {buying ? <><BtnShimmer /><MiniSpin /> <span style={{ marginLeft: 8 }}>Покупаем…</span></> : <>Купить за {fmtGram(total)} <GramIcon size={24} /></>}
         </button>
+      )}
+
+      {!isOwnListing && (
+        <button
+          className="btn btn-ghost btn-full"
+          style={{ marginTop: 10 }}
+          onClick={() => { haptic('light'); setShowOrderSheet(true) }}
+        >
+          Создать ордер на такой подарок
+        </button>
+      )}
+
+      {showOrderSheet && (
+        <CreateOrderSheet
+          gift={{
+            name: item.name,
+            number: String(item.number || '').replace(/[#\s]/g, ''),
+            collection: item.collection,
+          }}
+          refPrice={item.price}
+          onClose={() => setShowOrderSheet(false)}
+        />
       )}
     </div>
   )

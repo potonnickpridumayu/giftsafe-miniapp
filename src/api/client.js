@@ -201,6 +201,24 @@ export const api = {
   declineTradeOffer: (offerId) => request(`/trades/offers/${offerId}/decline`, { method: 'POST' }),
   cancelTradeOffer: (offerId) => request(`/trades/offers/${offerId}/cancel`, { method: 'POST' }),
 
+  // Ордеры (заявки на покупку)
+  createOrder: (data) => request('/orders', { method: 'POST', body: JSON.stringify(data) }),
+  getOrders: async () => {
+    const res = await request('/orders')
+    return toArray(res, 'orders')
+  },
+  getMyOrders: async () => {
+    const res = await request('/orders/mine')
+    return toArray(res, 'orders')
+  },
+  getOrdersForGift: async (giftId) => {
+    const res = await request(`/orders/for-gift/${giftId}`)
+    return toArray(res, 'orders')
+  },
+  fulfillOrder: (orderId, giftId) =>
+    request(`/orders/${orderId}/fulfill`, { method: 'POST', body: JSON.stringify({ gift_id: giftId }) }),
+  cancelOrder: (orderId) => request(`/orders/${orderId}/cancel`, { method: 'POST' }),
+
   // Portfolio
   getMyGifts: async () => {
     const res = await request('/portfolio')

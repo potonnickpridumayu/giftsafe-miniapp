@@ -9,7 +9,7 @@ import TgGiftSticker from '../components/TgGiftSticker'
 import AppHeader from '../components/AppHeader'
 import WalletButton from '../components/WalletButton'
 import EmptyState, { IlloCase } from '../components/EmptyState'
-import { LoadingScreen, MiniSpinAccent } from '../components/StatusIcons'
+import { LoadingScreen, MiniSpin, MiniSpinAccent } from '../components/StatusIcons'
 import StateCard, { IlloSearch } from '../components/MarketStates'
 import { showResult } from '../components/ResultSheet'
 import { fmtGram } from '../utils/format'
@@ -82,6 +82,10 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
   const [newPrice, setNewPrice] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  // Ордеры (заявки на покупку), которые этот подарок может исполнить.
+  // null = ещё не грузили; тянем лениво при раскрытии свободной карточки.
+  const [orders, setOrders] = useState(null)
+  const [fulfillId, setFulfillId] = useState(null)
   const panelRef = useRef(null)
 
   useEffect(() => {
@@ -89,6 +93,38 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
       scrollToPanel(panelRef.current)
     }
   }, [panel])
+
+  const isFree = !gift.on_sale && !gift.on_trade
+
+  // Подтягиваем подходящие ордеры, когда владелец раскрыл свободный подарок —
+  // не грузим для всех карточек сразу (был бы запрос на каждый подарок).
+  useEffect(() => {
+    if (!expanded || !isFree) return
+    let alive = true
+    api.getOrdersForGift(gift.gift_id)
+      .then(o => { if (alive) setOrders(o) })
+      .catch(() => { if (alive) setOrders([]) })
+    return () => { alive = false }
+  }, [expanded, isFree, gift.gift_id])
+
+  const fulfill = async (order) => {
+    haptic('light')
+    setFulfillId(order.order_id)
+    setError('')
+    try {
+      const res = await api.fulfillOrder(order.order_id, gift.gift_id)
+      haptic('medium')
+      showResult({
+        icon: 'success', title: 'Ордер исполнен',
+        sub: `Вы получили ${fmtGram(res.seller_net)} Gram за ${res.gift_name}`,
+      })
+      // Подарок сменил владельца — убираем из портфеля (как при выводе).
+      onWithdrawn(gift.gift_id)
+    } catch (e) {
+      setFulfillId(null)
+      showResult({ icon: 'error', title: 'Не удалось исполнить ордер', sub: e.message })
+    }
+  }
 
   const rarityColor = giftAccentColor(gift.gift_id)
   const onChain = Boolean(gift.nft_address)
@@ -247,6 +283,15 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
             </button>
           ) : (
             <>
+              {orders && orders.length > 0 && (
+                <button
+                  className="rd-act"
+                  style={{ background: 'var(--money-radial)', color: '#3a2a06', fontWeight: 800 }}
+                  onClick={() => togglePanel('orders')}
+                >
+                  {panel === 'orders' ? 'Скрыть ордеры' : `Продать по ордеру · ${orders.length}`}
+                </button>
+              )}
               <button className="rd-act rd-act--ruby" onClick={() => togglePanel('sell')}>
                 {panel === 'sell' ? 'Скрыть' : 'Продать'}
               </button>
@@ -292,6 +337,53 @@ function GiftCard({ gift, onWithdrawn, onListed, onStartTrade, haptic }) {
           >
             {busy ? 'Сохраняем…' : 'Сохранить цену'}
           </button>
+        </div>
+      )}
+
+      {panel === 'orders' && (
+        <div ref={panelRef} style={{
+          marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)',
+          scrollMarginBottom: 'calc(var(--nav-h) + 20px + var(--safe-bottom))',
+        }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
+            Заявки на покупку такого подарка. Продайте мгновенно — деньги
+            заказчика уже заморожены. Комиссия {Math.round(FEE_RATE * 100)}%.
+          </div>
+          {(!orders || orders.length === 0) ? (
+            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Подходящих ордеров нет</div>
+          ) : orders.map(o => {
+            const net = round4(o.amount_ton - o.amount_ton * FEE_RATE)
+            const rowBusy = fulfillId === o.order_id
+            const anyBusy = fulfillId != null
+            return (
+              <div key={o.order_id} style={{
+                display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8,
+                padding: '8px 10px', borderRadius: 10, background: 'var(--rd-surf)', border: '1px solid var(--rd-line)',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 800, fontSize: 15 }}>
+                    {fmtGram(o.amount_ton)} <GramIcon size={15} />
+                    {o.kind === 'gift' && (
+                      <span style={{ fontSize: 10.5, color: 'var(--rd-ruby-solid, #ff4d6f)', fontWeight: 700, marginLeft: 2 }}>
+                        именно #{o.gift_number}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
+                    {o.buyer_username ? `@${o.buyer_username}` : 'покупатель'} · вам {fmtGram(net)} <GramIcon size={11} />
+                  </div>
+                </div>
+                <button
+                  className="rd-act rd-act--ruby"
+                  style={{ width: 'auto', minWidth: 88, marginTop: 0, padding: '0 14px' }}
+                  disabled={anyBusy}
+                  onClick={() => fulfill(o)}
+                >
+                  {rowBusy ? <MiniSpin size={15} /> : 'Продать'}
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
 
